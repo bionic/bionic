@@ -24,10 +24,6 @@ var importCmd = &cobra.Command{
 			return err
 		}
 
-		if err := manager.Migrate(provider); err != nil {
-			return err
-		}
-
 		return provider.Process(inputPath)
 	},
 	Args: cobra.MinimumNArgs(2),

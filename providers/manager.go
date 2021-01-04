@@ -24,13 +24,21 @@ func NewManager(dbPath string) (*Manager, error) {
 		return nil, err
 	}
 
-	return &Manager{
+	manager := &Manager{
 		db: db,
 		providers: map[string]provider.Provider{
 			"twitter": twitter.New(db),
 			"netflix": netflix.New(db),
 		},
-	}, nil
+	}
+
+	for _, p := range manager.providers {
+		if err := manager.migrate(manager.db, p); err != nil {
+			return nil, err
+		}
+	}
+
+	return manager, nil
 }
 
 func (m Manager) GetByName(name string) (provider.Provider, error) {
@@ -40,10 +48,6 @@ func (m Manager) GetByName(name string) (provider.Provider, error) {
 	}
 
 	return p, nil
-}
-
-func (m Manager) Migrate(p provider.Provider) error {
-	return m.migrate(m.db, p)
 }
 
 func (m Manager) Reset(p provider.Provider) error {
