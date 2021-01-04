@@ -18,10 +18,16 @@ func New(db *gorm.DB) provider.Provider {
 func (p *twitter) Models() []interface{} {
 	return []interface{}{
 		&Like{},
+		&URL{},
 		&Conversation{},
 		&DirectMessage{},
-		&Reaction{},
-		&URL{},
+		&DirectMessageReaction{},
+		&Tweet{},
+		&TweetEntities{},
+		&TweetHashtag{},
+		&TweetMedia{},
+		&TweetUserMention{},
+		&TweetURL{},
 	}
 }
 
@@ -35,6 +41,10 @@ func (p *twitter) Process(inputPath string) error {
 	}
 
 	if err := p.processDirectMessages(inputPath); err != nil {
+		return err
+	}
+
+	if err := p.processTweets(inputPath); err != nil {
 		return err
 	}
 

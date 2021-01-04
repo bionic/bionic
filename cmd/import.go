@@ -36,4 +36,3 @@ var importCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(importCmd)
 }
-
