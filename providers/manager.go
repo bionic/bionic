@@ -7,6 +7,7 @@ import (
 	"github.com/shekhirin/bionic-cli/providers/provider"
 	"github.com/shekhirin/bionic-cli/providers/twitter"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 var ErrProviderNotFound = errors.New("provider not found")
@@ -45,7 +46,7 @@ func (m Manager) Migrate(p provider.Provider) error {
 
 func (m Manager) Reset(p provider.Provider) error {
 	return m.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Migrator().DropTable(p.Models()...); err != nil {
+		if err := tx.Migrator().DropTable(tablersToInterfaces(p.Models())...); err != nil {
 			return err
 		}
 
@@ -58,5 +59,13 @@ func (m Manager) Reset(p provider.Provider) error {
 }
 
 func (m Manager) migrate(db *gorm.DB, p provider.Provider) error {
-	return db.AutoMigrate(p.Models()...)
+	return db.AutoMigrate(tablersToInterfaces(p.Models())...)
+}
+
+func tablersToInterfaces(tablers []schema.Tabler) []interface{} {
+	interfaces := make([]interface{}, len(tablers))
+	for i, tabler := range tablers {
+		interfaces[i] = tabler
+	}
+	return interfaces
 }

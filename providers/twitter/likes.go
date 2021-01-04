@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"gorm.io/gorm/clause"
 	"io/ioutil"
-	"path"
 	"strings"
 )
 
@@ -13,7 +12,7 @@ func (p *twitter) processLikes(inputPath string) error {
 		Like Like `json:"like"`
 	}
 
-	bytes, err := ioutil.ReadFile(path.Join(inputPath, "data", "like.js"))
+	bytes, err := ioutil.ReadFile(inputPath)
 	if err != nil {
 		return err
 	}

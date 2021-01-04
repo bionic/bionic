@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"gorm.io/gorm/clause"
 	"io/ioutil"
-	"path"
 	"strings"
 )
 
@@ -35,7 +34,7 @@ func (p *twitter) processTweets(inputPath string) error {
 		} `json:"tweet"`
 	}
 
-	bytes, err := ioutil.ReadFile(path.Join(inputPath, "data", "tweet.js"))
+	bytes, err := ioutil.ReadFile(inputPath)
 	if err != nil {
 		return err
 	}

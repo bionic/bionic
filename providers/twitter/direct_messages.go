@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"gorm.io/gorm/clause"
 	"io/ioutil"
-	"path"
 	"strings"
 )
 
@@ -18,7 +17,7 @@ func (p *twitter) processDirectMessages(inputPath string) error {
 		} `json:"dmConversation"`
 	}
 
-	bytes, err := ioutil.ReadFile(path.Join(inputPath, "data", "direct-messages.js"))
+	bytes, err := ioutil.ReadFile(inputPath)
 	if err != nil {
 		return err
 	}
