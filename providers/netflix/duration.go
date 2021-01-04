@@ -1,14 +1,22 @@
 package netflix
 
 import (
+	"database/sql"
 	"fmt"
 	"strconv"
 	"strings"
 )
 
-type Duration int
+type Duration struct {
+	sql.NullInt64
+}
 
 func (d *Duration) UnmarshalCSV(csv string) error {
+	if csv == "Not latest view" {
+		d.Valid = false
+		return nil
+	}
+
 	parts := strings.Split(csv, ":")
 	if len(parts) != 3 {
 		return fmt.Errorf("incorrect duration format: %s", csv)
@@ -29,7 +37,8 @@ func (d *Duration) UnmarshalCSV(csv string) error {
 		return err
 	}
 
-	*d = Duration(hours*3600 + minutes*60 + seconds)
+	d.Valid = true
+	d.Int64 = int64(hours*3600 + minutes*60 + seconds)
 
 	return nil
 }

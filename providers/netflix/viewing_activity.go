@@ -18,7 +18,7 @@ type ViewingAction struct {
 	SupplementalVideoType string         `csv:"Supplemental Video Type"`
 	DeviceType            string         `csv:"Device Type"`
 	Bookmark              Duration       `csv:"Bookmark"`
-	LatestBookmark        Duration       `csv:"LatestBookmark"`
+	LatestBookmark        Duration       `csv:"Latest Bookmark"`
 	Country               string         `csv:"Country"`
 }
 
