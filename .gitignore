@@ -1,0 +1,6 @@
+.idea/*
+!.idea/runConfigurations/
+
+test_data/*/**
+
+!/**/.gitkeep
