@@ -1,6 +1,9 @@
+!.idea/
 .idea/*
 !.idea/runConfigurations/
 
 test_data/*/**
+
+build
 
 !/**/.gitkeep
