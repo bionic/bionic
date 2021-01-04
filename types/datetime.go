@@ -26,6 +26,17 @@ func (dt *DateTime) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func (dt *DateTime) UnmarshalCSV(csv string) (err error) {
+	t, err := dateparse.ParseStrict(csv)
+	if err != nil {
+		return err
+	}
+
+	*dt = DateTime(t)
+
+	return nil
+}
+
 func (dt *DateTime) Scan(src interface{}) error {
 	t, ok := src.(time.Time)
 	if !ok {
