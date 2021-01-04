@@ -3,9 +3,9 @@ package providers
 import (
 	"errors"
 	"fmt"
+	"github.com/shekhirin/bionic-cli/database"
 	"github.com/shekhirin/bionic-cli/providers/provider"
 	"github.com/shekhirin/bionic-cli/providers/twitter"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +17,7 @@ type Manager struct {
 }
 
 func NewManager(dbPath string) (*Manager, error) {
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	db, err := database.New(dbPath)
 	if err != nil {
 		return nil, err
 	}
