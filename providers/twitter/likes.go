@@ -21,8 +21,8 @@ func (l Like) TableName() string {
 }
 
 func (p *twitter) processLikes(inputPath string) error {
-	var likes []struct {
-		Like *Like `json:"like"`
+	var fileData []struct {
+		Like Like `json:"like"`
 	}
 
 	bytes, err := ioutil.ReadFile(path.Join(inputPath, "data", "like.js"))
@@ -33,22 +33,21 @@ func (p *twitter) processLikes(inputPath string) error {
 	data := string(bytes)
 	data = strings.TrimPrefix(data, "window.YTD.like.part0 = ")
 
-	if err := json.Unmarshal([]byte(data), &likes); err != nil {
+	if err := json.Unmarshal([]byte(data), &fileData); err != nil {
 		return err
 	}
 
-	var likesToInsert []*Like
+	var likes []Like
 
-	for _, like := range likes {
-		likesToInsert = append(likesToInsert, like.Like)
+	for _, entry := range fileData {
+		likes = append(likes, entry.Like)
 	}
 
 	err = p.db.
 		Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "tweet_id"}},
 			DoNothing: true,
 		}).
-		Create(likesToInsert).
+		Create(likes).
 		Error
 	if err != nil {
 		return err
