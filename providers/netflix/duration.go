@@ -13,7 +13,6 @@ type Duration struct {
 
 func (d *Duration) UnmarshalCSV(csv string) error {
 	if csv == "Not latest view" {
-		d.Valid = false
 		return nil
 	}
 
