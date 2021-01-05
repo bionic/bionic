@@ -3,7 +3,6 @@ package cmd
 import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/shekhirin/bionic-cli/providers"
-	"github.com/shekhirin/bionic-cli/providers/provider"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 )
@@ -21,24 +20,20 @@ var importCmd = &cobra.Command{
 			return err
 		}
 
-		p, err := manager.GetByName(providerName)
+		provider, err := manager.GetByName(providerName)
 		if err != nil {
 			return err
 		}
 
-		importFns, err := p.ImportFns(inputPath)
+		importFns, err := provider.ImportFns(inputPath)
 		if err != nil {
 			return err
 		}
 
-		dbProvider, isDbProvider := p.(provider.Database)
-
-		if isDbProvider {
-			if err := dbProvider.BeginTx(); err != nil {
-				return err
-			}
-			defer dbProvider.RollbackTx()
+		if err := provider.BeginTx(); err != nil {
+			return err
 		}
+		defer provider.RollbackTx()
 
 		errs, _ := errgroup.WithContext(cmd.Context())
 
@@ -49,13 +44,11 @@ var importCmd = &cobra.Command{
 
 		err = errs.Wait()
 
-		if isDbProvider {
-			if err := dbProvider.CommitTx(); err != nil {
-				return err
-			}
+		if err := provider.CommitTx(); err != nil {
+			return err
 		}
 
-		return err
+		return nil
 	},
 	Args: cobra.MinimumNArgs(2),
 }

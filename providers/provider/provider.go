@@ -18,6 +18,7 @@ func (pf ImportFn) Call() error {
 }
 
 type Provider interface {
+	Database
 	Models() []schema.Tabler
 	ImportFns(inputPath string) ([]ImportFn, error)
 }
