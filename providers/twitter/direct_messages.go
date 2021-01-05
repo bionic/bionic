@@ -40,7 +40,7 @@ func (p *twitter) importDirectMessages(inputPath string) error {
 		conversations = append(conversations, conversation)
 	}
 
-	err = p.db.
+	err = p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

@@ -8,12 +8,12 @@ import (
 )
 
 type twitter struct {
-	db *gorm.DB
+	provider.Database
 }
 
 func New(db *gorm.DB) provider.Provider {
 	return &twitter{
-		db: db,
+		Database: provider.NewDatabase(db),
 	}
 }
 

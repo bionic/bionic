@@ -8,12 +8,12 @@ import (
 )
 
 type netflix struct {
-	db *gorm.DB
+	provider.Database
 }
 
 func New(db *gorm.DB) provider.Provider {
 	return &netflix{
-		db: db,
+		Database: provider.NewDatabase(db),
 	}
 }
 

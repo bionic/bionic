@@ -93,7 +93,7 @@ func (p *twitter) importTweets(inputPath string) error {
 		tweets = append(tweets, tweet)
 	}
 
-	err = p.db.
+	err = p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

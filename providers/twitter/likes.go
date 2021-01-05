@@ -30,7 +30,7 @@ func (p *twitter) importLikes(inputPath string) error {
 		likes = append(likes, entry.Like)
 	}
 
-	err = p.db.
+	err = p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

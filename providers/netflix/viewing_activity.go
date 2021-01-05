@@ -38,7 +38,7 @@ func (p *netflix) importViewingActivity(inputPath string) error {
 		return err
 	}
 
-	err = p.db.
+	err = p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).
