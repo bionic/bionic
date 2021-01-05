@@ -1,13 +1,13 @@
 package provider
 
 import (
+	"database/sql"
 	"errors"
 	"gorm.io/gorm"
 )
 
 var (
-	ErrTxAlreadyInProgress = errors.New("tx already in progress")
-	ErrNoTxInProgress      = errors.New("no tx in progress")
+	ErrTxInProgress = errors.New("sql: transaction is already in progress")
 )
 
 type Database interface {
@@ -38,7 +38,7 @@ func (db *database) DB() *gorm.DB {
 
 func (db *database) BeginTx() error {
 	if db.tx != nil {
-		return ErrTxAlreadyInProgress
+		return ErrTxInProgress
 	}
 
 	tx := db.db.Begin()
@@ -53,7 +53,7 @@ func (db *database) BeginTx() error {
 
 func (db *database) CommitTx() error {
 	if db.tx == nil {
-		return ErrNoTxInProgress
+		return sql.ErrTxDone
 	}
 
 	commit := db.tx.Commit()
@@ -68,7 +68,7 @@ func (db *database) CommitTx() error {
 
 func (db *database) RollbackTx() error {
 	if db.tx == nil {
-		return nil
+		return sql.ErrTxDone
 	}
 
 	rollback := db.tx.Rollback()
