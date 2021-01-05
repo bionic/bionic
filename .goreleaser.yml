@@ -15,10 +15,13 @@ checksum:
 
 builds:
   - binary: bionic
+    env:
+      - CGO_ENABLED=1
 
 brews:
   - tap:
       owner: shekhirin
       name: homebrew-bionic-cli
+      token: "{{ .Env.API_GITHUB_TOKEN }}"
     folder: Formula
     homepage: https://github.com/shekhirin/bionic-cli
