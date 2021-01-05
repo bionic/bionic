@@ -26,7 +26,7 @@ func (r ViewingAction) TableName() string {
 	return "netflix_viewing_activity"
 }
 
-func (p *netflix) processViewingActivity(inputPath string) error {
+func (p *netflix) importViewingActivity(inputPath string) error {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return err

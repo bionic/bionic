@@ -23,14 +23,15 @@ func (p *netflix) Models() []schema.Tabler {
 	}
 }
 
-func (p *netflix) Process(inputPath string) error {
+func (p *netflix) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 	if !provider.IsPathDir(inputPath) {
-		return provider.ErrInputPathShouldBeDirectory
+		return nil, provider.ErrInputPathShouldBeDirectory
 	}
 
-	if err := p.processViewingActivity(path.Join(inputPath, "Content_Interaction", "ViewingActivity.csv")); err != nil {
-		return err
-	}
-
-	return nil
+	return []provider.ImportFn{
+		{
+			p.importViewingActivity,
+			path.Join(inputPath, "Content_Interaction", "ViewingActivity.csv"),
+		},
+	}, nil
 }

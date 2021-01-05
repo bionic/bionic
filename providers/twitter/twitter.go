@@ -33,22 +33,23 @@ func (p *twitter) Models() []schema.Tabler {
 	}
 }
 
-func (p *twitter) Process(inputPath string) error {
+func (p *twitter) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 	if !provider.IsPathDir(inputPath) {
-		return provider.ErrInputPathShouldBeDirectory
+		return nil, provider.ErrInputPathShouldBeDirectory
 	}
 
-	if err := p.processLikes(path.Join(inputPath, "data", "like.js")); err != nil {
-		return err
-	}
-
-	if err := p.processDirectMessages(path.Join(inputPath, "data", "direct-messages.js")); err != nil {
-		return err
-	}
-
-	if err := p.processTweets(path.Join(inputPath, "data", "tweet.js")); err != nil {
-		return err
-	}
-
-	return nil
+	return []provider.ImportFn{
+		{
+			p.importLikes,
+			path.Join(inputPath, "data", "like.js"),
+		},
+		{
+			p.importDirectMessages,
+			path.Join(inputPath, "data", "direct-messages.js"),
+		},
+		{
+			p.importTweets,
+			path.Join(inputPath, "data", "tweet.js"),
+		},
+	}, nil
 }

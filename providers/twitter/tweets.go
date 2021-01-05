@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func (p *twitter) processTweets(inputPath string) error {
+func (p *twitter) importTweets(inputPath string) error {
 	var fileData []struct {
 		Tweet struct {
 			Tweet

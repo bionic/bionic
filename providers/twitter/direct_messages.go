@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func (p *twitter) processDirectMessages(inputPath string) error {
+func (p *twitter) importDirectMessages(inputPath string) error {
 	var fileData []struct {
 		DmConversation struct {
 			Conversation

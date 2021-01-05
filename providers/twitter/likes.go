@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func (p *twitter) processLikes(inputPath string) error {
+func (p *twitter) importLikes(inputPath string) error {
 	var fileData []struct {
 		Like Like `json:"like"`
 	}
