@@ -2,10 +2,22 @@ package twitter
 
 import (
 	"encoding/json"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"io/ioutil"
 	"strings"
 )
+
+type Like struct {
+	gorm.Model
+	TweetID     int    `json:"tweetId,string" gorm:"unique"`
+	FullText    string `json:"fullText"`
+	ExpandedURL string `json:"expandedUrl"`
+}
+
+func (Like) TableName() string {
+	return "twitter_likes"
+}
 
 func (p *twitter) importLikes(inputPath string) error {
 	var fileData []struct {
