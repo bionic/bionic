@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func (p *twitter) processDirectMessages(inputPath string) error {
+func (p *twitter) importDirectMessages(inputPath string) error {
 	var fileData []struct {
 		DmConversation struct {
 			Conversation
@@ -40,7 +40,7 @@ func (p *twitter) processDirectMessages(inputPath string) error {
 		conversations = append(conversations, conversation)
 	}
 
-	err = p.db.
+	err = p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

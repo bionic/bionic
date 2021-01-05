@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func (p *twitter) processTweets(inputPath string) error {
+func (p *twitter) importTweets(inputPath string) error {
 	var fileData []struct {
 		Tweet struct {
 			Tweet
@@ -93,7 +93,7 @@ func (p *twitter) processTweets(inputPath string) error {
 		tweets = append(tweets, tweet)
 	}
 
-	err = p.db.
+	err = p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

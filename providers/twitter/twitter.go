@@ -8,12 +8,12 @@ import (
 )
 
 type twitter struct {
-	db *gorm.DB
+	provider.Database
 }
 
 func New(db *gorm.DB) provider.Provider {
 	return &twitter{
-		db: db,
+		Database: provider.NewDatabase(db),
 	}
 }
 
@@ -33,22 +33,23 @@ func (p *twitter) Models() []schema.Tabler {
 	}
 }
 
-func (p *twitter) Process(inputPath string) error {
+func (p *twitter) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 	if !provider.IsPathDir(inputPath) {
-		return provider.ErrInputPathShouldBeDirectory
+		return nil, provider.ErrInputPathShouldBeDirectory
 	}
 
-	if err := p.processLikes(path.Join(inputPath, "data", "like.js")); err != nil {
-		return err
-	}
-
-	if err := p.processDirectMessages(path.Join(inputPath, "data", "direct-messages.js")); err != nil {
-		return err
-	}
-
-	if err := p.processTweets(path.Join(inputPath, "data", "tweet.js")); err != nil {
-		return err
-	}
-
-	return nil
+	return []provider.ImportFn{
+		{
+			Fn:        p.importLikes,
+			InputPath: path.Join(inputPath, "data", "like.js"),
+		},
+		{
+			Fn:        p.importDirectMessages,
+			InputPath: path.Join(inputPath, "data", "direct-messages.js"),
+		},
+		{
+			Fn:        p.importTweets,
+			InputPath: path.Join(inputPath, "data", "tweet.js"),
+		},
+	}, nil
 }

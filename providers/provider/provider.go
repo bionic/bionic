@@ -8,9 +8,19 @@ import (
 
 var ErrInputPathShouldBeDirectory = errors.New("input path should be directory")
 
+type ImportFn struct {
+	Fn        func(inputPath string) error
+	InputPath string
+}
+
+func (pf ImportFn) Call() error {
+	return pf.Fn(pf.InputPath)
+}
+
 type Provider interface {
+	Database
 	Models() []schema.Tabler
-	Process(inputPath string) error
+	ImportFns(inputPath string) ([]ImportFn, error)
 }
 
 func IsPathDir(inputPath string) bool {

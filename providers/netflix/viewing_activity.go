@@ -26,7 +26,7 @@ func (r ViewingAction) TableName() string {
 	return "netflix_viewing_activity"
 }
 
-func (p *netflix) processViewingActivity(inputPath string) error {
+func (p *netflix) importViewingActivity(inputPath string) error {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func (p *netflix) processViewingActivity(inputPath string) error {
 		return err
 	}
 
-	err = p.db.
+	err = p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

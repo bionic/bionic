@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func (p *twitter) processLikes(inputPath string) error {
+func (p *twitter) importLikes(inputPath string) error {
 	var fileData []struct {
 		Like Like `json:"like"`
 	}
@@ -30,7 +30,7 @@ func (p *twitter) processLikes(inputPath string) error {
 		likes = append(likes, entry.Like)
 	}
 
-	err = p.db.
+	err = p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

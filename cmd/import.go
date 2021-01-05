@@ -4,6 +4,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/shekhirin/bionic-cli/providers"
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 )
 
 var importCmd = &cobra.Command{
@@ -24,7 +25,30 @@ var importCmd = &cobra.Command{
 			return err
 		}
 
-		return provider.Process(inputPath)
+		importFns, err := provider.ImportFns(inputPath)
+		if err != nil {
+			return err
+		}
+
+		if err := provider.BeginTx(); err != nil {
+			return err
+		}
+		defer provider.RollbackTx()
+
+		errs, _ := errgroup.WithContext(cmd.Context())
+
+		for _, importFn := range importFns {
+			fn := importFn.Call
+			errs.Go(fn)
+		}
+
+		err = errs.Wait()
+
+		if err := provider.CommitTx(); err != nil {
+			return err
+		}
+
+		return nil
 	},
 	Args: cobra.MinimumNArgs(2),
 }

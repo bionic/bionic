@@ -8,12 +8,12 @@ import (
 )
 
 type netflix struct {
-	db *gorm.DB
+	provider.Database
 }
 
 func New(db *gorm.DB) provider.Provider {
 	return &netflix{
-		db: db,
+		Database: provider.NewDatabase(db),
 	}
 }
 
@@ -23,14 +23,15 @@ func (p *netflix) Models() []schema.Tabler {
 	}
 }
 
-func (p *netflix) Process(inputPath string) error {
+func (p *netflix) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 	if !provider.IsPathDir(inputPath) {
-		return provider.ErrInputPathShouldBeDirectory
+		return nil, provider.ErrInputPathShouldBeDirectory
 	}
 
-	if err := p.processViewingActivity(path.Join(inputPath, "Content_Interaction", "ViewingActivity.csv")); err != nil {
-		return err
-	}
-
-	return nil
+	return []provider.ImportFn{
+		{
+			Fn:        p.importViewingActivity,
+			InputPath: path.Join(inputPath, "Content_Interaction", "ViewingActivity.csv"),
+		},
+	}, nil
 }
