@@ -30,6 +30,17 @@ func (p *twitter) Models() []schema.Tabler {
 		&TweetMedia{},
 		&TweetUserMention{},
 		&TweetURL{},
+		&Personalization{},
+		&Demographics{},
+		&DemographicsLanguage{},
+		&GenderInfo{},
+		&Interests{},
+		&Interest{},
+		&AudienceAndAdvertisers{},
+		&Advertiser{},
+		&Show{},
+		&Location{},
+		&InferredAgeInfo{},
 	}
 }
 
@@ -50,6 +61,10 @@ func (p *twitter) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 		{
 			Fn:        p.importTweets,
 			InputPath: path.Join(inputPath, "data", "tweet.js"),
+		},
+		{
+			Fn:        p.importPersonalization,
+			InputPath: path.Join(inputPath, "data", "personalization.js"),
 		},
 	}, nil
 }

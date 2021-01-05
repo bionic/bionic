@@ -42,7 +42,9 @@ var importCmd = &cobra.Command{
 			errs.Go(fn)
 		}
 
-		err = errs.Wait()
+		if err := errs.Wait(); err != nil {
+			return err
+		}
 
 		if err := provider.CommitTx(); err != nil {
 			return err
