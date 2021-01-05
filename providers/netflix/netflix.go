@@ -30,8 +30,8 @@ func (p *netflix) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 
 	return []provider.ImportFn{
 		{
-			p.importViewingActivity,
-			path.Join(inputPath, "Content_Interaction", "ViewingActivity.csv"),
+			Fn:        p.importViewingActivity,
+			InputPath: path.Join(inputPath, "Content_Interaction", "ViewingActivity.csv"),
 		},
 	}, nil
 }
