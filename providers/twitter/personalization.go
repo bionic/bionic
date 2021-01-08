@@ -10,10 +10,13 @@ import (
 
 type Personalization struct {
 	gorm.Model
-	Demographics    Demographics `json:"demographics"`
-	Interests       Interests    `json:"interests"`
-	LocationHistory []Location
-	InferredAgeInfo InferredAgeInfo `json:"inferredAgeInfo"`
+	Languages              []DemographicsLanguage
+	GenderInfo             GenderInfo
+	Interests              []Interest
+	AudienceAndAdvertisers AudienceAndAdvertisers
+	Shows                  []Show
+	LocationHistory        []Location
+	InferredAgeInfo        InferredAgeInfo `json:"inferredAgeInfo"`
 }
 
 func (Personalization) TableName() string {
@@ -25,6 +28,15 @@ func (p *Personalization) UnmarshalJSON(b []byte) error {
 
 	var data struct {
 		alias
+		Demographics struct {
+			Languages  []DemographicsLanguage `json:"languages"`
+			GenderInfo GenderInfo             `json:"genderInfo"`
+		} `json:"demographics"`
+		Interests struct {
+			Interests              []Interest             `json:"interests"`
+			AudienceAndAdvertisers AudienceAndAdvertisers `json:"audienceAndAdvertisers"`
+			Shows                  []string               `json:"shows"`
+		} `json:"interests"`
 		LocationHistory []string `json:"locationHistory"`
 	}
 
@@ -33,6 +45,18 @@ func (p *Personalization) UnmarshalJSON(b []byte) error {
 	}
 
 	*p = Personalization(data.alias)
+
+	p.Languages = data.Demographics.Languages
+	p.GenderInfo = data.Demographics.GenderInfo
+
+	p.Interests = data.Interests.Interests
+	p.AudienceAndAdvertisers = data.Interests.AudienceAndAdvertisers
+
+	for _, show := range data.Interests.Shows {
+		p.Shows = append(p.Shows, Show{
+			Name: show,
+		})
+	}
 
 	for _, location := range data.LocationHistory {
 		p.LocationHistory = append(p.LocationHistory, Location{
@@ -43,78 +67,32 @@ func (p *Personalization) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type Demographics struct {
-	gorm.Model
-	PersonalizationID int
-	Languages         []DemographicsLanguage `json:"languages"`
-	GenderInfo        GenderInfo             `json:"genderInfo"`
-}
-
-func (Demographics) TableName() string {
-	return "twitter_personalization_demographics"
-}
-
 type DemographicsLanguage struct {
 	gorm.Model
-	DemographicsID int
-	Language       string `json:"language"`
-	IsDisabled     bool   `json:"isDisabled"`
+	PersonalizationID int
+	Language          string `json:"language"`
+	IsDisabled        bool   `json:"isDisabled"`
 }
 
 func (DemographicsLanguage) TableName() string {
-	return "twitter_personalization_demographic_languages"
+	return "twitter_personalization_languages"
 }
 
 type GenderInfo struct {
 	gorm.Model
-	DemographicsID int
-	Gender         string `json:"gender"`
+	PersonalizationID int
+	Gender            string `json:"gender"`
 }
 
 func (GenderInfo) TableName() string {
 	return "twitter_personalization_gender_infos"
 }
 
-type Interests struct {
-	gorm.Model
-	PersonalizationID      int
-	Interests              []Interest             `json:"interests"`
-	AudienceAndAdvertisers AudienceAndAdvertisers `json:"audienceAndAdvertisers"`
-	Shows                  []Show
-}
-
-func (Interests) TableName() string {
-	return "twitter_personalization_interestses"
-}
-
-func (i *Interests) UnmarshalJSON(b []byte) error {
-	type alias Interests
-
-	var data struct {
-		alias
-		Shows []string `json:"shows"`
-	}
-
-	if err := json.Unmarshal(b, &data); err != nil {
-		return err
-	}
-
-	*i = Interests(data.alias)
-
-	for _, show := range data.Shows {
-		i.Shows = append(i.Shows, Show{
-			Name: show,
-		})
-	}
-
-	return nil
-}
-
 type Interest struct {
 	gorm.Model
-	InterestsID int
-	Name        string `json:"name"`
-	IsDisabled  bool   `json:"isDisabled"`
+	PersonalizationID int
+	Name              string `json:"name"`
+	IsDisabled        bool   `json:"isDisabled"`
 }
 
 func (Interest) TableName() string {
@@ -123,10 +101,10 @@ func (Interest) TableName() string {
 
 type AudienceAndAdvertisers struct {
 	gorm.Model
-	InterestsID          int
+	PersonalizationID    int
 	NumAudiences         int          `json:"numAudiences,string"`
-	Advertisers          []Advertiser `gorm:"foreignKey:AdvertisersID"`
-	LookalikeAdvertisers []Advertiser `gorm:"foreignKey:LookalikeAdvertisersID"`
+	Advertisers          []Advertiser `gorm:"foreignKey:AudienceAndAdvertisersID"`
+	LookalikeAdvertisers []Advertiser `gorm:"foreignKey:AudienceAndAdvertisersID"`
 }
 
 func (AudienceAndAdvertisers) TableName() string {
@@ -161,7 +139,8 @@ func (aaa *AudienceAndAdvertisers) UnmarshalJSON(b []byte) error {
 		aaa.LookalikeAdvertisers = append(
 			aaa.LookalikeAdvertisers,
 			Advertiser{
-				Name: lookalikeAdvertiser,
+				Name:      lookalikeAdvertiser,
+				Lookalike: true,
 			},
 		)
 	}
@@ -171,9 +150,9 @@ func (aaa *AudienceAndAdvertisers) UnmarshalJSON(b []byte) error {
 
 type Advertiser struct {
 	gorm.Model
-	AdvertisersID          *int
-	LookalikeAdvertisersID *int
-	Name                   string
+	AudienceAndAdvertisersID *int
+	Name                     string
+	Lookalike                bool
 }
 
 func (Advertiser) TableName() string {
@@ -182,8 +161,8 @@ func (Advertiser) TableName() string {
 
 type Show struct {
 	gorm.Model
-	InterestsID int
-	Name        string
+	PersonalizationID int
+	Name              string
 }
 
 func (Show) TableName() string {
