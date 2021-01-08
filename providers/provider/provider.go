@@ -9,12 +9,25 @@ import (
 var ErrInputPathShouldBeDirectory = errors.New("input path should be directory")
 
 type ImportFn struct {
-	Fn        func(inputPath string) error
-	InputPath string
+	name      string
+	fn        func(inputPath string) error
+	inputPath string
 }
 
-func (pf ImportFn) Call() error {
-	return pf.Fn(pf.InputPath)
+func NewImportFn(name string, fn func(inputPath string) error, inputPath string) ImportFn {
+	return ImportFn{
+		name:      name,
+		fn:        fn,
+		inputPath: inputPath,
+	}
+}
+
+func (fn ImportFn) Name() string {
+	return fn.name
+}
+
+func (fn ImportFn) Call() error {
+	return fn.fn(fn.inputPath)
 }
 
 type Provider interface {

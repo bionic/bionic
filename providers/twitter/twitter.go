@@ -39,17 +39,20 @@ func (p *twitter) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 	}
 
 	return []provider.ImportFn{
-		{
-			Fn:        p.importLikes,
-			InputPath: path.Join(inputPath, "data", "like.js"),
-		},
-		{
-			Fn:        p.importDirectMessages,
-			InputPath: path.Join(inputPath, "data", "direct-messages.js"),
-		},
-		{
-			Fn:        p.importTweets,
-			InputPath: path.Join(inputPath, "data", "tweet.js"),
-		},
+		provider.NewImportFn(
+			"Likes",
+			p.importLikes,
+			path.Join(inputPath, "data", "like.js"),
+		),
+		provider.NewImportFn(
+			"Direct Messages",
+			p.importDirectMessages,
+			path.Join(inputPath, "data", "direct-messages.js"),
+		),
+		provider.NewImportFn(
+			"Tweets",
+			p.importTweets,
+			path.Join(inputPath, "data", "tweet.js"),
+		),
 	}, nil
 }
