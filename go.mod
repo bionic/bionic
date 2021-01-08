@@ -4,7 +4,6 @@ go 1.15
 
 require (
 	github.com/araddon/dateparse v0.0.0-20201001162425-8aadafed4dc4
-	github.com/buger/goterm v0.0.0-20200322175922-2f3e71b85129
 	github.com/gocarina/gocsv v0.0.0-20201208093247-67c824bc04d4
 	github.com/gosuri/uilive v0.0.4
 	github.com/mattn/go-isatty v0.0.12 // indirect

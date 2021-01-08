@@ -20,33 +20,33 @@ func New() Progress {
 	}
 }
 
-func (s *Progress) Draw() {
+func (p *Progress) Draw() {
 	var output string
-	for _, name := range s.names {
-		output += fmt.Sprintf("%s %s\n", s.states[name], name)
+	for _, name := range p.names {
+		output += fmt.Sprintf("%s %s\n", p.states[name], name)
 	}
-	_, _ = fmt.Fprint(s.writer, output)
-	_ = s.writer.Flush()
+	_, _ = fmt.Fprint(p.writer, output)
+	_ = p.writer.Flush()
 }
 
-func (s *Progress) add(name, state string) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func (p *Progress) add(name, state string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
-	if _, ok := s.states[name]; !ok {
-		s.names = append(s.names, name)
+	if _, ok := p.states[name]; !ok {
+		p.names = append(p.names, name)
 	}
-	s.states[name] = state
+	p.states[name] = state
 }
 
-func (s *Progress) Init(name string) {
-	s.add(name, "⌛️")
+func (p *Progress) Init(name string) {
+	p.add(name, "⌛️")
 }
 
-func (s *Progress) Error(name string) {
-	s.add(name, "❌")
+func (p *Progress) Error(name string) {
+	p.add(name, "❌")
 }
 
-func (s *Progress) Success(name string) {
-	s.add(name, "✅")
+func (p *Progress) Success(name string) {
+	p.add(name, "✅")
 }
