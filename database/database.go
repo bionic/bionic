@@ -12,8 +12,12 @@ func New(dbPath string) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
-		if _, err := os.Create(dbPath); err != nil {
+	if _, err := os.Stat(dbPath); err != nil {
+		if os.IsNotExist(err) {
+			if _, err := os.Create(dbPath); err != nil {
+				return nil, err
+			}
+		} else {
 			return nil, err
 		}
 	}

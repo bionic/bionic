@@ -150,7 +150,7 @@ func (aaa *AudienceAndAdvertisers) UnmarshalJSON(b []byte) error {
 
 type Advertiser struct {
 	gorm.Model
-	AudienceAndAdvertisersID *int
+	AudienceAndAdvertisersID int
 	Name                     string
 	Lookalike                bool
 }
