@@ -2,6 +2,7 @@ package cmd
 
 import (
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/shekhirin/bionic-cli/internal/progress"
 	"github.com/shekhirin/bionic-cli/providers"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
@@ -37,12 +38,39 @@ var importCmd = &cobra.Command{
 
 		errs, _ := errgroup.WithContext(cmd.Context())
 
+		importProgress := progress.New()
+
 		for _, importFn := range importFns {
+			name := importFn.Name()
+			importProgress.Init(name)
+		}
+
+		importProgress.Draw()
+
+		for _, importFn := range importFns {
+			name := importFn.Name()
 			fn := importFn.Call
-			errs.Go(fn)
+
+			errs.Go(func() error {
+				defer importProgress.Draw()
+
+				err := fn()
+
+				if err != nil {
+					importProgress.Error(name)
+					return err
+				}
+
+				importProgress.Success(name)
+
+				return nil
+			})
 		}
 
 		err = errs.Wait()
+		if err != nil {
+			return err
+		}
 
 		if err := provider.CommitTx(); err != nil {
 			return err
