@@ -6,16 +6,37 @@ import (
 	"sync"
 )
 
+type State int
+
+const (
+	InitState State = iota
+	ErrorState
+	SuccessState
+)
+
+func (s State) String() string {
+	switch s {
+	case InitState:
+		return "⌛️"
+	case ErrorState:
+		return "❌"
+	case SuccessState:
+		return "✅"
+	default:
+		return ""
+	}
+}
+
 type Progress struct {
 	mu     sync.Mutex
 	names  []string
-	states map[string]string
+	states map[string]State
 	writer *uilive.Writer
 }
 
 func New() Progress {
 	return Progress{
-		states: map[string]string{},
+		states: map[string]State{},
 		writer: uilive.New(),
 	}
 }
@@ -29,7 +50,7 @@ func (p *Progress) Draw() {
 	_ = p.writer.Flush()
 }
 
-func (p *Progress) add(name, state string) {
+func (p *Progress) add(name string, state State) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -40,13 +61,13 @@ func (p *Progress) add(name, state string) {
 }
 
 func (p *Progress) Init(name string) {
-	p.add(name, "⌛️")
+	p.add(name, InitState)
 }
 
 func (p *Progress) Error(name string) {
-	p.add(name, "❌")
+	p.add(name, ErrorState)
 }
 
 func (p *Progress) Success(name string) {
-	p.add(name, "✅")
+	p.add(name, SuccessState)
 }
