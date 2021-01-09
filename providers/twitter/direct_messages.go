@@ -16,7 +16,7 @@ type Conversation struct {
 }
 
 func (Conversation) TableName() string {
-	return "twitter_conversations"
+	return tablePrefix + "conversations"
 }
 
 type DirectMessage struct {
@@ -33,7 +33,7 @@ type DirectMessage struct {
 }
 
 func (DirectMessage) TableName() string {
-	return "twitter_direct_messages"
+	return tablePrefix + "direct_messages"
 }
 
 type DirectMessageReaction struct {
@@ -46,7 +46,7 @@ type DirectMessageReaction struct {
 }
 
 func (DirectMessageReaction) TableName() string {
-	return "twitter_direct_message_reactions"
+	return tablePrefix + "direct_message_reactions"
 }
 
 func (p *twitter) importDirectMessages(inputPath string) error {

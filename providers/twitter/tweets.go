@@ -33,7 +33,7 @@ type Tweet struct {
 }
 
 func (Tweet) TableName() string {
-	return "twitter_tweets"
+	return tablePrefix + "tweets"
 }
 
 type TweetEntities struct {
@@ -47,7 +47,7 @@ type TweetEntities struct {
 }
 
 func (TweetEntities) TableName() string {
-	return "twitter_tweet_entities"
+	return tablePrefix + "tweet_entities"
 }
 
 type TweetHashtag struct {
@@ -59,7 +59,7 @@ type TweetHashtag struct {
 }
 
 func (TweetHashtag) TableName() string {
-	return "twitter_tweet_hashtags"
+	return tablePrefix + "tweet_hashtags"
 }
 
 type TweetMedia struct {
@@ -98,7 +98,7 @@ type TweetMedia struct {
 }
 
 func (TweetMedia) TableName() string {
-	return "twitter_tweet_media"
+	return tablePrefix + "tweet_media"
 }
 
 type TweetUserMention struct {
@@ -110,7 +110,7 @@ type TweetUserMention struct {
 }
 
 func (TweetUserMention) TableName() string {
-	return "twitter_tweet_user_mentions"
+	return tablePrefix + "tweet_user_mentions"
 }
 
 type TweetURL struct {
@@ -122,7 +122,7 @@ type TweetURL struct {
 }
 
 func (TweetURL) TableName() string {
-	return "twitter_tweet_urls"
+	return tablePrefix + "tweet_urls"
 }
 
 func (p *twitter) importTweets(inputPath string) error {
