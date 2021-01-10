@@ -28,7 +28,7 @@ func DefaultProviders(db *gorm.DB) []provider.Provider {
 
 func NewManager(db *gorm.DB, providers []provider.Provider) (*Manager, error) {
 	manager := &Manager{
-		db: db,
+		db:        db,
 		providers: map[string]provider.Provider{},
 	}
 
@@ -60,6 +60,14 @@ func (m Manager) GetByName(name string) (provider.Provider, error) {
 
 func (m Manager) Reset(p provider.Provider) error {
 	return m.db.Transaction(func(tx *gorm.DB) error {
+		err := tx.
+			Where("provider = ?", p.Name()).
+			Delete(&database.Import{}).
+			Error
+		if err != nil {
+			return err
+		}
+
 		rows, err := tx.
 			Table("sqlite_master").
 			Select("name").
