@@ -8,34 +8,34 @@ import (
 	"strings"
 )
 
-type Personalization struct {
+type PersonalizationRecord struct {
 	gorm.Model
-	Languages              []DemographicsLanguage
-	GenderInfo             GenderInfo
-	Interests              []Interest
-	AudienceAndAdvertisers AudienceAndAdvertisers
-	Shows                  []Show
-	LocationHistory        []Location
-	InferredAgeInfo        InferredAgeInfo `json:"inferredAgeInfo"`
+	Languages              []PersonalizationLanguageRecord
+	GenderInfo             PersonalizationGenderInfoRecord
+	Interests              []PersonalizationInterestRecord
+	AudienceAndAdvertisers PersonalizationAudienceAndAdvertiserRecord
+	Shows                  []PersonalizationShowRecord
+	LocationHistory        []PersonalizationLocationRecord
+	InferredAgeInfo        PersonalizationInferredAgeInfoRecord `json:"inferredAgeInfo"`
 }
 
-func (Personalization) TableName() string {
-	return "twitter_personalizations"
+func (PersonalizationRecord) TableName() string {
+	return "twitter_personalization_records"
 }
 
-func (p *Personalization) UnmarshalJSON(b []byte) error {
-	type alias Personalization
+func (p *PersonalizationRecord) UnmarshalJSON(b []byte) error {
+	type alias PersonalizationRecord
 
 	var data struct {
 		alias
 		Demographics struct {
-			Languages  []DemographicsLanguage `json:"languages"`
-			GenderInfo GenderInfo             `json:"genderInfo"`
+			Languages  []PersonalizationLanguageRecord `json:"languages"`
+			GenderInfo PersonalizationGenderInfoRecord `json:"genderInfo"`
 		} `json:"demographics"`
 		Interests struct {
-			Interests              []Interest             `json:"interests"`
-			AudienceAndAdvertisers AudienceAndAdvertisers `json:"audienceAndAdvertisers"`
-			Shows                  []string               `json:"shows"`
+			Interests              []PersonalizationInterestRecord            `json:"interests"`
+			AudienceAndAdvertisers PersonalizationAudienceAndAdvertiserRecord `json:"audienceAndAdvertisers"`
+			Shows                  []string                                   `json:"shows"`
 		} `json:"interests"`
 		LocationHistory []string `json:"locationHistory"`
 	}
@@ -44,7 +44,7 @@ func (p *Personalization) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*p = Personalization(data.alias)
+	*p = PersonalizationRecord(data.alias)
 
 	p.Languages = data.Demographics.Languages
 	p.GenderInfo = data.Demographics.GenderInfo
@@ -53,13 +53,13 @@ func (p *Personalization) UnmarshalJSON(b []byte) error {
 	p.AudienceAndAdvertisers = data.Interests.AudienceAndAdvertisers
 
 	for _, show := range data.Interests.Shows {
-		p.Shows = append(p.Shows, Show{
+		p.Shows = append(p.Shows, PersonalizationShowRecord{
 			Name: show,
 		})
 	}
 
 	for _, location := range data.LocationHistory {
-		p.LocationHistory = append(p.LocationHistory, Location{
+		p.LocationHistory = append(p.LocationHistory, PersonalizationLocationRecord{
 			Name: location,
 		})
 	}
@@ -67,52 +67,52 @@ func (p *Personalization) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type DemographicsLanguage struct {
+type PersonalizationLanguageRecord struct {
 	gorm.Model
-	PersonalizationID int
-	Language          string `json:"language"`
-	IsDisabled        bool   `json:"isDisabled"`
+	PersonalizationRecordID int
+	Language                string `json:"language"`
+	IsDisabled              bool   `json:"isDisabled"`
 }
 
-func (DemographicsLanguage) TableName() string {
-	return "twitter_personalization_languages"
+func (PersonalizationLanguageRecord) TableName() string {
+	return "twitter_personalization_language_records"
 }
 
-type GenderInfo struct {
+type PersonalizationGenderInfoRecord struct {
 	gorm.Model
-	PersonalizationID int
-	Gender            string `json:"gender"`
+	PersonalizationRecordID int
+	Gender                  string `json:"gender"`
 }
 
-func (GenderInfo) TableName() string {
-	return "twitter_personalization_gender_infos"
+func (PersonalizationGenderInfoRecord) TableName() string {
+	return "twitter_personalization_gender_info_records"
 }
 
-type Interest struct {
+type PersonalizationInterestRecord struct {
 	gorm.Model
-	PersonalizationID int
-	Name              string `json:"name"`
-	IsDisabled        bool   `json:"isDisabled"`
+	PersonalizationRecordID int
+	Name                    string `json:"name"`
+	IsDisabled              bool   `json:"isDisabled"`
 }
 
-func (Interest) TableName() string {
-	return "twitter_personalization_interests"
+func (PersonalizationInterestRecord) TableName() string {
+	return "twitter_personalization_interest_records"
 }
 
-type AudienceAndAdvertisers struct {
+type PersonalizationAudienceAndAdvertiserRecord struct {
 	gorm.Model
-	PersonalizationID    int
-	NumAudiences         int          `json:"numAudiences,string"`
-	Advertisers          []Advertiser `gorm:"foreignKey:AudienceAndAdvertisersID"`
-	LookalikeAdvertisers []Advertiser `gorm:"foreignKey:AudienceAndAdvertisersID"`
+	PersonalizationRecordID int
+	NumAudiences            int                               `json:"numAudiences,string"`
+	Advertisers             []PersonalizationAdvertiserRecord `gorm:"foreignKey:AudienceAndAdvertisersID"`
+	LookalikeAdvertisers    []PersonalizationAdvertiserRecord `gorm:"foreignKey:AudienceAndAdvertisersID"`
 }
 
-func (AudienceAndAdvertisers) TableName() string {
-	return "twitter_personalization_audience_and_advertisers"
+func (PersonalizationAudienceAndAdvertiserRecord) TableName() string {
+	return "twitter_personalization_audience_and_advertiser_records"
 }
 
-func (aaa *AudienceAndAdvertisers) UnmarshalJSON(b []byte) error {
-	type alias AudienceAndAdvertisers
+func (aaa *PersonalizationAudienceAndAdvertiserRecord) UnmarshalJSON(b []byte) error {
+	type alias PersonalizationAudienceAndAdvertiserRecord
 
 	var data struct {
 		alias
@@ -124,12 +124,12 @@ func (aaa *AudienceAndAdvertisers) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*aaa = AudienceAndAdvertisers(data.alias)
+	*aaa = PersonalizationAudienceAndAdvertiserRecord(data.alias)
 
 	for _, advertiser := range data.Advertisers {
 		aaa.Advertisers = append(
 			aaa.Advertisers,
-			Advertiser{
+			PersonalizationAdvertiserRecord{
 				Name: advertiser,
 			},
 		)
@@ -138,7 +138,7 @@ func (aaa *AudienceAndAdvertisers) UnmarshalJSON(b []byte) error {
 	for _, lookalikeAdvertiser := range data.LookalikeAdvertisers {
 		aaa.LookalikeAdvertisers = append(
 			aaa.LookalikeAdvertisers,
-			Advertiser{
+			PersonalizationAdvertiserRecord{
 				Name:      lookalikeAdvertiser,
 				Lookalike: true,
 			},
@@ -148,51 +148,51 @@ func (aaa *AudienceAndAdvertisers) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type Advertiser struct {
+type PersonalizationAdvertiserRecord struct {
 	gorm.Model
 	AudienceAndAdvertisersID int
 	Name                     string
 	Lookalike                bool
 }
 
-func (Advertiser) TableName() string {
-	return "twitter_personalization_advertisers"
+func (PersonalizationAdvertiserRecord) TableName() string {
+	return "twitter_personalization_advertiser_records"
 }
 
-type Show struct {
+type PersonalizationShowRecord struct {
 	gorm.Model
-	PersonalizationID int
-	Name              string
+	PersonalizationRecordID int
+	Name                    string
 }
 
-func (Show) TableName() string {
-	return "twitter_personalization_shows"
+func (PersonalizationShowRecord) TableName() string {
+	return "twitter_personalization_show_records"
 }
 
-type Location struct {
+type PersonalizationLocationRecord struct {
 	gorm.Model
-	PersonalizationID int
-	Name              string `json:"name"`
+	PersonalizationRecordID int
+	Name                    string `json:"name"`
 }
 
-func (Location) TableName() string {
-	return "twitter_personalization_locations"
+func (PersonalizationLocationRecord) TableName() string {
+	return "twitter_personalization_location_records"
 }
 
-type InferredAgeInfo struct {
+type PersonalizationInferredAgeInfoRecord struct {
 	gorm.Model
-	PersonalizationID int
-	Age               []string `json:"age" gorm:"type:text"`
-	BirthDate         string   `json:"birthDate"`
+	PersonalizationRecordID int
+	Age                     []string `json:"age" gorm:"type:text"`
+	BirthDate               string   `json:"birthDate"`
 }
 
-func (InferredAgeInfo) TableName() string {
-	return "twitter_personalization_inferred_age_infos"
+func (PersonalizationInferredAgeInfoRecord) TableName() string {
+	return "twitter_personalization_inferred_age_info_records"
 }
 
 func (p *twitter) importPersonalization(inputPath string) error {
 	var fileData []struct {
-		P13nData Personalization `json:"p13nData"`
+		P13nData PersonalizationRecord `json:"p13nData"`
 	}
 
 	bytes, err := ioutil.ReadFile(inputPath)

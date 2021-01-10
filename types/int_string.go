@@ -23,21 +23,6 @@ func (is *IntString) UnmarshalJSON(b []byte) error {
 	return json.Unmarshal(b, (*int)(is))
 }
 
-func (is *IntString) Scan(src interface{}) error {
-	i, ok := src.(int)
-	if !ok {
-		return fmt.Errorf("failed to scan value into int: %+v", src)
-	}
-
-	*is = IntString(i)
-
-	return nil
-}
-
-func (is IntString) Value() (driver.Value, error) {
-	return json.Marshal(int(is))
-}
-
 type IntStringSlice []IntString
 
 func (iss *IntStringSlice) Scan(src interface{}) error {
