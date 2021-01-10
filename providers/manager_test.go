@@ -1,7 +1,7 @@
 package providers
 
 import (
-	"github.com/DATA-DOG/go-sqlmock"
+	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/shekhirin/bionic-cli/database"
 	"github.com/shekhirin/bionic-cli/providers/provider"
@@ -33,18 +33,58 @@ func TestNewManager(t *testing.T) {
 
 	manager, err := NewManager(db, []provider.Provider{p})
 	require.NoError(t, err)
-	require.NotNil(t, manager)
 
 	assert.Equal(t, map[string]provider.Provider{"mock": p}, manager.providers)
 
 	assert.True(t, db.Migrator().HasTable(&database.MockModel{}))
 }
 
-func TestDefaultProviders(t *testing.T) {
-	sqlDB, _, err := sqlmock.New()
-	require.NoError(t, err)
+func TestManager_GetByName(t *testing.T) {
+	t.Run("found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 
-	db, err := gorm.Open(sqlite.Dialector{Conn: sqlDB}, &gorm.Config{})
+		db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+		require.NoError(t, err)
+
+		p := provider.NewMockProvider(ctrl)
+
+		p.EXPECT().
+			Name().
+			Return("mock")
+
+		p.EXPECT().
+			Models().
+			Return([]schema.Tabler{&database.MockModel{}})
+
+		manager, err := NewManager(db, []provider.Provider{p})
+		require.NoError(t, err)
+
+		pByName, err := manager.GetByName("mock")
+		require.NoError(t, err)
+
+		assert.Equal(t, p, pByName)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+		require.NoError(t, err)
+
+		manager, err := NewManager(db, []provider.Provider{})
+		require.NoError(t, err)
+
+		pByName, err := manager.GetByName("mock")
+		require.Nil(t, pByName)
+
+		assert.True(t, errors.Is(err, ErrProviderNotFound))
+	})
+}
+
+func TestDefaultProviders(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	require.NoError(t, err)
 
 	providers := DefaultProviders(db)
