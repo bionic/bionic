@@ -34,7 +34,7 @@ func (p *netflix) importViewingActivity(inputPath string) error {
 
 	var actions []ViewingAction
 
-	if err := gocsv.UnmarshalFile(file, &actions); err != nil { // Load clients from file
+	if err := gocsv.UnmarshalFile(file, &actions); err != nil {
 		return err
 	}
 
