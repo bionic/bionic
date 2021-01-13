@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/shekhirin/bionic-cli/database"
+	"github.com/shekhirin/bionic-cli/providers/google"
 	"github.com/shekhirin/bionic-cli/providers/netflix"
 	"github.com/shekhirin/bionic-cli/providers/provider"
 	"github.com/shekhirin/bionic-cli/providers/twitter"
@@ -29,6 +30,7 @@ func NewManager(dbPath string) (*Manager, error) {
 		providers: map[string]provider.Provider{
 			"twitter": twitter.New(db),
 			"netflix": netflix.New(db),
+			"google":  google.New(db),
 		},
 	}
 
