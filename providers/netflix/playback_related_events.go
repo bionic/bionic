@@ -19,6 +19,10 @@ type PlaybackRelatedEvent struct {
 	Playtraces        PlaytracesJSON `csv:"Playtraces"`
 }
 
+func (r PlaybackRelatedEvent) TableName() string {
+	return "netflix_playback_related_events"
+}
+
 type Playtrace struct {
 	gorm.Model
 	PlaybackRelatedEventID int
@@ -26,6 +30,10 @@ type Playtrace struct {
 	EventType              string `json:"eventType"`
 	SessionOffsetMs        int    `json:"sessionOffsetMs"`
 	MediaOffsetMs          int    `json:"mediaOffsetMs"`
+}
+
+func (r Playtrace) TableName() string {
+	return "netflix_playtraces"
 }
 
 type PlaytracesJSON []Playtrace
@@ -37,14 +45,6 @@ func (p *PlaytracesJSON) UnmarshalCSV(csv string) error {
 	}
 
 	return nil
-}
-
-func (r PlaybackRelatedEvent) TableName() string {
-	return "netflix_playback_related_events"
-}
-
-func (r Playtrace) TableName() string {
-	return "netflix_playtraces"
 }
 
 func (p *netflix) importPlaybackRelatedEvents(inputPath string) error {
