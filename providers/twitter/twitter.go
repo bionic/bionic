@@ -31,14 +31,14 @@ func (p *twitter) Models() []schema.Tabler {
 		&TweetUserMention{},
 		&TweetURL{},
 		&PersonalizationRecord{},
-		&PersonalizationLanguageRecord{},
-		&PersonalizationGenderInfoRecord{},
-		&PersonalizationInterestRecord{},
-		&PersonalizationAudienceAndAdvertiserRecord{},
-		&PersonalizationAdvertiserRecord{},
-		&PersonalizationShowRecord{},
-		&PersonalizationLocationRecord{},
-		&PersonalizationInferredAgeInfoRecord{},
+		&LanguageRecord{},
+		&GenderInfo{},
+		&InterestRecord{},
+		&AudienceAndAdvertiserRecord{},
+		&Advertiser{},
+		&Show{},
+		&Location{},
+		&InferredAgeInfoRecord{},
 	}
 }
 
