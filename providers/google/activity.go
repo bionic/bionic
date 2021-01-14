@@ -36,6 +36,15 @@ func (p Product) TableName() string {
 	return "google_activity_products"
 }
 
+type ActionProductAssoc struct {
+	ActionID  int `gorm:"primaryKey;not null"`
+	ProductID int `gorm:"primaryKey;not null"`
+}
+
+func (a ActionProductAssoc) TableName() string {
+	return "google_activity_products_assoc"
+}
+
 func (p *Product) UnmarshalJSON(b []byte) error {
 	var str string
 	if err := json.Unmarshal(b, &str); err != nil {

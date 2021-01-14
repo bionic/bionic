@@ -67,6 +67,11 @@ func (m Manager) Reset(p provider.Provider) error {
 }
 
 func (m Manager) migrate(db *gorm.DB, p provider.Provider) error {
+	err := db.SetupJoinTable(&google.Action{}, "Products", &google.ActionProductAssoc{})
+	if err != nil {
+		return err
+	}
+
 	return db.AutoMigrate(tablersToInterfaces(p.Models())...)
 }
 
