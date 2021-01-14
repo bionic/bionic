@@ -13,14 +13,14 @@ import (
 
 type Action struct {
 	gorm.Model
-	Header        string         `json:"header"`
-	Title         string         `json:"title"`
+	Header        string         `json:"header" gorm:"uniqueIndex:idx_google_activity"`
+	Title         string         `json:"title" gorm:"uniqueIndex:idx_google_activity"`
 	TitleUrl      string         `json:"titleUrl"`
-	Time          types.DateTime `json:"time"`
-	Products      []Product      `json:"products" gorm:"many2many:google_action_products;"`
+	Time          types.DateTime `json:"time" gorm:"uniqueIndex:idx_google_activity"`
+	Products      []Product      `json:"products" gorm:"many2many:google_activity_products_assoc;"`
 	LocationInfos []LocationInfo
 	Subtitles     []Subtitle
-	Details       []Detail `json:"details" gorm:"many2many:google_action_details;"`
+	Details       []Detail `json:"details"`
 }
 
 func (a Action) TableName() string {
@@ -34,6 +34,16 @@ type Product struct {
 
 func (p Product) TableName() string {
 	return "google_activity_products"
+}
+
+func (p *Product) UnmarshalJSON(b []byte) error {
+	var str string
+	if err := json.Unmarshal(b, &str); err != nil {
+		return err
+	}
+
+	*p = Product{Name: str}
+	return nil
 }
 
 type LocationInfo struct {
@@ -64,21 +74,13 @@ func (s Subtitle) TableName() string {
 
 type Detail struct {
 	gorm.Model
-	Name string `json:"name" gorm:"unique"`
+	ActionID int
+	Action   Action
+	Name     string `json:"name"`
 }
 
 func (d Detail) TableName() string {
 	return "google_activity_details"
-}
-
-func (p *Product) UnmarshalJSON(b []byte) error {
-	var str string
-	if err := json.Unmarshal(b, &str); err != nil {
-		return err
-	}
-
-	*p = Product{Name: str}
-	return nil
 }
 
 // TODO: Rebuild on https://stackoverflow.com/questions/31794355/decode-large-stream-json
@@ -116,6 +118,17 @@ func (p *google) importActivity(inputPath string) error {
 		var actions []Action
 		if err := json.Unmarshal(bytes, &actions); err != nil {
 			return err
+		}
+
+		for i, action := range actions {
+			for j, product := range action.Products {
+				err = p.DB().
+					FirstOrCreate(&actions[i].Products[j], map[string]interface{}{"name": product.Name}).
+					Error
+				if err != nil {
+					return err
+				}
+			}
 		}
 
 		err = p.DB().
