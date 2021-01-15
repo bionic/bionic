@@ -19,10 +19,24 @@ func (Like) TableName() string {
 	return "twitter_likes"
 }
 
-func (p *twitter) importLikes(inputPath string) error {
-	var fileData []struct {
-		Like Like `json:"like"`
+func (l *Like) UnmarshalJSON(b []byte) error {
+	type alias Like
+
+	var data struct {
+		Like alias `json:"like"`
 	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	*l = Like(data.Like)
+
+	return nil
+}
+
+func (p *twitter) importLikes(inputPath string) error {
+	var likes []Like
 
 	bytes, err := ioutil.ReadFile(inputPath)
 	if err != nil {
@@ -32,14 +46,8 @@ func (p *twitter) importLikes(inputPath string) error {
 	data := string(bytes)
 	data = strings.TrimPrefix(data, "window.YTD.like.part0 = ")
 
-	if err := json.Unmarshal([]byte(data), &fileData); err != nil {
+	if err := json.Unmarshal([]byte(data), &likes); err != nil {
 		return err
-	}
-
-	var likes []Like
-
-	for _, entry := range fileData {
-		likes = append(likes, entry.Like)
 	}
 
 	err = p.DB().

@@ -11,12 +11,28 @@ import (
 
 type Conversation struct {
 	gorm.Model
-	ID             string `json:"conversationId"`
-	DirectMessages []DirectMessage
+	ID             string          `json:"conversationId"`
+	DirectMessages []DirectMessage `json:"messages"`
 }
 
 func (Conversation) TableName() string {
 	return "twitter_conversations"
+}
+
+func (c *Conversation) UnmarshalJSON(b []byte) error {
+	type alias Conversation
+
+	var data struct {
+		DmConversation alias `json:"dmConversation"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	*c = Conversation(data.DmConversation)
+
+	return nil
 }
 
 type DirectMessage struct {
@@ -36,6 +52,22 @@ func (DirectMessage) TableName() string {
 	return "twitter_direct_messages"
 }
 
+func (dm *DirectMessage) UnmarshalJSON(b []byte) error {
+	type alias DirectMessage
+
+	var data struct {
+		MessageCreate alias `json:"messageCreate"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	*dm = DirectMessage(data.MessageCreate)
+
+	return nil
+}
+
 type DirectMessageReaction struct {
 	gorm.Model
 	DirectMessageID int
@@ -50,14 +82,7 @@ func (DirectMessageReaction) TableName() string {
 }
 
 func (p *twitter) importDirectMessages(inputPath string) error {
-	var fileData []struct {
-		DmConversation struct {
-			Conversation
-			Messages []struct {
-				MessageCreate DirectMessage `json:"messageCreate"`
-			} `json:"messages"`
-		} `json:"dmConversation"`
-	}
+	var conversations []Conversation
 
 	bytes, err := ioutil.ReadFile(inputPath)
 	if err != nil {
@@ -67,19 +92,8 @@ func (p *twitter) importDirectMessages(inputPath string) error {
 	data := string(bytes)
 	data = strings.TrimPrefix(data, "window.YTD.direct_messages.part0 = ")
 
-	if err := json.Unmarshal([]byte(data), &fileData); err != nil {
+	if err := json.Unmarshal([]byte(data), &conversations); err != nil {
 		return err
-	}
-
-	var conversations []Conversation
-
-	for _, entry := range fileData {
-		conversation := entry.DmConversation.Conversation
-		for _, message := range entry.DmConversation.Messages {
-			conversation.DirectMessages = append(conversation.DirectMessages, message.MessageCreate)
-		}
-
-		conversations = append(conversations, conversation)
 	}
 
 	err = p.DB().
