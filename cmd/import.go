@@ -67,8 +67,7 @@ var importCmd = &cobra.Command{
 			})
 		}
 
-		err = errs.Wait()
-		if err != nil {
+		if err := errs.Wait(); err != nil {
 			return err
 		}
 

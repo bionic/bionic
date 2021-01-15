@@ -132,6 +132,7 @@ func (TweetURL) TableName() string {
 }
 
 func (p *twitter) importTweets(inputPath string) error {
+	// TODO: use json.Unmarshaler as in personalization.go
 	var fileData []struct {
 		Tweet struct {
 			Tweet
