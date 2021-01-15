@@ -12,26 +12,26 @@ import (
 
 type Tweet struct {
 	gorm.Model
-	ID                   int `json:"id,string"`
-	AuthorID             *int
-	Author               *User
-	Retweeted            bool          `json:"retweeted"`
-	Source               string        `json:"source"`
-	Entities             TweetEntities `json:"entities"`
+	ID                 int `json:"id,string"`
+	AuthorID           *int
+	Author             *User
+	Retweeted          bool          `json:"retweeted"`
+	Source             string        `json:"source"`
+	Entities           TweetEntities `json:"entities"`
 	DisplayTextFromIdx *int
 	DisplayTextToIdx   *int
-	FavoriteCount        int            `json:"favorite_count,string"`
-	Truncated            bool           `json:"truncated"`
-	RetweetCount         int            `json:"retweet_count,string"`
-	PossiblySensitive    bool           `json:"possibly_sensitive"`
-	Created              types.DateTime `json:"created_at"`
-	Favorited            bool           `json:"favorited"`
-	FullText             string         `json:"full_text"`
-	Lang                 string         `json:"lang"`
-	InReplyToUserID      *int
-	InReplyToUser        *User
-	InReplyToStatusID    *int
-	InReplyToStatus      *Tweet
+	FavoriteCount      int            `json:"favorite_count,string"`
+	Truncated          bool           `json:"truncated"`
+	RetweetCount       int            `json:"retweet_count,string"`
+	PossiblySensitive  bool           `json:"possibly_sensitive"`
+	Created            types.DateTime `json:"created_at"`
+	Favorited          bool           `json:"favorited"`
+	FullText           string         `json:"full_text"`
+	Lang               string         `json:"lang"`
+	InReplyToUserID    *int
+	InReplyToUser      *User
+	InReplyToStatusID  *int
+	InReplyToStatus    *Tweet
 }
 
 func (Tweet) TableName() string {
@@ -57,8 +57,8 @@ type TweetHashtag struct {
 	TweetEntitiesID int
 	HashtagID       int
 	Hashtag         Hashtag
-	FromIdx       *int
-	ToIdx         *int
+	FromIdx         *int
+	ToIdx           *int
 }
 
 func (TweetHashtag) TableName() string {
@@ -70,8 +70,8 @@ type TweetMedia struct {
 	TweetEntitiesID int
 	ID              int    `json:"id,string"`
 	ExpandedURL     string `json:"expanded_url"`
-	FromIdx       *int
-	ToIdx         *int
+	FromIdx         *int
+	ToIdx           *int
 	URL             string `json:"url"`
 	MediaURL        string `json:"media_url"`
 	MediaURLHTTPS   string `json:"media_url_https"`
@@ -110,8 +110,8 @@ type TweetUserMention struct {
 	TweetEntitiesID int
 	UserID          int
 	User            User
-	FromIdx       *int
-	ToIdx         *int
+	FromIdx         *int
+	ToIdx           *int
 }
 
 func (TweetUserMention) TableName() string {
@@ -123,8 +123,8 @@ type TweetURL struct {
 	TweetEntitiesID int
 	URLID           string
 	URL             URL
-	FromIdx       *int
-	ToIdx         *int
+	FromIdx         *int
+	ToIdx           *int
 }
 
 func (TweetURL) TableName() string {
