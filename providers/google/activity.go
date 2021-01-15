@@ -7,7 +7,6 @@ import (
 	"github.com/shekhirin/bionic-cli/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"io/ioutil"
 	"path/filepath"
 )
 
@@ -26,6 +25,8 @@ type Action struct {
 func (a Action) TableName() string {
 	return "google_activity"
 }
+
+const actionBatchSize = 100
 
 type Product struct {
 	gorm.Model
@@ -106,55 +107,80 @@ func (p *google) importActivity(inputPath string) error {
 	}()
 
 	for _, f := range r.File {
-		rc, err := f.Open()
-		if err != nil {
-			return err
-		}
-
 		filename := filepath.Base(f.Name)
 
 		if filename != "MyActivity.json" {
 			continue
 		}
-
-		bytes, err := ioutil.ReadAll(rc)
-		if err != nil {
-			return nil
-		}
-
 		fmt.Println(f.Name)
 
-		var actions []Action
-		if err := json.Unmarshal(bytes, &actions); err != nil {
-			return err
-		}
-
-		for i, action := range actions {
-			for j, product := range action.Products {
-				err = p.DB().
-					FirstOrCreate(&actions[i].Products[j], map[string]interface{}{"name": product.Name}).
-					Error
-				if err != nil {
-					return err
-				}
-			}
-		}
-
-		err = p.DB().
-			Clauses(clause.OnConflict{
-				DoNothing: true,
-			}).
-			CreateInBatches(actions, 1000).
-			Error
+		err := processActionsFile(p.DB(), f)
 		if err != nil {
 			return err
 		}
-
-		if err := rc.Close(); err != nil {
-			return err
-		}
-
 	}
 
 	return nil
+}
+
+func processActionsFile(db *gorm.DB, file *zip.File) error {
+	rc, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := rc.Close(); err != nil {
+			panic(err)
+		}
+	}()
+
+	decoder := json.NewDecoder(rc)
+	if _, err := decoder.Token(); err != nil {
+		return err
+	} // Skip first token, which is opening the list
+
+	var actionBatch []Action
+
+	for decoder.More() {
+		var action Action
+		err := decoder.Decode(&action)
+		if err != nil {
+			return err
+		}
+
+		actionBatch = append(actionBatch, action)
+		if len(actionBatch) >= actionBatchSize {
+			if err := saveActions(db, actionBatch); err != nil {
+				return err
+			}
+			actionBatch = nil
+		}
+	}
+
+	if err := saveActions(db, actionBatch); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func saveActions(db *gorm.DB, actions []Action) error {
+	for i, action := range actions {
+		for j, product := range action.Products {
+			err := db.
+				FirstOrCreate(&actions[i].Products[j], map[string]interface{}{"name": product.Name}).
+				Error
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	err := db.
+		Clauses(clause.OnConflict{
+			DoNothing: true,
+		}).
+		CreateInBatches(actions, 1000).
+		Error
+	return err
 }
