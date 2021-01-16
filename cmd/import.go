@@ -40,7 +40,7 @@ var importCmd = &cobra.Command{
 		if err := provider.BeginTx(); err != nil {
 			return err
 		}
-		defer provider.RollbackTx()
+		defer provider.RollbackTx() //nolint:errcheck
 
 		errs, _ := errgroup.WithContext(cmd.Context())
 
@@ -73,8 +73,7 @@ var importCmd = &cobra.Command{
 			})
 		}
 
-		err = errs.Wait()
-		if err != nil {
+		if err := errs.Wait(); err != nil {
 			return err
 		}
 

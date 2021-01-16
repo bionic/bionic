@@ -41,7 +41,7 @@ func NewManager(db *gorm.DB, providers []provider.Provider) (*Manager, error) {
 	}
 
 	for _, p := range manager.providers {
-		if err := manager.migrate(db, p); err != nil {
+		if err := migrate(db, p); err != nil {
 			return nil, err
 		}
 	}
@@ -94,7 +94,7 @@ func (m Manager) Reset(p provider.Provider) error {
 			}
 		}
 
-		if err := m.migrate(tx, p); err != nil {
+		if err := migrate(tx, p); err != nil {
 			return err
 		}
 
@@ -102,7 +102,7 @@ func (m Manager) Reset(p provider.Provider) error {
 	})
 }
 
-func (m Manager) migrate(db *gorm.DB, p provider.Provider) error {
+func migrate(db *gorm.DB, p provider.Provider) error {
 	return db.AutoMigrate(tablersToInterfaces(p.Models())...)
 }
 
