@@ -1,7 +1,6 @@
 package netflix
 
 import (
-	"encoding/json"
 	"github.com/gocarina/gocsv"
 	"github.com/shekhirin/bionic-cli/types"
 	"gorm.io/gorm"
@@ -16,7 +15,7 @@ type PlaybackRelatedEvent struct {
 	Device            string         `csv:"Device"`
 	Country           string         `csv:"Country"`
 	PlaybackStartTime types.DateTime `csv:"Playback Start Utc Ts" gorm:"uniqueIndex:idx_playback"`
-	Playtraces        PlaytracesJSON `csv:"Playtraces"`
+	Playtraces        []Playtrace    `csv:"Playtraces"`
 }
 
 func (r PlaybackRelatedEvent) TableName() string {
@@ -34,17 +33,6 @@ type Playtrace struct {
 
 func (r Playtrace) TableName() string {
 	return "netflix_playtraces"
-}
-
-type PlaytracesJSON []Playtrace
-
-func (p *PlaytracesJSON) UnmarshalCSV(csv string) error {
-	err := json.Unmarshal([]byte(csv), &p)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (p *netflix) importPlaybackRelatedEvents(inputPath string) error {
