@@ -28,7 +28,7 @@ func (p *google) Models() []schema.Tabler {
 
 func (p *google) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 	if !provider.IsPathDir(inputPath) {
-		//return nil, provider.ErrInputPathShouldBeDirectory FIXME
+		//return nil, provider.ErrInputPathShouldBeDirectory FIXME Add conditional work on zip/folder
 	}
 
 	return []provider.ImportFn{

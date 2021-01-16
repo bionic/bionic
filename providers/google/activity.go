@@ -3,37 +3,36 @@ package google
 import (
 	"archive/zip"
 	"encoding/json"
-	"fmt"
 	"github.com/shekhirin/bionic-cli/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"path/filepath"
 )
 
+const actionBatchSize = 100
+
 type Action struct {
 	gorm.Model
-	Header        string         `json:"header" gorm:"uniqueIndex:idx_google_activity"`
-	Title         string         `json:"title" gorm:"uniqueIndex:idx_google_activity"`
-	TitleUrl      string         `json:"titleUrl"`
-	Time          types.DateTime `json:"time" gorm:"uniqueIndex:idx_google_activity"`
+	Header        string         `json:"header" gorm:"uniqueIndex:google_activity_key"`
+	Title         string         `json:"title" gorm:"uniqueIndex:google_activity_key"`
+	TitleURL      string         `json:"titleUrl"`
+	Time          types.DateTime `json:"time" gorm:"uniqueIndex:google_activity_key"`
 	Products      []Product      `json:"products" gorm:"many2many:google_activity_products_assoc;"`
 	LocationInfos []LocationInfo
 	Subtitles     []Subtitle
 	Details       []Detail `json:"details"`
 }
 
-func (a Action) TableName() string {
+func (Action) TableName() string {
 	return "google_activity"
 }
-
-const actionBatchSize = 100
 
 type Product struct {
 	gorm.Model
 	Name string `gorm:"unique"`
 }
 
-func (p Product) TableName() string {
+func (Product) TableName() string {
 	return "google_activity_products"
 }
 
@@ -42,7 +41,7 @@ type ActionProductAssoc struct {
 	ProductID int `gorm:"primaryKey;not null"`
 }
 
-func (a ActionProductAssoc) TableName() string {
+func (ActionProductAssoc) TableName() string {
 	return "google_activity_products_assoc"
 }
 
@@ -61,12 +60,12 @@ type LocationInfo struct {
 	ActionID  int
 	Action    Action
 	Name      string `json:"name"`
-	Url       string `json:"url" `
+	URL       string `json:"url" `
 	Source    string `json:"source"`
-	SourceUrl string `json:"sourceUrl"`
+	SourceURL string `json:"sourceUrl"`
 }
 
-func (i LocationInfo) TableName() string {
+func (LocationInfo) TableName() string {
 	return "google_activity_location_infos"
 }
 
@@ -75,7 +74,7 @@ type Subtitle struct {
 	ActionID int
 	Action   Action
 	Name     string `json:"name"`
-	Url      string `json:"url"`
+	URL      string `json:"url"`
 }
 
 func (s Subtitle) TableName() string {
@@ -93,17 +92,13 @@ func (d Detail) TableName() string {
 	return "google_activity_details"
 }
 
-// TODO: Rebuild on https://stackoverflow.com/questions/31794355/decode-large-stream-json
-
 func (p *google) importActivity(inputPath string) error {
 	r, err := zip.OpenReader(inputPath)
 	if err != nil {
 		return err
 	}
 	defer func() {
-		if err := r.Close(); err != nil {
-			panic(err)
-		}
+		_ = r.Close()
 	}()
 
 	for _, f := range r.File {
@@ -112,9 +107,8 @@ func (p *google) importActivity(inputPath string) error {
 		if filename != "MyActivity.json" {
 			continue
 		}
-		fmt.Println(f.Name)
 
-		err := processActionsFile(p.DB(), f)
+		err := p.processActionsFile(f)
 		if err != nil {
 			return err
 		}
@@ -123,7 +117,7 @@ func (p *google) importActivity(inputPath string) error {
 	return nil
 }
 
-func processActionsFile(db *gorm.DB, file *zip.File) error {
+func (p *google) processActionsFile(file *zip.File) error {
 	rc, err := file.Open()
 	if err != nil {
 		return err
@@ -139,7 +133,7 @@ func processActionsFile(db *gorm.DB, file *zip.File) error {
 		return err
 	} // Skip first token, which is opening the list
 
-	var actionBatch []Action
+	var batch []Action
 
 	for decoder.More() {
 		var action Action
@@ -148,26 +142,26 @@ func processActionsFile(db *gorm.DB, file *zip.File) error {
 			return err
 		}
 
-		actionBatch = append(actionBatch, action)
-		if len(actionBatch) >= actionBatchSize {
-			if err := saveActions(db, actionBatch); err != nil {
+		batch = append(batch, action)
+		if len(batch) >= actionBatchSize {
+			if err := p.saveActions(batch); err != nil {
 				return err
 			}
-			actionBatch = nil
+			batch = nil
 		}
 	}
 
-	if err := saveActions(db, actionBatch); err != nil {
+	if err := p.saveActions(batch); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func saveActions(db *gorm.DB, actions []Action) error {
+func (p *google) saveActions(actions []Action) error {
 	for i, action := range actions {
 		for j, product := range action.Products {
-			err := db.
+			err := p.DB().
 				FirstOrCreate(&actions[i].Products[j], map[string]interface{}{"name": product.Name}).
 				Error
 			if err != nil {
@@ -176,7 +170,7 @@ func saveActions(db *gorm.DB, actions []Action) error {
 		}
 	}
 
-	err := db.
+	err := p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).
