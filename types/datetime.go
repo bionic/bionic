@@ -27,6 +27,10 @@ func (dt *DateTime) UnmarshalJSON(b []byte) error {
 }
 
 func (dt *DateTime) UnmarshalCSV(csv string) (err error) {
+	if csv == "" {
+		return nil
+	}
+
 	t, err := dateparse.ParseStrict(csv)
 	if err != nil {
 		return err
@@ -49,5 +53,9 @@ func (dt *DateTime) Scan(src interface{}) error {
 }
 
 func (dt DateTime) Value() (driver.Value, error) {
+	if time.Time(dt).IsZero() {
+		return nil, nil
+	}
+
 	return time.Time(dt), nil
 }

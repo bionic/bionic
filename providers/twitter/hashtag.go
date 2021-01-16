@@ -8,5 +8,5 @@ type Hashtag struct {
 }
 
 func (Hashtag) TableName() string {
-	return "twitter_hashtags"
+	return tablePrefix + "hashtags"
 }

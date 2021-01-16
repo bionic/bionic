@@ -10,5 +10,5 @@ type URL struct {
 }
 
 func (URL) TableName() string {
-	return "twitter_urls"
+	return tablePrefix + "urls"
 }
