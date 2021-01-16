@@ -35,7 +35,7 @@ type Tweet struct {
 }
 
 func (Tweet) TableName() string {
-	return "twitter_tweets"
+	return tablePrefix + "tweets"
 }
 
 func (t *Tweet) UnmarshalJSON(b []byte) error {
@@ -92,7 +92,7 @@ type TweetEntities struct {
 }
 
 func (TweetEntities) TableName() string {
-	return "twitter_tweet_entities"
+	return tablePrefix + "tweet_entities"
 }
 
 type TweetHashtag struct {
@@ -105,7 +105,7 @@ type TweetHashtag struct {
 }
 
 func (TweetHashtag) TableName() string {
-	return "twitter_tweet_hashtags"
+	return tablePrefix + "tweet_hashtags"
 }
 
 func (th *TweetHashtag) UnmarshalJSON(b []byte) error {
@@ -166,7 +166,7 @@ type TweetMedia struct {
 }
 
 func (TweetMedia) TableName() string {
-	return "twitter_tweet_media"
+	return tablePrefix + "tweet_media"
 }
 
 func (tm *TweetMedia) UnmarshalJSON(b []byte) error {
@@ -198,7 +198,7 @@ type TweetUserMention struct {
 }
 
 func (TweetUserMention) TableName() string {
-	return "twitter_tweet_user_mentions"
+	return tablePrefix + "tweet_user_mentions"
 }
 
 func (tum *TweetUserMention) UnmarshalJSON(b []byte) error {
@@ -232,7 +232,7 @@ type TweetURL struct {
 }
 
 func (TweetURL) TableName() string {
-	return "twitter_tweet_urls"
+	return tablePrefix + "tweet_urls"
 }
 
 func (tu *TweetURL) UnmarshalJSON(b []byte) error {

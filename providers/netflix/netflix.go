@@ -7,6 +7,9 @@ import (
 	"path"
 )
 
+const name = "netflix"
+const tablePrefix = "netflix_"
+
 type netflix struct {
 	provider.Database
 }
@@ -17,7 +20,15 @@ func New(db *gorm.DB) provider.Provider {
 	}
 }
 
-func (p *netflix) Models() []schema.Tabler {
+func (netflix) Name() string {
+	return name
+}
+
+func (netflix) TablePrefix() string {
+	return tablePrefix
+}
+
+func (netflix) Models() []schema.Tabler {
 	return []schema.Tabler{
 		&ViewingAction{},
 		&SubscriptionHistoryItem{},

@@ -23,7 +23,7 @@ type ViewingAction struct {
 }
 
 func (r ViewingAction) TableName() string {
-	return "netflix_viewing_activity"
+	return tablePrefix + "viewing_activity"
 }
 
 func (p *netflix) importViewingActivity(inputPath string) error {

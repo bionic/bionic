@@ -16,7 +16,7 @@ type Like struct {
 }
 
 func (Like) TableName() string {
-	return "twitter_likes"
+	return tablePrefix + "likes"
 }
 
 func (l *Like) UnmarshalJSON(b []byte) error {

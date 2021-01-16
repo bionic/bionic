@@ -32,6 +32,8 @@ func (fn ImportFn) Call() error {
 
 type Provider interface {
 	Database
+	Name() string
+	TablePrefix() string
 	Models() []schema.Tabler
 	ImportFns(inputPath string) ([]ImportFn, error)
 }

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/shekhirin/bionic-cli/database"
 	"github.com/shekhirin/bionic-cli/internal/progress"
 	"github.com/shekhirin/bionic-cli/providers"
 	"github.com/spf13/cobra"
@@ -9,14 +10,19 @@ import (
 )
 
 var importCmd = &cobra.Command{
-	Use:   "import [service] [path]",
-	Short: "Import GDPR export to local db",
+	Use:   "import [provider] [path]",
+	Short: "Import data to local db",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		providerName, inputPath := args[0], args[1]
 
 		dbPath := rootCmd.PersistentFlags().Lookup("db").Value.String()
 
-		manager, err := providers.NewManager(dbPath)
+		db, err := database.New(dbPath)
+		if err != nil {
+			return err
+		}
+
+		manager, err := providers.NewManager(db, providers.DefaultProviders(db))
 		if err != nil {
 			return err
 		}
@@ -68,6 +74,15 @@ var importCmd = &cobra.Command{
 		}
 
 		if err := errs.Wait(); err != nil {
+			return err
+		}
+
+		err = provider.DB().
+			Create(&database.Import{
+				Provider: provider.Name(),
+			}).
+			Error
+		if err != nil {
 			return err
 		}
 
