@@ -23,10 +23,14 @@ type ViewingAction struct {
 }
 
 func (r ViewingAction) TableName() string {
-	return "netflix_viewing_activity"
+	return tablePrefix + "viewing_activity"
 }
 
 func (p *netflix) importViewingActivity(inputPath string) error {
+	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
+		return nil
+	}
+
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -34,7 +38,7 @@ func (p *netflix) importViewingActivity(inputPath string) error {
 
 	var actions []ViewingAction
 
-	if err := gocsv.UnmarshalFile(file, &actions); err != nil { // Load clients from file
+	if err := gocsv.UnmarshalFile(file, &actions); err != nil {
 		return err
 	}
 

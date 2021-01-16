@@ -6,34 +6,79 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"io/ioutil"
+	"strconv"
 	"strings"
 )
 
 type Tweet struct {
 	gorm.Model
-	ID                int `json:"id,string"`
-	AuthorID          *int
-	Author            *User
-	Retweeted         bool                 `json:"retweeted"`
-	Source            string               `json:"source"`
-	Entities          TweetEntities        `json:"entities"`
-	DisplayTextRange  types.IntStringSlice `json:"display_text_range"`
-	FavoriteCount     int                  `json:"favorite_count,string"`
-	Truncated         bool                 `json:"truncated"`
-	RetweetCount      int                  `json:"retweet_count,string"`
-	PossiblySensitive bool                 `json:"possibly_sensitive"`
-	Created           types.DateTime       `json:"created_at"`
-	Favorited         bool                 `json:"favorited"`
-	FullText          string               `json:"full_text"`
-	Lang              string               `json:"lang"`
-	InReplyToUserID   *int
-	InReplyToUser     *User
-	InReplyToStatusID *int
-	InReplyToStatus   *Tweet
+	ID                 int `json:"id,string"`
+	AuthorID           *int
+	Author             *User
+	Retweeted          bool          `json:"retweeted"`
+	Source             string        `json:"source"`
+	Entities           TweetEntities `json:"entities"`
+	DisplayTextFromIdx *int
+	DisplayTextToIdx   *int
+	FavoriteCount      int            `json:"favorite_count,string"`
+	Truncated          bool           `json:"truncated"`
+	RetweetCount       int            `json:"retweet_count,string"`
+	PossiblySensitive  bool           `json:"possibly_sensitive"`
+	Created            types.DateTime `json:"created_at"`
+	Favorited          bool           `json:"favorited"`
+	FullText           string         `json:"full_text"`
+	Lang               string         `json:"lang"`
+	InReplyToUserID    *int
+	InReplyToUser      *User
+	InReplyToStatusID  *int
+	InReplyToStatus    *Tweet
 }
 
 func (Tweet) TableName() string {
-	return "twitter_tweets"
+	return tablePrefix + "tweets"
+}
+
+func (t *Tweet) UnmarshalJSON(b []byte) error {
+	type alias Tweet
+
+	var data struct {
+		Tweet struct {
+			alias
+			DisplayTextRange    []string `json:"display_text_range"`
+			InReplyToStatusID   *int     `json:"in_reply_to_status_id,string"`
+			InReplyToUserID     *int     `json:"in_reply_to_user_id,string"`
+			InReplyToScreenName *string  `json:"in_reply_to_screen_name"`
+		} `json:"tweet"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	tweet := data.Tweet
+
+	*t = Tweet(tweet.alias)
+
+	t.DisplayTextFromIdx, t.DisplayTextToIdx = rangeToIndices(tweet.DisplayTextRange)
+
+	if tweet.InReplyToStatusID != nil {
+		t.InReplyToStatus = &Tweet{
+			ID: *tweet.InReplyToStatusID,
+		}
+	}
+
+	if tweet.InReplyToUserID != nil && tweet.InReplyToScreenName != nil {
+		t.InReplyToUser = &User{
+			ID:         *tweet.InReplyToUserID,
+			ScreenName: *tweet.InReplyToScreenName,
+		}
+
+		if t.InReplyToStatus != nil {
+			t.InReplyToStatus.Author = t.InReplyToUser
+		}
+	}
+
+	return nil
 }
 
 type TweetEntities struct {
@@ -47,7 +92,7 @@ type TweetEntities struct {
 }
 
 func (TweetEntities) TableName() string {
-	return "twitter_tweet_entities"
+	return tablePrefix + "tweet_entities"
 }
 
 type TweetHashtag struct {
@@ -55,22 +100,45 @@ type TweetHashtag struct {
 	TweetEntitiesID int
 	HashtagID       int
 	Hashtag         Hashtag
-	Indices         types.IntStringSlice `json:"indices"`
+	FromIdx         *int
+	ToIdx           *int
 }
 
 func (TweetHashtag) TableName() string {
-	return "twitter_tweet_hashtags"
+	return tablePrefix + "tweet_hashtags"
+}
+
+func (th *TweetHashtag) UnmarshalJSON(b []byte) error {
+	type alias TweetHashtag
+
+	var data struct {
+		alias
+		Hashtag
+		Indices []string `json:"indices"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	*th = TweetHashtag(data.alias)
+
+	th.Hashtag = data.Hashtag
+	th.FromIdx, th.ToIdx = rangeToIndices(data.Indices)
+
+	return nil
 }
 
 type TweetMedia struct {
 	gorm.Model
 	TweetEntitiesID int
-	ID              int                  `json:"id,string"`
-	ExpandedURL     string               `json:"expanded_url"`
-	Indices         types.IntStringSlice `json:"indices"`
-	URL             string               `json:"url"`
-	MediaURL        string               `json:"media_url"`
-	MediaURLHTTPS   string               `json:"media_url_https"`
+	ID              int    `json:"id,string"`
+	ExpandedURL     string `json:"expanded_url"`
+	FromIdx         *int
+	ToIdx           *int
+	URL             string `json:"url"`
+	MediaURL        string `json:"media_url"`
+	MediaURLHTTPS   string `json:"media_url_https"`
 	//Sizes           struct {
 	//	Thumb struct {
 	//		W      string `json:"w"`
@@ -98,7 +166,26 @@ type TweetMedia struct {
 }
 
 func (TweetMedia) TableName() string {
-	return "twitter_tweet_media"
+	return tablePrefix + "tweet_media"
+}
+
+func (tm *TweetMedia) UnmarshalJSON(b []byte) error {
+	type alias TweetMedia
+
+	var data struct {
+		alias
+		Indices []string `json:"indices"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	*tm = TweetMedia(data.alias)
+
+	tm.FromIdx, tm.ToIdx = rangeToIndices(data.Indices)
+
+	return nil
 }
 
 type TweetUserMention struct {
@@ -106,11 +193,33 @@ type TweetUserMention struct {
 	TweetEntitiesID int
 	UserID          int
 	User            User
-	Indices         types.IntStringSlice `json:"indices"`
+	FromIdx         *int
+	ToIdx           *int
 }
 
 func (TweetUserMention) TableName() string {
-	return "twitter_tweet_user_mentions"
+	return tablePrefix + "tweet_user_mentions"
+}
+
+func (tum *TweetUserMention) UnmarshalJSON(b []byte) error {
+	type alias TweetUserMention
+
+	var data struct {
+		alias
+		User
+		Indices []string `json:"indices"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	*tum = TweetUserMention(data.alias)
+
+	tum.User = data.User
+	tum.FromIdx, tum.ToIdx = rangeToIndices(data.Indices)
+
+	return nil
 }
 
 type TweetURL struct {
@@ -118,39 +227,41 @@ type TweetURL struct {
 	TweetEntitiesID int
 	URLID           string
 	URL             URL
-	Indices         types.IntStringSlice `json:"indices"`
+	FromIdx         *int
+	ToIdx           *int
 }
 
 func (TweetURL) TableName() string {
-	return "twitter_tweet_urls"
+	return tablePrefix + "tweet_urls"
+}
+
+func (tu *TweetURL) UnmarshalJSON(b []byte) error {
+	type alias TweetURL
+
+	var data struct {
+		alias
+		URL
+		Indices  []string `json:"indices"`
+		Expanded string   `json:"expanded_url"`
+		Display  string   `json:"display_url"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	*tu = TweetURL(data.alias)
+
+	tu.URL = data.URL
+	tu.URL.Expanded = data.Expanded
+	tu.URL.Display = data.Display
+	tu.FromIdx, tu.ToIdx = rangeToIndices(data.Indices)
+
+	return nil
 }
 
 func (p *twitter) importTweets(inputPath string) error {
-	var fileData []struct {
-		Tweet struct {
-			Tweet
-			Entities struct {
-				TweetEntities
-				Hashtags []struct {
-					TweetHashtag
-					Hashtag
-				} `json:"hashtags"`
-				UserMentions []struct {
-					TweetUserMention
-					User
-				} `json:"user_mentions"`
-				URLs []struct {
-					TweetURL
-					URL
-					Expanded string `json:"expanded_url"`
-					Display  string `json:"display_url"`
-				} `json:"urls"`
-			} `json:"entities"`
-			InReplyToStatusID   *int    `json:"in_reply_to_status_id,string"`
-			InReplyToUserID     *int    `json:"in_reply_to_user_id,string"`
-			InReplyToScreenName *string `json:"in_reply_to_screen_name"`
-		} `json:"tweet"`
-	}
+	var tweets []Tweet
 
 	bytes, err := ioutil.ReadFile(inputPath)
 	if err != nil {
@@ -160,55 +271,8 @@ func (p *twitter) importTweets(inputPath string) error {
 	data := string(bytes)
 	data = strings.TrimPrefix(data, "window.YTD.tweet.part0 = ")
 
-	if err := json.Unmarshal([]byte(data), &fileData); err != nil {
+	if err := json.Unmarshal([]byte(data), &tweets); err != nil {
 		return err
-	}
-
-	var tweets []Tweet
-
-	for _, entry := range fileData {
-		tweet := entry.Tweet.Tweet
-
-		tweet.Entities = entry.Tweet.Entities.TweetEntities
-
-		for _, hashtag := range entry.Tweet.Entities.Hashtags {
-			tweetHashtag := hashtag.TweetHashtag
-			tweetHashtag.Hashtag = hashtag.Hashtag
-			tweet.Entities.Hashtags = append(tweet.Entities.Hashtags, tweetHashtag)
-		}
-
-		for _, userMention := range entry.Tweet.Entities.UserMentions {
-			tweetUserMention := userMention.TweetUserMention
-			tweetUserMention.User = userMention.User
-			tweet.Entities.UserMentions = append(tweet.Entities.UserMentions, tweetUserMention)
-		}
-
-		for _, url := range entry.Tweet.Entities.URLs {
-			tweetURL := url.TweetURL
-			tweetURL.URL = url.URL
-			tweetURL.URL.Expanded = url.Expanded
-			tweetURL.URL.Display = url.Display
-			tweet.Entities.URLs = append(tweet.Entities.URLs, tweetURL)
-		}
-
-		if entry.Tweet.InReplyToStatusID != nil {
-			tweet.InReplyToStatus = &Tweet{
-				ID: *entry.Tweet.InReplyToStatusID,
-			}
-		}
-
-		if entry.Tweet.InReplyToUserID != nil && entry.Tweet.InReplyToScreenName != nil {
-			tweet.InReplyToUser = &User{
-				ID:         *entry.Tweet.InReplyToUserID,
-				ScreenName: *entry.Tweet.InReplyToScreenName,
-			}
-
-			if tweet.InReplyToStatus != nil {
-				tweet.InReplyToStatus.Author = tweet.InReplyToUser
-			}
-		}
-
-		tweets = append(tweets, tweet)
 	}
 
 	err = p.DB().
@@ -222,4 +286,24 @@ func (p *twitter) importTweets(inputPath string) error {
 	}
 
 	return nil
+}
+
+func rangeToIndices(indicesRange []string) (*int, *int) {
+	if len(indicesRange) != 2 {
+		return nil, nil
+	}
+
+	from, to := indicesRange[0], indicesRange[1]
+
+	fromInt, err := strconv.Atoi(from)
+	if err != nil {
+		return nil, nil
+	}
+
+	toInt, err := strconv.Atoi(to)
+	if err != nil {
+		return nil, nil
+	}
+
+	return &fromInt, &toInt
 }

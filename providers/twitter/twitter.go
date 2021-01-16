@@ -7,6 +7,9 @@ import (
 	"path"
 )
 
+const name = "twitter"
+const tablePrefix = "twitter_"
+
 type twitter struct {
 	provider.Database
 }
@@ -17,7 +20,15 @@ func New(db *gorm.DB) provider.Provider {
 	}
 }
 
-func (p *twitter) Models() []schema.Tabler {
+func (twitter) Name() string {
+	return name
+}
+
+func (twitter) TablePrefix() string {
+	return tablePrefix
+}
+
+func (twitter) Models() []schema.Tabler {
 	return []schema.Tabler{
 		&Like{},
 		&URL{},
@@ -30,6 +41,15 @@ func (p *twitter) Models() []schema.Tabler {
 		&TweetMedia{},
 		&TweetUserMention{},
 		&TweetURL{},
+		&PersonalizationRecord{},
+		&LanguageRecord{},
+		&GenderInfo{},
+		&InterestRecord{},
+		&AudienceAndAdvertiserRecord{},
+		&Advertiser{},
+		&Show{},
+		&Location{},
+		&InferredAgeInfoRecord{},
 	}
 }
 
@@ -53,6 +73,11 @@ func (p *twitter) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 			"Tweets",
 			p.importTweets,
 			path.Join(inputPath, "data", "tweet.js"),
+		),
+		provider.NewImportFn(
+			"Personalization",
+			p.importPersonalization,
+			path.Join(inputPath, "data", "personalization.js"),
 		),
 	}, nil
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/shekhirin/bionic-cli/providers/provider"
 	"github.com/shekhirin/bionic-cli/providers/twitter"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
 )
 
@@ -19,23 +20,30 @@ type Manager struct {
 	providers map[string]provider.Provider
 }
 
-func NewManager(dbPath string) (*Manager, error) {
-	db, err := database.New(dbPath)
-	if err != nil {
+func DefaultProviders(db *gorm.DB) []provider.Provider {
+	return []provider.Provider{
+		twitter.New(db),
+		netflix.New(db),
+		google.New(db),
+	}
+}
+
+func NewManager(db *gorm.DB, providers []provider.Provider) (*Manager, error) {
+	manager := &Manager{
+		db:        db,
+		providers: map[string]provider.Provider{},
+	}
+
+	for _, p := range providers {
+		manager.providers[p.Name()] = p
+	}
+
+	if err := db.AutoMigrate(&database.Import{}); err != nil {
 		return nil, err
 	}
 
-	manager := &Manager{
-		db: db,
-		providers: map[string]provider.Provider{
-			"twitter": twitter.New(db),
-			"netflix": netflix.New(db),
-			"google":  google.New(db),
-		},
-	}
-
 	for _, p := range manager.providers {
-		if err := manager.migrate(manager.db, p); err != nil {
+		if err := migrate(db, p); err != nil {
 			return nil, err
 		}
 	}
@@ -54,11 +62,41 @@ func (m Manager) GetByName(name string) (provider.Provider, error) {
 
 func (m Manager) Reset(p provider.Provider) error {
 	return m.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Migrator().DropTable(tablersToInterfaces(p.Models())...); err != nil {
+		err := tx.
+			Where("provider = ?", p.Name()).
+			Delete(&database.Import{}).
+			Error
+		if err != nil {
 			return err
 		}
 
-		if err := m.migrate(tx, p); err != nil {
+		rows, err := tx.
+			Table("sqlite_master").
+			Select("name").
+			Where("type = 'table' AND name LIKE ?", p.TablePrefix()+"%").
+			Rows()
+		if err != nil {
+			return err
+		}
+
+		var tables []string
+
+		for rows.Next() {
+			var name string
+			if err := rows.Scan(&name); err != nil {
+				return err
+			}
+
+			tables = append(tables, name)
+		}
+
+		for _, table := range tables {
+			if err := tx.Exec("DROP TABLE IF EXISTS ?", clause.Table{Name: table}).Error; err != nil {
+				return err
+			}
+		}
+
+		if err := migrate(tx, p); err != nil {
 			return err
 		}
 
@@ -66,12 +104,7 @@ func (m Manager) Reset(p provider.Provider) error {
 	})
 }
 
-func (m Manager) migrate(db *gorm.DB, p provider.Provider) error {
-	err := db.SetupJoinTable(&google.Action{}, "Products", &google.ActionProductAssoc{})
-	if err != nil {
-		return err
-	}
-
+func migrate(db *gorm.DB, p provider.Provider) error {
 	return db.AutoMigrate(tablersToInterfaces(p.Models())...)
 }
 

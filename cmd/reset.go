@@ -1,20 +1,26 @@
 package cmd
 
 import (
+	"github.com/shekhirin/bionic-cli/database"
 	"github.com/shekhirin/bionic-cli/providers"
 
 	"github.com/spf13/cobra"
 )
 
 var resetCmd = &cobra.Command{
-	Use:   "reset [service]",
-	Short: "Reset service data stored in local db",
+	Use:   "reset [provider]",
+	Short: "Reset provider data stored in local db",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		providerName := args[0]
 
 		dbPath := rootCmd.PersistentFlags().Lookup("db").Value.String()
 
-		manager, err := providers.NewManager(dbPath)
+		db, err := database.New(dbPath)
+		if err != nil {
+			return err
+		}
+
+		manager, err := providers.NewManager(db, providers.DefaultProviders(db))
 		if err != nil {
 			return err
 		}
