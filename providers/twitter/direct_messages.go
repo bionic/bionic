@@ -96,11 +96,11 @@ func (p *twitter) importDirectMessages(inputPath string) error {
 		return err
 	}
 
-	for _, conversation := range conversations {
-		for i, message := range conversation.DirectMessages {
-			for j, reaction := range message.Reactions {
+	for i, conversation := range conversations {
+		for j, message := range conversation.DirectMessages {
+			for k, reaction := range message.Reactions {
 				err = p.DB().
-					FirstOrCreate(&conversation.DirectMessages[i].Reactions[j], map[string]interface{}{
+					FirstOrCreate(&conversations[i].DirectMessages[j].Reactions[k], map[string]interface{}{
 						"direct_message_id": message.ID,
 						"key":               reaction.Key,
 					}).
@@ -110,9 +110,9 @@ func (p *twitter) importDirectMessages(inputPath string) error {
 				}
 			}
 
-			for j, url := range message.URLs {
+			for k, url := range message.URLs {
 				err = p.DB().
-					FirstOrCreate(&conversation.DirectMessages[i].URLs[j], map[string]interface{}{
+					FirstOrCreate(&conversations[i].DirectMessages[j].URLs[k], map[string]interface{}{
 						"url": url.URL,
 					}).
 					Error
