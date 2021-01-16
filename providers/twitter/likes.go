@@ -10,7 +10,8 @@ import (
 
 type Like struct {
 	gorm.Model
-	TweetID     int    `json:"tweetId,string" gorm:"unique"`
+	TweetID     int `json:"tweetId,string" gorm:"unique"`
+	Tweet       Tweet
 	FullText    string `json:"fullText"`
 	ExpandedURL string `json:"expandedUrl"`
 }
@@ -48,6 +49,17 @@ func (p *twitter) importLikes(inputPath string) error {
 
 	if err := json.Unmarshal([]byte(data), &likes); err != nil {
 		return err
+	}
+
+	for i, like := range likes {
+		err = p.DB().
+			FirstOrCreate(&likes[i].Tweet, map[string]interface{}{
+				"id": like.TweetID,
+			}).
+			Error
+		if err != nil {
+			return err
+		}
 	}
 
 	err = p.DB().
