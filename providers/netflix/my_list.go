@@ -21,6 +21,10 @@ func (r MyListItem) TableName() string {
 }
 
 func (p *netflix) importMyList(inputPath string) error {
+	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
+		return nil
+	}
+
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return err

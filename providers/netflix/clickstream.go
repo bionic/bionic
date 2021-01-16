@@ -23,6 +23,10 @@ func (r ClickstreamAction) TableName() string {
 }
 
 func (p *netflix) importClickstream(inputPath string) error {
+	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
+		return nil
+	}
+
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return err

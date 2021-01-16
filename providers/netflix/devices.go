@@ -29,6 +29,10 @@ func (r Device) TableName() string {
 }
 
 func (p *netflix) importDevices(inputPath string) error {
+	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
+		return nil
+	}
+
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return err
