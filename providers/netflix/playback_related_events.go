@@ -10,11 +10,11 @@ import (
 
 type PlaybackRelatedEvent struct {
 	gorm.Model
-	ProfileName       string         `csv:"Profile Name" gorm:"uniqueIndex:idx_playback"`
-	TitleDescription  string         `csv:"Title Description" gorm:"uniqueIndex:idx_playback"`
+	ProfileName       string         `csv:"Profile Name" gorm:"uniqueIndex:netflix_playback_related_events_key"`
+	TitleDescription  string         `csv:"Title Description" gorm:"uniqueIndex:netflix_playback_related_events_key"`
 	Device            string         `csv:"Device"`
 	Country           string         `csv:"Country"`
-	PlaybackStartTime types.DateTime `csv:"Playback Start Utc Ts" gorm:"uniqueIndex:idx_playback"`
+	PlaybackStartTime types.DateTime `csv:"Playback Start Utc Ts" gorm:"uniqueIndex:netflix_playback_related_events_key"`
 	Playtraces        []Playtrace    `csv:"Playtraces"`
 }
 

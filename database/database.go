@@ -29,3 +29,27 @@ func New(dbPath string) (*gorm.DB, error) {
 
 	return db, nil
 }
+
+func GetTables(db *gorm.DB) ([]string, error) {
+	rows, err := db.
+		Table("sqlite_master").
+		Select("name").
+		Where("type = 'table' AND name NOT LIKE 'sqlite_%'").
+		Rows()
+	if err != nil {
+		return nil, err
+	}
+
+	var tables []string
+
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+
+		tables = append(tables, name)
+	}
+
+	return tables, nil
+}

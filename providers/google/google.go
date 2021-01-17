@@ -3,7 +3,6 @@ package google
 import (
 	"github.com/shekhirin/bionic-cli/providers/provider"
 	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
 )
 
 const name = "google"
@@ -27,14 +26,22 @@ func (google) TablePrefix() string {
 	return tablePrefix
 }
 
-func (p *google) Models() []schema.Tabler {
-	return []schema.Tabler{
+func (p *google) Migrate() error {
+	err := p.DB().AutoMigrate(
 		&Action{},
 		&Product{},
 		&LocationInfo{},
 		&Subtitle{},
-		&Detail{},
+		&Detail{})
+	if err != nil {
+		return err
 	}
+
+	if err := p.DB().SetupJoinTable(&Action{}, "Products", &ActionProductAssoc{}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (p *google) ImportFns(inputPath string) ([]provider.ImportFn, error) {

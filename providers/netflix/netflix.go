@@ -3,7 +3,6 @@ package netflix
 import (
 	"github.com/shekhirin/bionic-cli/providers/provider"
 	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
 	"path"
 )
 
@@ -28,8 +27,8 @@ func (netflix) TablePrefix() string {
 	return tablePrefix
 }
 
-func (netflix) Models() []schema.Tabler {
-	return []schema.Tabler{
+func (p *netflix) Migrate() error {
+	return p.DB().AutoMigrate(
 		&ViewingAction{},
 		&SubscriptionHistoryItem{},
 		&ClickstreamAction{},
@@ -43,7 +42,7 @@ func (netflix) Models() []schema.Tabler {
 		&Device{},
 		&IPAddress{},
 		&BillingHistoryItem{},
-	}
+	)
 }
 
 func (p *netflix) ImportFns(inputPath string) ([]provider.ImportFn, error) {

@@ -27,6 +27,10 @@ var importCmd = &cobra.Command{
 			return err
 		}
 
+		if err := manager.Migrate(); err != nil {
+			return err
+		}
+
 		provider, err := manager.GetByName(providerName)
 		if err != nil {
 			return err

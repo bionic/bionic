@@ -10,13 +10,13 @@ import (
 
 type IPAddress struct {
 	gorm.Model
-	ESN                        string         `csv:"esn" gorm:"uniqueIndex:idx_ip_addresses"`
+	ESN                        string         `csv:"esn" gorm:"uniqueIndex:netflix_ip_addresses_key"`
 	Country                    string         `csv:"country"`
 	LocalizedDeviceDescription string         `csv:"localizedDeviceDescription"`
 	DeviceDescription          string         `csv:"deviceDescription"`
 	IP                         string         `csv:"ip"`
 	RegionCodeDisplayName      string         `csv:"regionCodeDisplayName"`
-	Time                       types.DateTime `csv:"ts" gorm:"uniqueIndex:idx_ip_addresses"`
+	Time                       types.DateTime `csv:"ts" gorm:"uniqueIndex:netflix_ip_addresses_key"`
 }
 
 func (r IPAddress) TableName() string {
