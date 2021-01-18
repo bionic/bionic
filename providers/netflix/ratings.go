@@ -10,13 +10,13 @@ import (
 
 type Rating struct {
 	gorm.Model
-	ProfileName    string         `csv:"Profile Name" gorm:"uniqueIndex:idx_rating"`
-	TitleName      string         `csv:"Title Name" gorm:"uniqueIndex:idx_rating"`
+	ProfileName    string         `csv:"Profile Name" gorm:"uniqueIndex:netflix_ratings_key"`
+	TitleName      string         `csv:"Title Name" gorm:"uniqueIndex:netflix_ratings_key"`
 	RatingType     string         `csv:"Rating Type"`
 	StarValue      int            `csv:"Star Value"`
 	ThumbsValue    int            `csv:"Thumbs Value"`
 	DeviceModel    string         `csv:"Device Model"`
-	EventTime      types.DateTime `csv:"Event Utc Ts" gorm:"uniqueIndex:idx_rating"`
+	EventTime      types.DateTime `csv:"Event Utc Ts" gorm:"uniqueIndex:netflix_ratings_key"`
 	RegionViewDate types.DateTime `csv:"Region View Date"`
 }
 

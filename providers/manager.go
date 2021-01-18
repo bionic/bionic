@@ -4,12 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/shekhirin/bionic-cli/database"
+	"github.com/shekhirin/bionic-cli/providers/google"
 	"github.com/shekhirin/bionic-cli/providers/netflix"
 	"github.com/shekhirin/bionic-cli/providers/provider"
 	"github.com/shekhirin/bionic-cli/providers/twitter"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"gorm.io/gorm/schema"
 )
 
 var ErrProviderNotFound = errors.New("provider not found")
@@ -23,6 +23,7 @@ func DefaultProviders(db *gorm.DB) []provider.Provider {
 	return []provider.Provider{
 		twitter.New(db),
 		netflix.New(db),
+		google.New(db),
 	}
 }
 
@@ -36,17 +37,21 @@ func NewManager(db *gorm.DB, providers []provider.Provider) (*Manager, error) {
 		manager.providers[p.Name()] = p
 	}
 
-	if err := db.AutoMigrate(&database.Import{}); err != nil {
-		return nil, err
+	return manager, nil
+}
+
+func (m Manager) Migrate() error {
+	if err := m.db.AutoMigrate(&database.Import{}); err != nil {
+		return err
 	}
 
-	for _, p := range manager.providers {
-		if err := migrate(db, p); err != nil {
-			return nil, err
+	for _, p := range m.providers {
+		if err := p.Migrate(); err != nil {
+			return err
 		}
 	}
 
-	return manager, nil
+	return nil
 }
 
 func (m Manager) GetByName(name string) (provider.Provider, error) {
@@ -94,22 +99,10 @@ func (m Manager) Reset(p provider.Provider) error {
 			}
 		}
 
-		if err := migrate(tx, p); err != nil {
+		if err := p.Migrate(); err != nil {
 			return err
 		}
 
 		return nil
 	})
-}
-
-func migrate(db *gorm.DB, p provider.Provider) error {
-	return db.AutoMigrate(tablersToInterfaces(p.Models())...)
-}
-
-func tablersToInterfaces(tablers []schema.Tabler) []interface{} {
-	interfaces := make([]interface{}, len(tablers))
-	for i, tabler := range tablers {
-		interfaces[i] = tabler
-	}
-	return interfaces
 }

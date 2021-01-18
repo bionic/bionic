@@ -10,15 +10,15 @@ import (
 
 type SearchHistoryItem struct {
 	gorm.Model
-	ProfileName    string         `csv:"Profile Name" gorm:"uniqueIndex:idx_search_history"`
+	ProfileName    string         `csv:"Profile Name" gorm:"uniqueIndex:netflix_search_history_key"`
 	CountryIsoCode string         `csv:"Country Iso Code"`
-	Device         string         `csv:"Device" gorm:"uniqueIndex:idx_search_history"`
+	Device         string         `csv:"Device" gorm:"uniqueIndex:netflix_search_history_key"`
 	IsKids         bool           `csv:"Is Kids"`
 	QueryTyped     string         `csv:"Query Typed"`
 	DisplayedName  string         `csv:"Displayed Name"`
 	Action         string         `csv:"Action"`
 	Section        string         `csv:"Section"`
-	Time           types.DateTime `csv:"Utc Timestamp" gorm:"uniqueIndex:idx_search_history"`
+	Time           types.DateTime `csv:"Utc Timestamp" gorm:"uniqueIndex:netflix_search_history_key"`
 }
 
 func (r SearchHistoryItem) TableName() string {

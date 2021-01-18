@@ -10,12 +10,12 @@ import (
 
 type ClickstreamAction struct {
 	gorm.Model
-	ProfileName     string         `csv:"Profile Name" gorm:"uniqueIndex:idx_action"`
-	Source          string         `csv:"Source" gorm:"uniqueIndex:idx_action"`
-	NavigationLevel string         `csv:"Navigation Level" gorm:"uniqueIndex:idx_action"`
+	ProfileName     string         `csv:"Profile Name" gorm:"uniqueIndex:netflix_clickstream_key"`
+	Source          string         `csv:"Source" gorm:"uniqueIndex:netflix_clickstream_key"`
+	NavigationLevel string         `csv:"Navigation Level" gorm:"uniqueIndex:netflix_clickstream_key"`
 	ReferrerUrl     string         `csv:"Referrer Url"`
 	WebpageUrl      string         `csv:"Webpage Url"`
-	ClickTime       types.DateTime `csv:"Click Utc Ts" gorm:"uniqueIndex:idx_action"`
+	ClickTime       types.DateTime `csv:"Click Utc Ts" gorm:"uniqueIndex:netflix_clickstream_key"`
 }
 
 func (r ClickstreamAction) TableName() string {

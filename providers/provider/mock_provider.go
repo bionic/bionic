@@ -7,7 +7,6 @@ package provider
 import (
 	gomock "github.com/golang/mock/gomock"
 	gorm "gorm.io/gorm"
-	schema "gorm.io/gorm/schema"
 	reflect "reflect"
 )
 
@@ -91,18 +90,18 @@ func (mr *MockProviderMockRecorder) ImportFns(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ImportFns", reflect.TypeOf((*MockProvider)(nil).ImportFns), arg0)
 }
 
-// Models mocks base method
-func (m *MockProvider) Models() []schema.Tabler {
+// Migrate mocks base method
+func (m *MockProvider) Migrate() error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Models")
-	ret0, _ := ret[0].([]schema.Tabler)
+	ret := m.ctrl.Call(m, "Migrate")
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Models indicates an expected call of Models
-func (mr *MockProviderMockRecorder) Models() *gomock.Call {
+// Migrate indicates an expected call of Migrate
+func (mr *MockProviderMockRecorder) Migrate() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Models", reflect.TypeOf((*MockProvider)(nil).Models))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Migrate", reflect.TypeOf((*MockProvider)(nil).Migrate))
 }
 
 // Name mocks base method
