@@ -275,11 +275,11 @@ func (p *twitter) importTweets(inputPath string) error {
 		return err
 	}
 
-	for i, tweet := range tweets {
-		entities := &tweets[i].Entities
+	for i := range tweets {
+		tweet := &tweets[i]
 
 		err = p.DB().
-			Find(entities, map[string]interface{}{
+			Find(&tweet.Entities, map[string]interface{}{
 				"tweet_id": tweet.ID,
 			}).
 			Error
@@ -287,26 +287,24 @@ func (p *twitter) importTweets(inputPath string) error {
 			return err
 		}
 
-		for i := range entities.Hashtags {
-			hashtag := &entities.Hashtags[i].Hashtag
+		for j := range tweet.Entities.Hashtags {
+			hashtag := &tweet.Entities.Hashtags[j]
 
 			err = p.DB().
-				FirstOrCreate(hashtag, map[string]interface{}{
-					"text": hashtag.Text,
+				FirstOrCreate(&hashtag.Hashtag, map[string]interface{}{
+					"text": hashtag.Hashtag.Text,
 				}).
 				Error
 			if err != nil {
 				return err
 			}
 
-			tweetHashtag := &entities.Hashtags[i]
-
 			err = p.DB().
-				FirstOrCreate(tweetHashtag, map[string]interface{}{
-					"tweet_entities_id": entities.ID,
-					"hashtag_id":        hashtag.ID,
-					"from_idx":          tweetHashtag.FromIdx,
-					"to_idx":            tweetHashtag.ToIdx,
+				FirstOrCreate(&hashtag, map[string]interface{}{
+					"tweet_entities_id": tweet.Entities.ID,
+					"hashtag_id":        hashtag.Hashtag.ID,
+					"from_idx":          hashtag.FromIdx,
+					"to_idx":            hashtag.ToIdx,
 				}).
 				Error
 			if err != nil {
@@ -314,13 +312,13 @@ func (p *twitter) importTweets(inputPath string) error {
 			}
 		}
 
-		for i := range entities.Media {
-			media := &entities.Media[i]
+		for j := range tweet.Entities.Media {
+			media := &tweet.Entities.Media[j]
 
 			err = p.DB().
-				FirstOrCreate(&entities.Media[i], map[string]interface{}{
+				FirstOrCreate(&media, map[string]interface{}{
 					"id":                media.ID,
-					"tweet_entities_id": entities.ID,
+					"tweet_entities_id": tweet.Entities.ID,
 					"from_idx":          media.FromIdx,
 					"to_idx":            media.ToIdx,
 				}).
@@ -330,13 +328,12 @@ func (p *twitter) importTweets(inputPath string) error {
 			}
 		}
 
-		for i := range entities.UserMentions {
-			userMention := &entities.UserMentions[i]
-			user := &userMention.User
+		for j := range tweet.Entities.UserMentions {
+			userMention := &tweet.Entities.UserMentions[j]
 
 			err = p.DB().
-				FirstOrCreate(&user, map[string]interface{}{
-					"id": user.ID,
+				FirstOrCreate(&userMention.User, map[string]interface{}{
+					"id": userMention.User.ID,
 				}).
 				Error
 			if err != nil {
@@ -345,8 +342,8 @@ func (p *twitter) importTweets(inputPath string) error {
 
 			err = p.DB().
 				FirstOrCreate(userMention, map[string]interface{}{
-					"tweet_entities_id": entities.ID,
-					"user_id":           user.ID,
+					"tweet_entities_id": tweet.Entities.ID,
+					"user_id":           userMention.User.ID,
 					"from_idx":          userMention.FromIdx,
 					"to_idx":            userMention.ToIdx,
 				}).
@@ -356,26 +353,24 @@ func (p *twitter) importTweets(inputPath string) error {
 			}
 		}
 
-		for i := range entities.URLs {
-			url := &entities.URLs[i].URL
+		for j := range tweet.Entities.URLs {
+			url := &tweet.Entities.URLs[j]
 
 			err = p.DB().
-				FirstOrCreate(url, map[string]interface{}{
-					"url": url.URL,
+				FirstOrCreate(&url.URL, map[string]interface{}{
+					"url": url.URL.URL,
 				}).
 				Error
 			if err != nil {
 				return err
 			}
 
-			tweetURL := &entities.URLs[i]
-
 			err = p.DB().
-				FirstOrCreate(tweetURL, map[string]interface{}{
-					"tweet_entities_id": entities.ID,
-					"url_id":            url.ID,
-					"from_idx":          tweetURL.FromIdx,
-					"to_idx":            tweetURL.ToIdx,
+				FirstOrCreate(url, map[string]interface{}{
+					"tweet_entities_id": tweet.Entities.ID,
+					"url_id":            url.URL.ID,
+					"from_idx":          url.FromIdx,
+					"to_idx":            url.ToIdx,
 				}).
 				Error
 			if err != nil {
@@ -384,7 +379,7 @@ func (p *twitter) importTweets(inputPath string) error {
 		}
 
 		err = p.DB().
-			FirstOrCreate(entities, map[string]interface{}{
+			FirstOrCreate(&tweet.Entities, map[string]interface{}{
 				"tweet_id": tweet.ID,
 			}).
 			Error
