@@ -20,14 +20,14 @@ type Action struct {
 	Title         string         `json:"title" gorm:"uniqueIndex:google_activity_key"`
 	TitleURL      string         `json:"titleUrl"`
 	Time          types.DateTime `json:"time" gorm:"uniqueIndex:google_activity_key"`
-	Products      []Product      `json:"products" gorm:"many2many:google_activity_products_assoc;"`
-	LocationInfos []LocationInfo
-	Subtitles     []Subtitle
-	Details       []Detail `json:"details"`
+	Products      []Product      `json:"products" gorm:"many2many:google_activity_products_assoc"`
+	LocationInfos []LocationInfo `json:"locationInfos"`
+	Subtitles     []Subtitle     `json:"subtitles"`
+	Details       []Detail       `json:"details"`
 }
 
 func (Action) TableName() string {
-	return "google_activity"
+	return tablePrefix + "activity"
 }
 
 type Product struct {
@@ -36,16 +36,7 @@ type Product struct {
 }
 
 func (Product) TableName() string {
-	return "google_activity_products"
-}
-
-type ActionProductAssoc struct {
-	ActionID  int `gorm:"primaryKey;not null"`
-	ProductID int `gorm:"primaryKey;not null"`
-}
-
-func (ActionProductAssoc) TableName() string {
-	return "google_activity_products_assoc"
+	return tablePrefix + "activity_products"
 }
 
 func (p *Product) UnmarshalJSON(b []byte) error {
@@ -56,6 +47,15 @@ func (p *Product) UnmarshalJSON(b []byte) error {
 
 	*p = Product{Name: str}
 	return nil
+}
+
+type ActionProductAssoc struct {
+	ActionID  int `gorm:"primaryKey;not null"`
+	ProductID int `gorm:"primaryKey;not null"`
+}
+
+func (ActionProductAssoc) TableName() string {
+	return tablePrefix + "activity_products_assoc"
 }
 
 type LocationInfo struct {
@@ -69,7 +69,7 @@ type LocationInfo struct {
 }
 
 func (LocationInfo) TableName() string {
-	return "google_activity_location_infos"
+	return tablePrefix + "activity_location_infos"
 }
 
 type Subtitle struct {
@@ -80,8 +80,8 @@ type Subtitle struct {
 	URL      string `json:"url"`
 }
 
-func (s Subtitle) TableName() string {
-	return "google_activity_subtitles"
+func (Subtitle) TableName() string {
+	return tablePrefix + "activity_subtitles"
 }
 
 type Detail struct {
@@ -91,8 +91,8 @@ type Detail struct {
 	Name     string `json:"name"`
 }
 
-func (d Detail) TableName() string {
-	return "google_activity_details"
+func (Detail) TableName() string {
+	return tablePrefix + "activity_details"
 }
 
 func (p *google) importActivityFromArchive(inputPath string) error {

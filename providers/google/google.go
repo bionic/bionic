@@ -33,7 +33,8 @@ func (p *google) Migrate() error {
 		&Product{},
 		&LocationInfo{},
 		&Subtitle{},
-		&Detail{})
+		&Detail{},
+	)
 	if err != nil {
 		return err
 	}
