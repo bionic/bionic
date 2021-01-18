@@ -3,7 +3,6 @@ package twitter
 import (
 	"github.com/shekhirin/bionic-cli/providers/provider"
 	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
 	"path"
 )
 
@@ -28,8 +27,8 @@ func (twitter) TablePrefix() string {
 	return tablePrefix
 }
 
-func (twitter) Models() []schema.Tabler {
-	return []schema.Tabler{
+func (p *twitter) Migrate() error {
+	return p.DB().AutoMigrate(
 		&Like{},
 		&URL{},
 		&Conversation{},
@@ -51,7 +50,7 @@ func (twitter) Models() []schema.Tabler {
 		&Location{},
 		&InferredAgeInfoRecord{},
 		&AgeInfoRecord{},
-	}
+	)
 }
 
 func (p *twitter) ImportFns(inputPath string) ([]provider.ImportFn, error) {

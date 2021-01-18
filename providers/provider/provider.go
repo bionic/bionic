@@ -2,7 +2,6 @@ package provider
 
 import (
 	"errors"
-	"gorm.io/gorm/schema"
 	"os"
 )
 
@@ -34,7 +33,7 @@ type Provider interface {
 	Database
 	Name() string
 	TablePrefix() string
-	Models() []schema.Tabler
+	Migrate() error
 	ImportFns(inputPath string) ([]ImportFn, error)
 }
 

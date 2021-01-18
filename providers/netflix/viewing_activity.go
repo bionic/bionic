@@ -10,11 +10,11 @@ import (
 
 type ViewingAction struct {
 	gorm.Model
-	ProfileName           string         `csv:"Profile Name" gorm:"uniqueIndex:idx_action"`
-	StartTime             types.DateTime `csv:"Start Time" gorm:"uniqueIndex:idx_action"`
+	ProfileName           string         `csv:"Profile Name" gorm:"uniqueIndex:netflix_viewing_activity_key"`
+	StartTime             types.DateTime `csv:"Start Time" gorm:"uniqueIndex:netflix_viewing_activity_key"`
 	Duration              Duration       `csv:"Duration"`
 	Attributes            string         `csv:"Attributes"`
-	Title                 string         `csv:"Title" gorm:"uniqueIndex:idx_action"`
+	Title                 string         `csv:"Title" gorm:"uniqueIndex:netflix_viewing_activity_key"`
 	SupplementalVideoType string         `csv:"Supplemental Video Type"`
 	DeviceType            string         `csv:"Device Type"`
 	Bookmark              Duration       `csv:"Bookmark"`

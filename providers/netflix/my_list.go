@@ -10,8 +10,8 @@ import (
 
 type MyListItem struct {
 	gorm.Model
-	ProfileName  string         `csv:"Profile Name" gorm:"uniqueIndex:idx_list_item"`
-	TitleName    string         `csv:"Title Name" gorm:"uniqueIndex:idx_list_item"`
+	ProfileName  string         `csv:"Profile Name" gorm:"uniqueIndex:netflix_my_list_key"`
+	TitleName    string         `csv:"Title Name" gorm:"uniqueIndex:netflix_my_list_key"`
 	Country      string         `csv:"Country"`
 	TitleAddDate types.DateTime `csv:"Utc Title Add Date"`
 }

@@ -10,8 +10,8 @@ import (
 
 type Device struct {
 	gorm.Model
-	ProfileName                                   string         `csv:"profileName" gorm:"uniqueIndex:idx_device"`
-	ESN                                           string         `csv:"esn" gorm:"uniqueIndex:idx_device"`
+	ProfileName                                   string         `csv:"profileName" gorm:"uniqueIndex:netflix_devices_key"`
+	ESN                                           string         `csv:"esn" gorm:"uniqueIndex:netflix_devices_key"`
 	DeviceType                                    string         `csv:"deviceType"`
 	AcctFirstPlaybackDate                         types.DateTime `csv:"acctFirstPlaybackDate"`
 	AcctLastPlaybackDate                          types.DateTime `csv:"acctLastPlaybackDate"`

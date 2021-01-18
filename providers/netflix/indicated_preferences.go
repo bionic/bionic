@@ -10,11 +10,11 @@ import (
 
 type IndicatedPreference struct {
 	gorm.Model
-	ProfileName  string         `csv:"Profile Name" gorm:"uniqueIndex:idx_preference"`
-	Show         string         `csv:"Show" gorm:"uniqueIndex:idx_preference"`
-	HasWatched   bool           `csv:"Has Watched" gorm:"uniqueIndex:idx_preference"`
-	IsInterested bool           `csv:"Is Interested" gorm:"uniqueIndex:idx_preference"`
-	EventDate    types.DateTime `csv:"Event Date" gorm:"uniqueIndex:idx_preference"`
+	ProfileName  string         `csv:"Profile Name" gorm:"uniqueIndex:netflix_indicated_preferences_key"`
+	Show         string         `csv:"Show" gorm:"uniqueIndex:netflix_indicated_preferences_key"`
+	HasWatched   bool           `csv:"Has Watched" gorm:"uniqueIndex:netflix_indicated_preferences_key"`
+	IsInterested bool           `csv:"Is Interested" gorm:"uniqueIndex:netflix_indicated_preferences_key"`
+	EventDate    types.DateTime `csv:"Event Date" gorm:"uniqueIndex:netflix_indicated_preferences_key"`
 }
 
 func (r IndicatedPreference) TableName() string {

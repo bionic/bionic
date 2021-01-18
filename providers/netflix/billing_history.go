@@ -10,21 +10,21 @@ import (
 
 type BillingHistoryItem struct {
 	gorm.Model
-	TransactionDate        types.DateTime `csv:"Transaction Date" gorm:"uniqueIndex:idx_billing_history"`
+	TransactionDate        types.DateTime `csv:"Transaction Date" gorm:"uniqueIndex:netflix_billing_history_key"`
 	ServicePeriodStartDate types.DateTime `csv:"Service Period Start Date"`
 	ServicePeriodEndDate   types.DateTime `csv:"Service Period End Date"`
 	Description            string         `csv:"Description"`
-	PaymentType            string         `csv:"Payment Type" gorm:"uniqueIndex:idx_billing_history"`
-	MopLast4               string         `csv:"Mop Last 4" gorm:"uniqueIndex:idx_billing_history"`
+	PaymentType            string         `csv:"Payment Type" gorm:"uniqueIndex:netflix_billing_history_key"`
+	MopLast4               string         `csv:"Mop Last 4" gorm:"uniqueIndex:netflix_billing_history_key"`
 	MopCreationDate        types.DateTime `csv:"Mop Creation Date"`
 	MopPmtProcessorDesc    string         `csv:"Mop Pmt Processor Desc"`
 	ItemPriceAmt           float32        `csv:"Item Price Amt"`
 	Currency               string         `csv:"Currency"`
 	TaxAmt                 float32        `csv:"Tax Amt"`
 	GrossSaleAmt           float32        `csv:"Gross Sale Amt"`
-	PmtTxnType             string         `csv:"Pmt Txn Type" gorm:"uniqueIndex:idx_billing_history"`
-	PmtStatus              string         `csv:"Pmt Status" gorm:"uniqueIndex:idx_billing_history"`
-	FinalInvoiceResult     string         `csv:"Final Invoice Result" gorm:"uniqueIndex:idx_billing_history"`
+	PmtTxnType             string         `csv:"Pmt Txn Type" gorm:"uniqueIndex:netflix_billing_history_key"`
+	PmtStatus              string         `csv:"Pmt Status" gorm:"uniqueIndex:netflix_billing_history_key"`
+	FinalInvoiceResult     string         `csv:"Final Invoice Result" gorm:"uniqueIndex:netflix_billing_history_key"`
 	Country                string         `csv:"Country"`
 	NextBillingDate        types.DateTime `csv:"Next Billing Date"`
 }

@@ -10,13 +10,13 @@ import (
 
 type InteractiveTitle struct {
 	gorm.Model
-	ProfileName     string         `csv:"Profile Name" gorm:"uniqueIndex:idx_title"`
+	ProfileName     string         `csv:"Profile Name" gorm:"uniqueIndex:netflix_interactive_titles_key"`
 	TitleDesc       string         `csv:"Title Desc"`
 	SelectionType   string         `csv:"Selection Type"`
 	ChoiceSegmentId string         `csv:"Choice Segment Id"`
 	HasWatched      bool           `csv:"Has Watched"`
 	Source          string         `csv:"Source"`
-	Time            types.DateTime `csv:"Utc Timestamp" gorm:"uniqueIndex:idx_title"`
+	Time            types.DateTime `csv:"Utc Timestamp" gorm:"uniqueIndex:netflix_interactive_titles_key"`
 }
 
 func (r InteractiveTitle) TableName() string {
