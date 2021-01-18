@@ -6,10 +6,13 @@ import (
 	"github.com/shekhirin/bionic-cli/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"io"
+	"os"
 	"path/filepath"
 )
 
 const actionBatchSize = 100
+const targetFilename = "MyActivity.json"
 
 type Action struct {
 	gorm.Model
@@ -92,7 +95,7 @@ func (d Detail) TableName() string {
 	return "google_activity_details"
 }
 
-func (p *google) importActivity(inputPath string) error {
+func (p *google) importActivityFromArchive(inputPath string) error {
 	r, err := zip.OpenReader(inputPath)
 	if err != nil {
 		return err
@@ -103,13 +106,17 @@ func (p *google) importActivity(inputPath string) error {
 
 	for _, f := range r.File {
 		filename := filepath.Base(f.Name)
-
-		if filename != "MyActivity.json" {
+		if filename != targetFilename {
 			continue
 		}
-
-		err := p.processActionsFile(f)
+		rc, err := f.Open()
 		if err != nil {
+			return err
+		}
+		if err := p.processActionsFile(rc); err != nil {
+			return err
+		}
+		if err := rc.Close(); err != nil {
 			return err
 		}
 	}
@@ -117,15 +124,35 @@ func (p *google) importActivity(inputPath string) error {
 	return nil
 }
 
-func (p *google) processActionsFile(file *zip.File) error {
-	rc, err := file.Open()
+func (p *google) importActivityFromDirectory(inputPath string) error {
+	err := filepath.Walk(inputPath,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.Name() != targetFilename {
+				return nil
+			}
+
+			rc, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+
+			err = p.processActionsFile(rc)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		})
 	if err != nil {
 		return err
 	}
-	defer func() {
-		_ = rc.Close()
-	}()
+	return nil
+}
 
+func (p *google) processActionsFile(rc io.ReadCloser) error {
 	decoder := json.NewDecoder(rc)
 	if _, err := decoder.Token(); err != nil {
 		return err

@@ -3,6 +3,7 @@ package google
 import (
 	"github.com/shekhirin/bionic-cli/providers/provider"
 	"gorm.io/gorm"
+	"path"
 )
 
 const name = "google"
@@ -45,15 +46,24 @@ func (p *google) Migrate() error {
 }
 
 func (p *google) ImportFns(inputPath string) ([]provider.ImportFn, error) {
-	if !provider.IsPathDir(inputPath) {
-		//return nil, provider.ErrInputPathShouldBeDirectory FIXME Add conditional work on zip/folder
-	}
-
-	return []provider.ImportFn{
+	directoryProviders := []provider.ImportFn{
 		provider.NewImportFn(
 			"Search Activity",
-			p.importActivity,
+			p.importActivityFromDirectory,
+			path.Join(inputPath, "My Activity"),
+		),
+	}
+	archiveProviders := []provider.ImportFn{
+		provider.NewImportFn(
+			"Search Activity",
+			p.importActivityFromArchive,
 			inputPath,
 		),
-	}, nil
+	}
+
+	if provider.IsPathDir(inputPath) {
+		return directoryProviders, nil
+	} else {
+		return archiveProviders, nil
+	}
 }
