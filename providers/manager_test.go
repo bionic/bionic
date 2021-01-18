@@ -2,6 +2,7 @@ package providers
 
 import (
 	"errors"
+	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/shekhirin/bionic-cli/database"
 	"github.com/shekhirin/bionic-cli/providers/provider"
@@ -92,7 +93,8 @@ func TestDefaultProviders(t *testing.T) {
 	t.Run("model tables have prefixes", func(t *testing.T) {
 		for _, p := range providers {
 			for _, model := range p.Models() {
-				assert.True(t, strings.HasPrefix(model.TableName(), p.TablePrefix()))
+				assert.True(t, strings.HasPrefix(model.TableName(), p.TablePrefix()),
+					fmt.Sprintf(`"%s" table does not have "%s" prefix`, model.TableName(), p.TablePrefix()))
 			}
 		}
 	})
