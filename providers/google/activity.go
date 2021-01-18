@@ -123,9 +123,7 @@ func (p *google) processActionsFile(file *zip.File) error {
 		return err
 	}
 	defer func() {
-		if err := rc.Close(); err != nil {
-			panic(err)
-		}
+		_ = rc.Close()
 	}()
 
 	decoder := json.NewDecoder(rc)
