@@ -21,7 +21,7 @@ type PersonalizationRecord struct {
 }
 
 func (PersonalizationRecord) TableName() string {
-	return "twitter_personalization_records"
+	return tablePrefix + "personalization_records"
 }
 
 func (p *PersonalizationRecord) UnmarshalJSON(b []byte) error {
@@ -76,7 +76,7 @@ type LanguageRecord struct {
 }
 
 func (LanguageRecord) TableName() string {
-	return "twitter_language_records"
+	return tablePrefix + "language_records"
 }
 
 type GenderInfo struct {
@@ -85,7 +85,7 @@ type GenderInfo struct {
 }
 
 func (GenderInfo) TableName() string {
-	return "twitter_gender_info"
+	return tablePrefix + "gender_info"
 }
 
 type InterestRecord struct {
@@ -96,7 +96,7 @@ type InterestRecord struct {
 }
 
 func (InterestRecord) TableName() string {
-	return "twitter_interest_records"
+	return tablePrefix + "interest_records"
 }
 
 type AudienceAndAdvertiserRecord struct {
@@ -108,7 +108,7 @@ type AudienceAndAdvertiserRecord struct {
 }
 
 func (AudienceAndAdvertiserRecord) TableName() string {
-	return "twitter_audience_and_advertiser_records"
+	return tablePrefix + "audience_and_advertiser_records"
 }
 
 func (aaa *AudienceAndAdvertiserRecord) UnmarshalJSON(b []byte) error {
@@ -155,7 +155,7 @@ type Advertiser struct {
 }
 
 func (Advertiser) TableName() string {
-	return "twitter_advertisers"
+	return tablePrefix + "advertisers"
 }
 
 type Show struct {
@@ -164,7 +164,7 @@ type Show struct {
 }
 
 func (Show) TableName() string {
-	return "twitter_shows"
+	return tablePrefix + "shows"
 }
 
 type Location struct {
@@ -173,7 +173,7 @@ type Location struct {
 }
 
 func (Location) TableName() string {
-	return "twitter_locations"
+	return tablePrefix + "locations"
 }
 
 type InferredAgeInfoRecord struct {
@@ -184,7 +184,7 @@ type InferredAgeInfoRecord struct {
 }
 
 func (InferredAgeInfoRecord) TableName() string {
-	return "twitter_inferred_age_info_records"
+	return tablePrefix + "inferred_age_info_records"
 }
 
 func (p *twitter) importPersonalization(inputPath string) error {

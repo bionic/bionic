@@ -17,7 +17,7 @@ type AgeInfoRecord struct {
 }
 
 func (AgeInfoRecord) TableName() string {
-	return "age_info_records"
+	return tablePrefix + "age_info_records"
 }
 
 func (ai *AgeInfoRecord) UnmarshalJSON(b []byte) error {
