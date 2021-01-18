@@ -50,7 +50,7 @@ func (p *twitter) Migrate() error {
 		&Location{},
 		&InferredAgeInfoRecord{},
 		&AgeInfoRecord{},
-	}
+	)
 }
 
 func (p *twitter) ImportFns(inputPath string) ([]provider.ImportFn, error) {
