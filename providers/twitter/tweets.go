@@ -83,7 +83,7 @@ func (t *Tweet) UnmarshalJSON(b []byte) error {
 
 type TweetEntities struct {
 	gorm.Model
-	TweetID  int
+	TweetID  int            `gorm:"unique"`
 	Hashtags []TweetHashtag `json:"hashtags"`
 	Media    []TweetMedia   `json:"media"`
 	//Symbols      []Symbol       `json:"symbols"`
@@ -97,11 +97,11 @@ func (TweetEntities) TableName() string {
 
 type TweetHashtag struct {
 	gorm.Model
-	TweetEntitiesID int
-	HashtagID       int
+	TweetEntitiesID int `gorm:"uniqueIndex:twitter_tweet_hashtags_key"`
+	HashtagID       int `gorm:"uniqueIndex:twitter_tweet_hashtags_key"`
 	Hashtag         Hashtag
-	FromIdx         *int
-	ToIdx           *int
+	FromIdx         *int `gorm:"uniqueIndex:twitter_tweet_hashtags_key"`
+	ToIdx           *int `gorm:"uniqueIndex:twitter_tweet_hashtags_key"`
 }
 
 func (TweetHashtag) TableName() string {
@@ -131,11 +131,11 @@ func (th *TweetHashtag) UnmarshalJSON(b []byte) error {
 
 type TweetMedia struct {
 	gorm.Model
-	TweetEntitiesID int
-	ID              int    `json:"id,string"`
+	ID              int    `json:"id,string" gorm:"uniqueIndex:twitter_tweet_media_key"`
+	TweetEntitiesID int    `gorm:"uniqueIndex:twitter_tweet_media_key"`
 	ExpandedURL     string `json:"expanded_url"`
-	FromIdx         *int
-	ToIdx           *int
+	FromIdx         *int   `gorm:"uniqueIndex:twitter_tweet_media_key"`
+	ToIdx           *int   `gorm:"uniqueIndex:twitter_tweet_media_key"`
 	URL             string `json:"url"`
 	MediaURL        string `json:"media_url"`
 	MediaURLHTTPS   string `json:"media_url_https"`
@@ -190,11 +190,11 @@ func (tm *TweetMedia) UnmarshalJSON(b []byte) error {
 
 type TweetUserMention struct {
 	gorm.Model
-	TweetEntitiesID int
-	UserID          int
+	TweetEntitiesID int `gorm:"uniqueIndex:twitter_tweet_user_mentions_key"`
+	UserID          int `gorm:"uniqueIndex:twitter_tweet_user_mentions_key"`
 	User            User
-	FromIdx         *int
-	ToIdx           *int
+	FromIdx         *int `gorm:"uniqueIndex:twitter_tweet_user_mentions_key"`
+	ToIdx           *int `gorm:"uniqueIndex:twitter_tweet_user_mentions_key"`
 }
 
 func (TweetUserMention) TableName() string {
@@ -224,11 +224,11 @@ func (tum *TweetUserMention) UnmarshalJSON(b []byte) error {
 
 type TweetURL struct {
 	gorm.Model
-	TweetEntitiesID int
-	URLID           string
+	TweetEntitiesID int `gorm:"uniqueIndex:twitter_tweet_urls_key"`
+	URLID           int `gorm:"uniqueIndex:twitter_tweet_urls_key"`
 	URL             URL
-	FromIdx         *int
-	ToIdx           *int
+	FromIdx         *int `gorm:"uniqueIndex:twitter_tweet_urls_key"`
+	ToIdx           *int `gorm:"uniqueIndex:twitter_tweet_urls_key"`
 }
 
 func (TweetURL) TableName() string {
@@ -273,6 +273,119 @@ func (p *twitter) importTweets(inputPath string) error {
 
 	if err := json.Unmarshal([]byte(data), &tweets); err != nil {
 		return err
+	}
+
+	for i := range tweets {
+		tweet := &tweets[i]
+
+		err = p.DB().
+			Find(&tweet.Entities, map[string]interface{}{
+				"tweet_id": tweet.ID,
+			}).
+			Error
+		if err != nil {
+			return err
+		}
+
+		for j := range tweet.Entities.Hashtags {
+			hashtag := &tweet.Entities.Hashtags[j]
+
+			err = p.DB().
+				FirstOrCreate(&hashtag.Hashtag, map[string]interface{}{
+					"text": hashtag.Hashtag.Text,
+				}).
+				Error
+			if err != nil {
+				return err
+			}
+
+			err = p.DB().
+				FirstOrCreate(&hashtag, map[string]interface{}{
+					"tweet_entities_id": tweet.Entities.ID,
+					"hashtag_id":        hashtag.Hashtag.ID,
+					"from_idx":          hashtag.FromIdx,
+					"to_idx":            hashtag.ToIdx,
+				}).
+				Error
+			if err != nil {
+				return err
+			}
+		}
+
+		for j := range tweet.Entities.Media {
+			media := &tweet.Entities.Media[j]
+
+			err = p.DB().
+				FirstOrCreate(&media, map[string]interface{}{
+					"id":                media.ID,
+					"tweet_entities_id": tweet.Entities.ID,
+					"from_idx":          media.FromIdx,
+					"to_idx":            media.ToIdx,
+				}).
+				Error
+			if err != nil {
+				return err
+			}
+		}
+
+		for j := range tweet.Entities.UserMentions {
+			userMention := &tweet.Entities.UserMentions[j]
+
+			err = p.DB().
+				FirstOrCreate(&userMention.User, map[string]interface{}{
+					"id": userMention.User.ID,
+				}).
+				Error
+			if err != nil {
+				return err
+			}
+
+			err = p.DB().
+				FirstOrCreate(userMention, map[string]interface{}{
+					"tweet_entities_id": tweet.Entities.ID,
+					"user_id":           userMention.User.ID,
+					"from_idx":          userMention.FromIdx,
+					"to_idx":            userMention.ToIdx,
+				}).
+				Error
+			if err != nil {
+				return err
+			}
+		}
+
+		for j := range tweet.Entities.URLs {
+			url := &tweet.Entities.URLs[j]
+
+			err = p.DB().
+				FirstOrCreate(&url.URL, map[string]interface{}{
+					"url": url.URL.URL,
+				}).
+				Error
+			if err != nil {
+				return err
+			}
+
+			err = p.DB().
+				FirstOrCreate(url, map[string]interface{}{
+					"tweet_entities_id": tweet.Entities.ID,
+					"url_id":            url.URL.ID,
+					"from_idx":          url.FromIdx,
+					"to_idx":            url.ToIdx,
+				}).
+				Error
+			if err != nil {
+				return err
+			}
+		}
+
+		err = p.DB().
+			FirstOrCreate(&tweet.Entities, map[string]interface{}{
+				"tweet_id": tweet.ID,
+			}).
+			Error
+		if err != nil {
+			return err
+		}
 	}
 
 	err = p.DB().
