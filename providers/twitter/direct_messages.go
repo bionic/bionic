@@ -70,9 +70,9 @@ func (dm *DirectMessage) UnmarshalJSON(b []byte) error {
 
 type DirectMessageReaction struct {
 	gorm.Model
-	DirectMessageID int
+	DirectMessageID int       `gorm:"uniqueIndex:twitter_direct_message_reactions_key"`
 	SenderID        string    `json:"senderId"`
-	ReactionKey     string    `json:"reactionKey"`
+	Key             string    `json:"reactionKey" gorm:"uniqueIndex:twitter_direct_message_reactions_key"`
 	EventID         string    `json:"eventId"`
 	Created         time.Time `json:"createdAt"`
 }
@@ -94,6 +94,33 @@ func (p *twitter) importDirectMessages(inputPath string) error {
 
 	if err := json.Unmarshal([]byte(data), &conversations); err != nil {
 		return err
+	}
+
+	for i, conversation := range conversations {
+		for j, message := range conversation.DirectMessages {
+			for k, reaction := range message.Reactions {
+				err = p.DB().
+					FirstOrCreate(&conversations[i].DirectMessages[j].Reactions[k], map[string]interface{}{
+						"direct_message_id": message.ID,
+						"key":               reaction.Key,
+					}).
+					Error
+				if err != nil {
+					return err
+				}
+			}
+
+			for k, url := range message.URLs {
+				err = p.DB().
+					FirstOrCreate(&conversations[i].DirectMessages[j].URLs[k], map[string]interface{}{
+						"url": url.URL,
+					}).
+					Error
+				if err != nil {
+					return err
+				}
+			}
+		}
 	}
 
 	err = p.DB().

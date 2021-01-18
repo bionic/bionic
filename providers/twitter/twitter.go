@@ -49,7 +49,8 @@ func (p *twitter) Migrate() error {
 		&Show{},
 		&Location{},
 		&InferredAgeInfoRecord{},
-	)
+		&AgeInfoRecord{},
+	}
 }
 
 func (p *twitter) ImportFns(inputPath string) ([]provider.ImportFn, error) {
@@ -77,6 +78,11 @@ func (p *twitter) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 			"Personalization",
 			p.importPersonalization,
 			path.Join(inputPath, "data", "personalization.js"),
+		),
+		provider.NewImportFn(
+			"Age Info",
+			p.importAgeInfo,
+			path.Join(inputPath, "data", "ageinfo.js"),
 		),
 	}, nil
 }
