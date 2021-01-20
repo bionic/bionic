@@ -2,7 +2,7 @@ package twitter
 
 import (
 	"encoding/json"
-	"github.com/shekhirin/bionic-cli/types"
+	"github.com/BionicTeam/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"io/ioutil"

@@ -1,4 +1,4 @@
-module github.com/shekhirin/bionic-cli
+module github.com/BionicTeam/bionic
 
 go 1.15
 
