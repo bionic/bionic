@@ -1,6 +1,6 @@
 package google
 
-import "github.com/shekhirin/bionic-cli/views/view"
+import "github.com/BionicTeam/bionic/views/view"
 
 var Views = []view.View{
 	Search{},

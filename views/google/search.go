@@ -1,8 +1,8 @@
 package google
 
 import (
-	"github.com/shekhirin/bionic-cli/providers/google"
-	"github.com/shekhirin/bionic-cli/types"
+	"github.com/BionicTeam/bionic/providers/google"
+	"github.com/BionicTeam/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"strings"
