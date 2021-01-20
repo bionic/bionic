@@ -52,7 +52,7 @@ func (p *twitter) Migrate() error {
 		&AgeInfoRecord{},
 		&AdImpression{},
 		&DeviceInfo{},
-		&MatchedTargetingCriterion{},
+		&TargetingCriterion{},
 	)
 }
 

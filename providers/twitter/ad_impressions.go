@@ -18,8 +18,8 @@ type AdImpression struct {
 	PromotedTweet            Tweet
 	AdvertiserID             int
 	Advertiser               Advertiser
-	MatchedTargetingCriteria []MatchedTargetingCriterion `json:"matchedTargetingCriteria" gorm:"many2many:twitter_ad_impressions_matched_targeting_criteria"`
-	ImpressionTime           types.DateTime              `json:"impressionTime" gorm:"unique"`
+	MatchedTargetingCriteria []TargetingCriterion `json:"matchedTargetingCriteria" gorm:"many2many:twitter_ad_impressions_matched_targeting_criteria"`
+	ImpressionTime           types.DateTime       `json:"impressionTime" gorm:"unique"`
 }
 
 func (AdImpression) TableName() string {
@@ -82,14 +82,14 @@ func (DeviceInfo) TableName() string {
 	return tablePrefix + "device_infos"
 }
 
-type MatchedTargetingCriterion struct {
+type TargetingCriterion struct {
 	gorm.Model
-	TargetingType  string `json:"targetingType" gorm:"uniqueIndex:twitter_matched_targeting_criterion_key"`
-	TargetingValue string `json:"targetingValue" gorm:"uniqueIndex:twitter_matched_targeting_criterion_key"`
+	TargetingType  string `json:"targetingType" gorm:"uniqueIndex:twitter_targeting_criterion_key"`
+	TargetingValue string `json:"targetingValue" gorm:"uniqueIndex:twitter_targeting_criterion_key"`
 }
 
-func (MatchedTargetingCriterion) TableName() string {
-	return tablePrefix + "matched_targeting_criteria"
+func (TargetingCriterion) TableName() string {
+	return tablePrefix + "targeting_criteria"
 }
 
 func (p *twitter) importAdImpressions(inputPath string) error {
@@ -188,6 +188,15 @@ func (p *twitter) importAdImpressions(inputPath string) error {
 			}
 
 			err = p.DB().
+				FirstOrCreate(&adImpression.PromotedTweet, map[string]interface{}{
+					"id": adImpression.PromotedTweet.ID,
+				}).
+				Error
+			if err != nil {
+				return err
+			}
+
+			err = p.DB().
 				FirstOrCreate(&adImpression.Advertiser, map[string]interface{}{
 					"name": adImpression.Advertiser.Name,
 				}).
@@ -208,15 +217,6 @@ func (p *twitter) importAdImpressions(inputPath string) error {
 				if err != nil {
 					return err
 				}
-			}
-
-			err = p.DB().
-				FirstOrCreate(&adImpression.PromotedTweet, map[string]interface{}{
-					"id": adImpression.PromotedTweet.ID,
-				}).
-				Error
-			if err != nil {
-				return err
 			}
 
 			adImpressions = append(adImpressions, *adImpression)
