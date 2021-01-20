@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/shekhirin/bionic-cli/cmd"
+	"github.com/BionicTeam/bionic/cmd"
 )
 
 func main() {

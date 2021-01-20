@@ -1,7 +1,7 @@
 package google
 
 import (
-	"github.com/shekhirin/bionic-cli/providers/provider"
+	"github.com/BionicTeam/bionic/providers/provider"
 	"gorm.io/gorm"
 	"path"
 )

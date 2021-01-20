@@ -3,8 +3,8 @@ package providers
 import (
 	"errors"
 	"github.com/golang/mock/gomock"
-	"github.com/shekhirin/bionic-cli/database"
-	"github.com/shekhirin/bionic-cli/providers/provider"
+	"github.com/BionicTeam/bionic/database"
+	"github.com/BionicTeam/bionic/providers/provider"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/sqlite"
