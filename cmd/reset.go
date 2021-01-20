@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/shekhirin/bionic-cli/database"
-	"github.com/shekhirin/bionic-cli/providers"
+	"github.com/BionicTeam/bionic/database"
+	"github.com/BionicTeam/bionic/providers"
 
 	"github.com/spf13/cobra"
 )

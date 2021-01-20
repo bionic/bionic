@@ -1,3 +1,3 @@
-//go:generate mockgen -package provider -destination mock_provider.go -self_package github.com/shekhirin/bionic-cli/providers/provider github.com/shekhirin/bionic-cli/providers/provider Provider
+//go:generate mockgen -package provider -destination mock_provider.go -self_package github.com/BionicTeam/bionic/providers/provider github.com/BionicTeam/bionic/providers/provider Provider
 
 package provider

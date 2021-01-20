@@ -3,11 +3,11 @@ package providers
 import (
 	"errors"
 	"fmt"
-	"github.com/shekhirin/bionic-cli/database"
-	"github.com/shekhirin/bionic-cli/providers/google"
-	"github.com/shekhirin/bionic-cli/providers/netflix"
-	"github.com/shekhirin/bionic-cli/providers/provider"
-	"github.com/shekhirin/bionic-cli/providers/twitter"
+	"github.com/BionicTeam/bionic/database"
+	"github.com/BionicTeam/bionic/providers/google"
+	"github.com/BionicTeam/bionic/providers/netflix"
+	"github.com/BionicTeam/bionic/providers/provider"
+	"github.com/BionicTeam/bionic/providers/twitter"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -64,7 +64,7 @@ func (m Manager) GetByName(name string) (provider.Provider, error) {
 }
 
 func (m Manager) Reset(p provider.Provider) error {
-	return m.db.Transaction(func(tx *gorm.DB) error {
+	err := m.db.Transaction(func(tx *gorm.DB) error {
 		err := tx.
 			Where("provider = ?", p.Name()).
 			Delete(&database.Import{}).
@@ -99,10 +99,11 @@ func (m Manager) Reset(p provider.Provider) error {
 			}
 		}
 
-		if err := p.Migrate(); err != nil {
-			return err
-		}
-
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+
+	return p.Migrate()
 }

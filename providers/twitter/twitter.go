@@ -1,7 +1,7 @@
 package twitter
 
 import (
-	"github.com/shekhirin/bionic-cli/providers/provider"
+	"github.com/BionicTeam/bionic/providers/provider"
 	"gorm.io/gorm"
 	"path"
 )
@@ -50,6 +50,9 @@ func (p *twitter) Migrate() error {
 		&Location{},
 		&InferredAgeInfoRecord{},
 		&AgeInfoRecord{},
+		&AdImpression{},
+		&DeviceInfo{},
+		&TargetingCriterion{},
 	)
 }
 
@@ -83,6 +86,11 @@ func (p *twitter) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 			"Age Info",
 			p.importAgeInfo,
 			path.Join(inputPath, "data", "ageinfo.js"),
+		),
+		provider.NewImportFn(
+			"Ad Impressions",
+			p.importAdImpressions,
+			path.Join(inputPath, "data", "ad-impressions.js"),
 		),
 	}, nil
 }

@@ -2,7 +2,7 @@ package twitter
 
 import (
 	"encoding/json"
-	"github.com/shekhirin/bionic-cli/types"
+	"github.com/BionicTeam/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"io/ioutil"
@@ -17,7 +17,7 @@ type AgeInfoRecord struct {
 }
 
 func (AgeInfoRecord) TableName() string {
-	return "age_info_records"
+	return tablePrefix + "age_info_records"
 }
 
 func (ai *AgeInfoRecord) UnmarshalJSON(b []byte) error {
