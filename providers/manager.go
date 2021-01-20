@@ -64,7 +64,7 @@ func (m Manager) GetByName(name string) (provider.Provider, error) {
 }
 
 func (m Manager) Reset(p provider.Provider) error {
-	return m.db.Transaction(func(tx *gorm.DB) error {
+	err := m.db.Transaction(func(tx *gorm.DB) error {
 		err := tx.
 			Where("provider = ?", p.Name()).
 			Delete(&database.Import{}).
@@ -99,10 +99,11 @@ func (m Manager) Reset(p provider.Provider) error {
 			}
 		}
 
-		if err := p.Migrate(); err != nil {
-			return err
-		}
-
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+
+	return p.Migrate()
 }
