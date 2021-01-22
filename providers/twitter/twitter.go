@@ -1,9 +1,12 @@
 package twitter
 
 import (
+	"encoding/json"
 	"github.com/BionicTeam/bionic/providers/provider"
 	"gorm.io/gorm"
+	"io/ioutil"
 	"path"
+	"strings"
 )
 
 const name = "twitter"
@@ -53,6 +56,10 @@ func (p *twitter) Migrate() error {
 		&AdImpression{},
 		&DeviceInfo{},
 		&TargetingCriterion{},
+		&Account{},
+		&ScreenNameChange{},
+		&EmailAddressChange{},
+		&LoginIP{},
 	)
 }
 
@@ -92,5 +99,26 @@ func (p *twitter) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 			p.importAdImpressions,
 			path.Join(inputPath, "data", "ad-impressions.js"),
 		),
+		provider.NewImportFn(
+			"Account",
+			p.importAccount,
+			path.Join(inputPath, "data"),
+		),
 	}, nil
+}
+
+func readJSON(path string, prefix string, dst interface{}) error {
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	data := string(bytes)
+	data = strings.TrimPrefix(data, prefix)
+
+	if err := json.Unmarshal([]byte(data), &dst); err != nil {
+		return err
+	}
+
+	return nil
 }
