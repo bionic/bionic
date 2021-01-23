@@ -5,9 +5,7 @@ import (
 	"github.com/BionicTeam/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"io/ioutil"
 	"strconv"
-	"strings"
 )
 
 type AgeInfoRecord struct {
@@ -55,19 +53,15 @@ func (ai *AgeInfoRecord) UnmarshalJSON(b []byte) error {
 func (p *twitter) importAgeInfo(inputPath string) error {
 	var ageInfo []AgeInfoRecord
 
-	bytes, err := ioutil.ReadFile(inputPath)
-	if err != nil {
+	if err := readJSON(
+		inputPath,
+		"window.YTD.ageinfo.part0 = ",
+		&ageInfo,
+	); err != nil {
 		return err
 	}
 
-	data := string(bytes)
-	data = strings.TrimPrefix(data, "window.YTD.ageinfo.part0 = ")
-
-	if err := json.Unmarshal([]byte(data), &ageInfo); err != nil {
-		return err
-	}
-
-	err = p.DB().
+	err := p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

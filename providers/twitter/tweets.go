@@ -5,9 +5,7 @@ import (
 	"github.com/BionicTeam/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"io/ioutil"
 	"strconv"
-	"strings"
 )
 
 type Tweet struct {
@@ -263,22 +261,18 @@ func (tu *TweetURL) UnmarshalJSON(b []byte) error {
 func (p *twitter) importTweets(inputPath string) error {
 	var tweets []Tweet
 
-	bytes, err := ioutil.ReadFile(inputPath)
-	if err != nil {
-		return err
-	}
-
-	data := string(bytes)
-	data = strings.TrimPrefix(data, "window.YTD.tweet.part0 = ")
-
-	if err := json.Unmarshal([]byte(data), &tweets); err != nil {
+	if err := readJSON(
+		inputPath,
+		"window.YTD.tweet.part0 = ",
+		&tweets,
+	); err != nil {
 		return err
 	}
 
 	for i := range tweets {
 		tweet := &tweets[i]
 
-		err = p.DB().
+		err := p.DB().
 			Find(&tweet.Entities, map[string]interface{}{
 				"tweet_id": tweet.ID,
 			}).
@@ -388,7 +382,7 @@ func (p *twitter) importTweets(inputPath string) error {
 		}
 	}
 
-	err = p.DB().
+	err := p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

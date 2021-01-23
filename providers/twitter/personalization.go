@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"io/ioutil"
-	"strings"
 )
 
 type PersonalizationRecord struct {
@@ -192,21 +190,17 @@ func (p *twitter) importPersonalization(inputPath string) error {
 		P13nData PersonalizationRecord `json:"p13nData"`
 	}
 
-	bytes, err := ioutil.ReadFile(inputPath)
-	if err != nil {
-		return err
-	}
-
-	data := string(bytes)
-	data = strings.TrimPrefix(data, "window.YTD.personalization.part0 = ")
-
-	if err := json.Unmarshal([]byte(data), &fileData); err != nil {
+	if err := readJSON(
+		inputPath,
+		"window.YTD.personalization.part0 = ",
+		&fileData,
+	); err != nil {
 		return err
 	}
 
 	personalization := fileData[0].P13nData
 
-	err = p.DB().
+	err := p.DB().
 		FirstOrCreate(&personalization.GenderInfo, map[string]interface{}{
 			"gender": personalization.GenderInfo.Gender,
 		}).

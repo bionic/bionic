@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"io/ioutil"
-	"strings"
 	"time"
 )
 
@@ -84,22 +82,18 @@ func (DirectMessageReaction) TableName() string {
 func (p *twitter) importDirectMessages(inputPath string) error {
 	var conversations []Conversation
 
-	bytes, err := ioutil.ReadFile(inputPath)
-	if err != nil {
-		return err
-	}
-
-	data := string(bytes)
-	data = strings.TrimPrefix(data, "window.YTD.direct_messages.part0 = ")
-
-	if err := json.Unmarshal([]byte(data), &conversations); err != nil {
+	if err := readJSON(
+		inputPath,
+		"window.YTD.direct_messages.part0 = ",
+		&conversations,
+	); err != nil {
 		return err
 	}
 
 	for i, conversation := range conversations {
 		for j, message := range conversation.DirectMessages {
 			for k, reaction := range message.Reactions {
-				err = p.DB().
+				err := p.DB().
 					FirstOrCreate(&conversations[i].DirectMessages[j].Reactions[k], map[string]interface{}{
 						"direct_message_id": message.ID,
 						"key":               reaction.Key,
@@ -111,7 +105,7 @@ func (p *twitter) importDirectMessages(inputPath string) error {
 			}
 
 			for k, url := range message.URLs {
-				err = p.DB().
+				err := p.DB().
 					FirstOrCreate(&conversations[i].DirectMessages[j].URLs[k], map[string]interface{}{
 						"url": url.URL,
 					}).
@@ -123,7 +117,7 @@ func (p *twitter) importDirectMessages(inputPath string) error {
 		}
 	}
 
-	err = p.DB().
+	err := p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

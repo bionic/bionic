@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"io/ioutil"
-	"strings"
 )
 
 type Like struct {
@@ -39,20 +37,16 @@ func (l *Like) UnmarshalJSON(b []byte) error {
 func (p *twitter) importLikes(inputPath string) error {
 	var likes []Like
 
-	bytes, err := ioutil.ReadFile(inputPath)
-	if err != nil {
-		return err
-	}
-
-	data := string(bytes)
-	data = strings.TrimPrefix(data, "window.YTD.like.part0 = ")
-
-	if err := json.Unmarshal([]byte(data), &likes); err != nil {
+	if err := readJSON(
+		inputPath,
+		"window.YTD.like.part0 = ",
+		&likes,
+	); err != nil {
 		return err
 	}
 
 	for i, like := range likes {
-		err = p.DB().
+		err := p.DB().
 			FirstOrCreate(&likes[i].Tweet, map[string]interface{}{
 				"id": like.TweetID,
 			}).
@@ -62,7 +56,7 @@ func (p *twitter) importLikes(inputPath string) error {
 		}
 	}
 
-	err = p.DB().
+	err := p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).
