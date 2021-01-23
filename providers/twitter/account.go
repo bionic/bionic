@@ -251,7 +251,7 @@ func (p *twitter) importAccount(inputPath string) error {
 
 	err := p.DB().
 		Clauses(clause.OnConflict{
-			DoNothing: true,
+			UpdateAll: true,
 		}).
 		Create(&account).
 		Error
