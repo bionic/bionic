@@ -5,8 +5,6 @@ import (
 	"github.com/BionicTeam/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"io/ioutil"
-	"strings"
 )
 
 type AdImpression struct {
@@ -103,15 +101,11 @@ func (p *twitter) importAdImpressions(inputPath string) error {
 		} `json:"ad"`
 	}
 
-	bytes, err := ioutil.ReadFile(inputPath)
-	if err != nil {
-		return err
-	}
-
-	data := string(bytes)
-	data = strings.TrimPrefix(data, "window.YTD.ad_impressions.part0 = ")
-
-	if err := json.Unmarshal([]byte(data), &ads); err != nil {
+	if err := readJSON(
+		inputPath,
+		"window.YTD.ad_impressions.part0 = ",
+		&ads,
+	); err != nil {
 		return err
 	}
 
@@ -121,7 +115,7 @@ func (p *twitter) importAdImpressions(inputPath string) error {
 		for j := range ad.Ad.AdsUserData.AdImpressions.Impressions {
 			adImpression := &ads[i].Ad.AdsUserData.AdImpressions.Impressions[j]
 
-			err = p.DB().
+			err := p.DB().
 				FirstOrCreate(&adImpression.DeviceInfo, map[string]interface{}{
 					"identifier": adImpression.DeviceInfo.Identifier,
 					"type":       adImpression.DeviceInfo.Type,
@@ -223,7 +217,7 @@ func (p *twitter) importAdImpressions(inputPath string) error {
 		}
 	}
 
-	err = p.DB().
+	err := p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).
