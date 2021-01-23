@@ -3,9 +3,9 @@ package providers
 import (
 	"errors"
 	"fmt"
-	"github.com/golang/mock/gomock"
 	"github.com/BionicTeam/bionic/database"
 	"github.com/BionicTeam/bionic/providers/provider"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/sqlite"
