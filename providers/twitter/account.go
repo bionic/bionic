@@ -8,18 +8,15 @@ import (
 )
 
 type accountCreationIP struct {
-	AccountId  int    `json:"accountId,string" gorm:"-"`
 	CreationIP string `json:"userCreationIp"`
 }
 
 type accountTimezone struct {
-	AccountId int    `json:"accountId,string" gorm:"-"`
-	Timezone  string `json:"timeZone"`
+	Timezone string `json:"timeZone"`
 }
 
 type accountVerified struct {
-	AccountId int  `json:"accountId,string" gorm:"-"`
-	Verified  bool `json:"verified"`
+	Verified bool `json:"verified"`
 }
 
 type Account struct {
@@ -27,12 +24,12 @@ type Account struct {
 	accountCreationIP
 	accountTimezone
 	accountVerified
-	ID                  int                  `json:"accountId,string"`
-	Email               string               `json:"email"`
-	CreatedVia          string               `json:"createdVia"`
-	Username            string               `json:"username"`
-	Created             types.DateTime       `json:"createdAt"`
-	DisplayName         string               `json:"accountDisplayName"`
+	ID                  int            `json:"accountId,string"`
+	Email               string         `json:"email"`
+	CreatedVia          string         `json:"createdVia"`
+	Username            string         `json:"username"`
+	Created             types.DateTime `json:"createdAt"`
+	DisplayName         string         `json:"accountDisplayName"`
 	ScreenNameChanges   []ScreenNameChange
 	EmailAddressChanges []EmailAddressChange
 	LoginIPs            []LoginIP
@@ -105,19 +102,28 @@ func (li LoginIP) Conditions() map[string]interface{} {
 
 func (p *twitter) importAccount(inputPath string) error {
 	var data = make([]struct {
-		Account           Account           `json:"account"`
-		AccountCreationIP accountCreationIP `json:"accountCreationIp"`
-		AccountTimezone   accountTimezone   `json:"accountTimezone"`
-		AccountVerified   accountVerified   `json:"accountVerified"`
+		Account           Account `json:"account"`
+		AccountCreationIP struct {
+			accountCreationIP
+			AccountId int `json:"accountId,string" gorm:"-"`
+		} `json:"accountCreationIp"`
+		AccountTimezone struct {
+			accountTimezone
+			AccountId int `json:"accountId,string" gorm:"-"`
+		} `json:"accountTimezone"`
+		AccountVerified struct {
+			accountVerified
+			AccountId int `json:"accountId,string" gorm:"-"`
+		} `json:"accountVerified"`
 		ScreenNameChanges []struct {
 			ScreenNameChange struct {
-				AccountID        int           `json:"accountId,string"`
+				AccountID        int              `json:"accountId,string"`
 				ScreenNameChange ScreenNameChange `json:"screenNameChange"`
 			} `json:"screenNameChange"`
 		}
 		EmailAddressChanges []struct {
 			EmailAddressChange struct {
-				AccountID          int             `json:"accountId,string"`
+				AccountID          int                `json:"accountId,string"`
 				EmailAddressChange EmailAddressChange `json:"emailChange"`
 			} `json:"emailAddressChange"`
 		}
@@ -185,15 +191,15 @@ func (p *twitter) importAccount(inputPath string) error {
 	account := data[0].Account
 
 	if data[0].AccountCreationIP.AccountId == account.ID {
-		account.accountCreationIP = data[0].AccountCreationIP
+		account.accountCreationIP = data[0].AccountCreationIP.accountCreationIP
 	}
 
 	if data[0].AccountTimezone.AccountId == account.ID {
-		account.accountTimezone = data[0].AccountTimezone
+		account.accountTimezone = data[0].AccountTimezone.accountTimezone
 	}
 
 	if data[0].AccountVerified.AccountId == account.ID {
-		account.accountVerified = data[0].AccountVerified
+		account.accountVerified = data[0].AccountVerified.accountVerified
 	}
 
 	for _, entity := range data[0].ScreenNameChanges {
