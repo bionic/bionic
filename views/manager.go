@@ -18,11 +18,7 @@ func DefaultViews() []view.View {
 func NewManager(db *gorm.DB, views []view.View) (*Manager, error) {
 	manager := &Manager{
 		db:    db,
-		Views: []view.View{},
-	}
-
-	for _, v := range views {
-		manager.Views = append(manager.Views, v)
+		Views: views,
 	}
 
 	return manager, nil

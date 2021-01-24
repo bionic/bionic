@@ -24,7 +24,10 @@ func (Search) TableName() string {
 
 func (Search) Update(db *gorm.DB) error {
 	var results []google.Action
-	db.Model(&google.Action{}).Where("Title like '%Searched for%' AND Header = 'Search'").FindInBatches(&results, 100, func(tx *gorm.DB, batch int) error {
+	query := db.Debug().
+		Model(&google.Action{}).
+		Where("Title like ? AND Header = 'Search'", "%"+searchQueryPrefix+"%")
+	query.FindInBatches(&results, 100, func(tx *gorm.DB, batch int) error {
 		var items []Search
 		for _, action := range results {
 			items = append(items, Search{
