@@ -49,14 +49,14 @@ func (p *google) Migrate() error {
 func (p *google) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 	directoryProviders := []provider.ImportFn{
 		provider.NewImportFn(
-			"Search Activity",
+			"Activity",
 			p.importActivityFromDirectory,
 			path.Join(inputPath, "My Activity"),
 		),
 	}
 	archiveProviders := []provider.ImportFn{
 		provider.NewImportFn(
-			"Search Activity",
+			"Activity",
 			p.importActivityFromArchive,
 			inputPath,
 		),
