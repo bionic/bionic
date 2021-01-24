@@ -5,9 +5,11 @@ import (
 	"strconv"
 )
 
-type NullableBool struct{ sql.NullBool }
+type NullableBool struct {
+	sql.NullBool
+}
 
-func (b *NullableBool) UnmarshalCSV(csv string) (err error) {
+func (b *NullableBool) UnmarshalCSV(csv string) error {
 	value, err := strconv.ParseBool(csv)
 
 	if err == nil {
