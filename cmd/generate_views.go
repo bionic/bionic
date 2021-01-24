@@ -10,7 +10,7 @@ import (
 )
 
 var viewsCmd = &cobra.Command{
-	Use:   "views",
+	Use:   "generate-views",
 	Short: "Create derivative SQL tables and materialized views based on raw imported data",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dbPath := rootCmd.PersistentFlags().Lookup("db").Value.String()
@@ -21,6 +21,11 @@ var viewsCmd = &cobra.Command{
 		}
 
 		manager, err := views.NewManager(db, views.DefaultViews())
+		if err != nil {
+			return err
+		}
+
+		err = manager.Migrate()
 		if err != nil {
 			return err
 		}

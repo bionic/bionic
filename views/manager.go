@@ -27,3 +27,14 @@ func NewManager(db *gorm.DB, views []view.View) (*Manager, error) {
 
 	return manager, nil
 }
+
+func (m *Manager) Migrate() error {
+	for _, v := range m.Views {
+		err := v.Migrate(m.db)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

@@ -1,8 +1,8 @@
 package netflix
 
 import (
-	"github.com/gocarina/gocsv"
 	"github.com/BionicTeam/bionic/types"
+	"github.com/gocarina/gocsv"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"os"
