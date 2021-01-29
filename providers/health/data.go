@@ -253,7 +253,7 @@ func (e MetadataEntry) Constraints() map[string]interface{} {
 	}
 }
 
-func (p *health) importExport(inputPath string) error {
+func (p *health) importData(inputPath string) error {
 	var data Data
 
 	f, err := os.Open(inputPath)

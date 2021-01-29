@@ -48,8 +48,8 @@ func (p *health) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 
 	return []provider.ImportFn{
 		provider.NewImportFn(
-			"Export",
-			p.importExport,
+			"Data",
+			p.importData,
 			path.Join(inputPath, "export.xml"),
 		),
 	}, nil
