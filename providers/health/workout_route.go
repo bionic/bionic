@@ -51,6 +51,7 @@ func (p *health) importWorkoutRoutes(data *Data, files map[string]io.ReadCloser)
 		}
 
 		err := p.DB().
+			Select("ID").
 			Find(workout.Route, workout.Route.Constraints()).
 			Error
 		if err != nil {
