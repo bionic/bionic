@@ -9,36 +9,36 @@ import (
 	"path/filepath"
 )
 
-func (p *health) parseWorkoutRoute(f io.Reader, route *WorkoutRoute) error {
-	gpxRoute := WorkoutRouteGPX(*route)
-
-	bytes, err := ioutil.ReadAll(f)
-	if err != nil {
-		return err
-	}
-
-	if err := xml.Unmarshal(bytes, &gpxRoute); err != nil {
-		return err
-	}
-
-	*route = WorkoutRoute(gpxRoute)
-
-	return nil
-}
-
-func (p *health) importWorkoutRoutes(data *Data, getWorkoutRouteReader func(name string) io.Reader) error {
+func (p *health) importWorkoutRoutes(data *Data, files map[string]io.ReadCloser) error {
 	var g errgroup.Group
 
 	for i := range data.Workouts {
 		workoutRoute := data.Workouts[i].Route
 
-		if workoutRoute != nil {
-			if rc := getWorkoutRouteReader(filepath.Base(workoutRoute.FilePath)); rc != nil {
-				g.Go(func() error {
-					return p.parseWorkoutRoute(rc, workoutRoute)
-				})
+		g.Go(func() error {
+			if workoutRoute != nil {
+				if r, ok := files[filepath.Base(workoutRoute.FilePath)]; ok {
+					gpxRoute := WorkoutRouteGPX(*workoutRoute)
+
+					bytes, err := ioutil.ReadAll(r)
+					if err != nil {
+						return err
+					}
+
+					if err := r.Close(); err != nil {
+						return err
+					}
+
+					if err := xml.Unmarshal(bytes, &gpxRoute); err != nil {
+						return err
+					}
+
+					*workoutRoute = WorkoutRoute(gpxRoute)
+				}
 			}
-		}
+
+			return nil
+		})
 	}
 
 	if err := g.Wait(); err != nil {

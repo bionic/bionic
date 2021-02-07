@@ -368,7 +368,7 @@ func (p *health) importDataFromArchive(inputPath string) error {
 				return err
 			}
 
-			data, err = p.importExport(rc)
+			data, err = p.importData(rc)
 			if err != nil {
 				return err
 			}
@@ -390,25 +390,7 @@ func (p *health) importDataFromArchive(inputPath string) error {
 		return errors.New("no export.xml file found")
 	}
 
-	err = p.importWorkoutRoutes(data, func(name string) io.Reader {
-		workoutRouteFile, ok := workoutRouteFiles[name]
-		if !ok {
-			return nil
-		}
-
-		return workoutRouteFile
-	})
-	if err != nil {
-		return err
-	}
-
-	for _, workoutRouteFile := range workoutRouteFiles {
-		if err := workoutRouteFile.Close(); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return p.importWorkoutRoutes(data, workoutRouteFiles)
 }
 
 func (p *health) importDataFromDirectory(inputPath string) error {
@@ -422,42 +404,31 @@ func (p *health) importDataFromDirectory(inputPath string) error {
 		_ = f.Close()
 	}()
 
-	data, err = p.importExport(f)
+	data, err = p.importData(f)
 	if err != nil {
 		return err
 	}
 
 	workoutRouteFiles := map[string]io.ReadCloser{}
 
-	if data == nil {
-		return errors.New("no export.xml file found")
-	}
-
 	for _, workout := range data.Workouts {
 		if route := workout.Route; route != nil {
-			rc, err := os.Open(path.Join(path.Dir(inputPath), route.FilePath))
+			r, err := os.Open(path.Join(path.Dir(inputPath), route.FilePath))
 			if err != nil {
 				return err
 			}
 
-			workoutRouteFiles[filepath.Base(route.FilePath)] = rc
+			workoutRouteFiles[filepath.Base(route.FilePath)] = r
 		}
 	}
 
-	return p.importWorkoutRoutes(data, func(name string) io.Reader {
-		workoutRouteFile, ok := workoutRouteFiles[name]
-		if !ok {
-			return nil
-		}
-
-		return workoutRouteFile
-	})
+	return p.importWorkoutRoutes(data, workoutRouteFiles)
 }
 
-func (p *health) importExport(f io.Reader) (*Data, error) {
+func (p *health) importData(r io.Reader) (*Data, error) {
 	var data Data
 
-	decoder := xml.NewDecoder(f)
+	decoder := xml.NewDecoder(r)
 
 	for {
 		token, err := decoder.Token()
