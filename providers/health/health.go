@@ -31,6 +31,7 @@ func (p *health) Migrate() error {
 	return p.DB().AutoMigrate(
 		&Data{},
 		&MeRecord{},
+		&Device{},
 		&Entry{},
 		&BeatsPerMinute{},
 		&Workout{},

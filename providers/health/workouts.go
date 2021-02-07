@@ -18,6 +18,15 @@ func (p *health) parseWorkout(data *Data, decoder *xml.Decoder, start *xml.Start
 		return err
 	}
 
+	if workout.Device != nil {
+		err = p.DB().
+			FirstOrCreate(workout.Device, workout.Device.Constraints()).
+			Error
+		if err != nil {
+			return err
+		}
+	}
+
 	for i := range workout.MetadataEntries {
 		metadataEntry := &workout.MetadataEntries[i]
 

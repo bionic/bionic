@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HealthData [
+<!-- HealthKit Export Version: 11 -->
+<!ELEMENT HealthData (ExportDate,Me,(Record|Correlation|Workout|ActivitySummary|ClinicalRecord)*)>
+<!ATTLIST HealthData
+  locale CDATA #REQUIRED
+>
+<!ELEMENT ExportDate EMPTY>
+<!ATTLIST ExportDate
+  value CDATA #REQUIRED
+>
+<!ELEMENT Me EMPTY>
+<!ATTLIST Me
+  HKCharacteristicTypeIdentifierDateOfBirth         CDATA #REQUIRED
+  HKCharacteristicTypeIdentifierBiologicalSex       CDATA #REQUIRED
+  HKCharacteristicTypeIdentifierBloodType           CDATA #REQUIRED
+  HKCharacteristicTypeIdentifierFitzpatrickSkinType CDATA #REQUIRED
+>
+<!ELEMENT Record ((MetadataEntry|HeartRateVariabilityMetadataList)*)>
+<!ATTLIST Record
+  type          CDATA #REQUIRED
+  unit          CDATA #IMPLIED
+  value         CDATA #IMPLIED
+  sourceName    CDATA #REQUIRED
+  sourceVersion CDATA #IMPLIED
+  device        CDATA #IMPLIED
+  creationDate  CDATA #IMPLIED
+  startDate     CDATA #REQUIRED
+  endDate       CDATA #REQUIRED
+>
+<!-- Note: Any Records that appear as children of a correlation also appear as top-level records in this document. -->
+<!ELEMENT Correlation ((MetadataEntry|Record)*)>
+<!ATTLIST Correlation
+  type          CDATA #REQUIRED
+  sourceName    CDATA #REQUIRED
+  sourceVersion CDATA #IMPLIED
+  device        CDATA #IMPLIED
+  creationDate  CDATA #IMPLIED
+  startDate     CDATA #REQUIRED
+  endDate       CDATA #REQUIRED
+>
+<!ELEMENT Workout ((MetadataEntry|WorkoutEvent|WorkoutRoute)*)>
+<!ATTLIST Workout
+  workoutActivityType   CDATA #REQUIRED
+  duration              CDATA #IMPLIED
+  durationUnit          CDATA #IMPLIED
+  totalDistance         CDATA #IMPLIED
+  totalDistanceUnit     CDATA #IMPLIED
+  totalEnergyBurned     CDATA #IMPLIED
+  totalEnergyBurnedUnit CDATA #IMPLIED
+  sourceName            CDATA #REQUIRED
+  sourceVersion         CDATA #IMPLIED
+  device                CDATA #IMPLIED
+  creationDate          CDATA #IMPLIED
+  startDate             CDATA #REQUIRED
+  endDate               CDATA #REQUIRED
+>
+<!ELEMENT WorkoutEvent EMPTY>
+<!ATTLIST WorkoutEvent
+  type         CDATA #REQUIRED
+  date         CDATA #REQUIRED
+  duration     CDATA #IMPLIED
+  durationUnit CDATA #IMPLIED
+>
+<!ELEMENT WorkoutRoute ((MetadataEntry|FileReference)*)>
+<!ATTLIST WorkoutRoute
+  sourceName    CDATA #REQUIRED
+  sourceVersion CDATA #IMPLIED
+  device        CDATA #IMPLIED
+  creationDate  CDATA #IMPLIED
+  startDate     CDATA #REQUIRED
+  endDate       CDATA #REQUIRED
+>
+<!ELEMENT FileReference EMPTY>
+<!ATTLIST FileReference
+  path CDATA #REQUIRED
+>
+<!ELEMENT ActivitySummary EMPTY>
+<!ATTLIST ActivitySummary
+  dateComponents           CDATA #IMPLIED
+  activeEnergyBurned       CDATA #IMPLIED
+  activeEnergyBurnedGoal   CDATA #IMPLIED
+  activeEnergyBurnedUnit   CDATA #IMPLIED
+  appleMoveTime            CDATA #IMPLIED
+  appleMoveTimeGoal        CDATA #IMPLIED
+  appleExerciseTime        CDATA #IMPLIED
+  appleExerciseTimeGoal    CDATA #IMPLIED
+  appleStandHours          CDATA #IMPLIED
+  appleStandHoursGoal      CDATA #IMPLIED
+>
+<!ELEMENT MetadataEntry EMPTY>
+<!ATTLIST MetadataEntry
+  key   CDATA #REQUIRED
+  value CDATA #REQUIRED
+>
+<!-- Note: Heart Rate Variability records captured by Apple Watch may include an associated list of instantaneous beats-per-minute readings. -->
+<!ELEMENT HeartRateVariabilityMetadataList (InstantaneousBeatsPerMinute*)>
+<!ELEMENT InstantaneousBeatsPerMinute EMPTY>
+<!ATTLIST InstantaneousBeatsPerMinute
+  bpm  CDATA #REQUIRED
+  time CDATA #REQUIRED
+>
+<!ELEMENT ClinicalRecord EMPTY>
+<!ATTLIST ClinicalRecord
+  type              CDATA #REQUIRED
+  identifier        CDATA #REQUIRED
+  sourceName        CDATA #REQUIRED
+  sourceURL         CDATA #REQUIRED
+  fhirVersion       CDATA #REQUIRED
+  receivedDate      CDATA #REQUIRED
+  resourceFilePath  CDATA #REQUIRED
+>
+<!ELEMENT Audiogram EMPTY>
+<!ATTLIST Audiogram
+  type          CDATA #REQUIRED
+  sourceName    CDATA #REQUIRED
+  sourceVersion CDATA #IMPLIED
+  device        CDATA #IMPLIED
+  creationDate  CDATA #IMPLIED
+  startDate     CDATA #REQUIRED
+  endDate       CDATA #REQUIRED
+>
+<!ELEMENT SensitivityPoint EMPTY>
+<!ATTLIST SensitivityPoint
+  frequencyValue   CDATA #REQUIRED
+  frequencyUnit    CDATA #REQUIRED
+  leftEarValue     CDATA #IMPLIED
+  leftEarUnit      CDATA #IMPLIED
+  rightEarValue    CDATA #IMPLIED
+  rightEarUnit     CDATA #IMPLIED
+>
+]>
+<HealthData locale="en_RU">
+ <ExportDate value="2021-01-11 12:06:40 +0300"/>
+ <Me HKCharacteristicTypeIdentifierDateOfBirth="2000-07-19" HKCharacteristicTypeIdentifierBiologicalSex="HKBiologicalSexMale" HKCharacteristicTypeIdentifierBloodType="HKBloodTypeAPositive" HKCharacteristicTypeIdentifierFitzpatrickSkinType="HKFitzpatrickSkinTypeNotSet" HKCharacteristicTypeIdentifierCardioFitnessMedicationsUse="None"/>
+ <Record type="HKQuantityTypeIdentifierHeartRateVariabilitySDNN" sourceName="Alexey’s Apple Watch" sourceVersion="5.1.2" device="&lt;&lt;HKDevice: 0x283f4a6c0&gt;, name:Apple Watch, manufacturer:Apple, model:Watch, hardware:Watch3,4, software:5.1.2&gt;" unit="ms" creationDate="2019-01-19 16:57:15 +0300" startDate="2019-01-19 16:56:13 +0300" endDate="2019-01-19 16:57:15 +0300" value="35.7133">
+  <MetadataEntry key="HKMetadataKeySyncVersion" value="2"/>
+  <HeartRateVariabilityMetadataList>
+   <InstantaneousBeatsPerMinute bpm="70" time="4:56:15,46 PM"/>
+  </HeartRateVariabilityMetadataList>
+ </Record>
+ <Workout workoutActivityType="HKWorkoutActivityTypeWalking" duration="16.49007770021757" durationUnit="min" totalDistance="1.154875562449862" totalDistanceUnit="km" totalEnergyBurned="52.07101376026529" totalEnergyBurnedUnit="kcal" sourceName="Alexey’s Apple Watch" sourceVersion="5.1.2" device="&lt;&lt;HKDevice: 0x283fb2e90&gt;, name:Apple Watch, manufacturer:Apple, model:Watch, hardware:Watch3,4, software:5.1.2&gt;" creationDate="2019-01-19 16:57:15 +0300" startDate="2019-01-19 16:56:13 +0300" endDate="2019-01-19 16:57:15 +0300">
+  <MetadataEntry key="HKMetadataKeySyncVersion" value="2"/>
+  <WorkoutEvent type="HKWorkoutEventTypeSegment" date="2019-01-22 20:20:16 +0300" duration="14.84274098277092" durationUnit="min"/>
+  <WorkoutRoute sourceName="Alexey’s Apple Watch" sourceVersion="12.1.2" creationDate="2019-01-19 16:57:15 +0300" startDate="2019-01-19 16:56:13 +0300" endDate="2019-01-19 16:57:15 +0300">
+   <MetadataEntry key="HKMetadataKeySyncVersion" value="2"/>
+   <FileReference path="/workout-routes/route_2019-01-22_8.32pm.gpx"/>
+  </WorkoutRoute>
+ </Workout>
+ <ActivitySummary dateComponents="2019-01-17" activeEnergyBurned="10" activeEnergyBurnedGoal="15" activeEnergyBurnedUnit="kcal" appleMoveTime="20" appleMoveTimeGoal="40" appleExerciseTime="30" appleExerciseTimeGoal="50" appleStandHours="90" appleStandHoursGoal="12"/>
+</HealthData>

@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 type Data struct {
@@ -17,9 +18,7 @@ type Data struct {
 	Locale            string
 	ExportDate        types.DateTime     `gorm:"unique"`
 	Me                MeRecord           `xml:"Me"`
-	Entries           []*Entry           `gorm:"-"`
 	Workouts          []*Workout         `gorm:"-"`
-	ActivitySummaries []*ActivitySummary `gorm:"-"`
 }
 
 func (Data) TableName() string {
@@ -52,17 +51,80 @@ func (m MeRecord) Constraints() map[string]interface{} {
 	}
 }
 
+type Device struct {
+	gorm.Model
+	Name         string
+	Manufacturer string
+	DeviceModel  string `gorm:"column:model"`
+	Hardware     string
+	Software     string
+}
+
+func (Device) TableName() string {
+	return tablePrefix + "devices"
+}
+
+func (d Device) Constraints() map[string]interface{} {
+	return map[string]interface{}{
+		"name":         d.Name,
+		"manufacturer": d.Manufacturer,
+		"model":        d.DeviceModel,
+		"hardware":     d.Hardware,
+		"software":     d.Software,
+	}
+}
+
+func (d *Device) UnmarshalText(b []byte) error {
+	text := string(b)
+
+	if len(text) < 3 {
+		return nil
+	}
+
+	parts := strings.Split(text[1:len(text)-1], ", ")
+	if len(parts) < 2 {
+		return nil
+	}
+
+	attributes := parts[1:]
+
+	for _, attr := range attributes {
+		attrParts := strings.Split(attr, ":")
+		if len(attrParts) != 2 {
+			continue
+		}
+
+		key, value := attrParts[0], attrParts[1]
+
+		switch key {
+		case "name":
+			d.Name = value
+		case "manufacturer":
+			d.Manufacturer = value
+		case "model":
+			d.DeviceModel = value
+		case "hardware":
+			d.Hardware = value
+		case "software":
+			d.Software = value
+		}
+	}
+
+	return nil
+}
+
 type Entry struct {
 	gorm.Model
-	Type            string           `xml:"type,attr" gorm:"uniqueIndex:health_entries_key"`
-	SourceName      string           `xml:"sourceName,attr"`
-	SourceVersion   string           `xml:"sourceVersion,attr"`
-	Unit            string           `xml:"unit,attr"`
-	CreationDate    types.DateTime   `xml:"creationDate,attr" gorm:"uniqueIndex:health_entries_key"`
-	StartDate       types.DateTime   `xml:"startDate,attr"`
-	EndDate         types.DateTime   `xml:"endDate,attr"`
-	Value           string           `xml:"value,attr"`
-	Device          string           `xml:"device,attr"`
+	Type            string         `xml:"type,attr" gorm:"uniqueIndex:health_entries_key"`
+	SourceName      string         `xml:"sourceName,attr"`
+	SourceVersion   string         `xml:"sourceVersion,attr"`
+	Unit            string         `xml:"unit,attr"`
+	CreationDate    types.DateTime `xml:"creationDate,attr" gorm:"uniqueIndex:health_entries_key"`
+	StartDate       types.DateTime `xml:"startDate,attr"`
+	EndDate         types.DateTime `xml:"endDate,attr"`
+	Value           string         `xml:"value,attr"`
+	DeviceID        *int
+	Device          *Device          `xml:"device,attr"`
 	MetadataEntries []MetadataEntry  `xml:"MetadataEntry" gorm:"polymorphic:Parent"`
 	BeatsPerMinutes []BeatsPerMinute `xml:"HeartRateVariabilityMetadataList"`
 }
@@ -102,7 +164,7 @@ func (e *Entry) UnmarshalXML(decoder *xml.Decoder, start xml.StartElement) error
 type BeatsPerMinute struct {
 	gorm.Model
 	EntryID uint   `gorm:"uniqueIndex:health_beats_per_minutes_key"`
-	Bpm     int    `xml:"bpm,attr"`
+	BPM     int    `xml:"bpm,attr"`
 	Time    string `xml:"time,attr" gorm:"uniqueIndex:health_beats_per_minutes_key"`
 }
 
@@ -119,19 +181,20 @@ func (bpm BeatsPerMinute) Constraints() map[string]interface{} {
 
 type Workout struct {
 	gorm.Model
-	ActivityType          string          `xml:"workoutActivityType,attr"`
-	Duration              float64         `xml:"duration,attr"`
-	DurationUnit          string          `xml:"durationUnit,attr"`
-	TotalDistance         float64         `xml:"totalDistance,attr"`
-	TotalDistanceUnit     string          `xml:"totalDistanceUnit,attr"`
-	TotalEnergyBurned     float64         `xml:"totalEnergyBurned,attr"`
-	TotalEnergyBurnedUnit string          `xml:"totalEnergyBurnedUnit,attr"`
-	SourceName            string          `xml:"sourceName,attr"`
-	SourceVersion         string          `xml:"sourceVersion,attr"`
-	CreationDate          types.DateTime  `xml:"creationDate,attr" gorm:"unique"`
-	StartDate             types.DateTime  `xml:"startDate,attr"`
-	EndDate               types.DateTime  `xml:"endDate,attr"`
-	Device                string          `xml:"device,attr"`
+	ActivityType          string         `xml:"workoutActivityType,attr"`
+	Duration              float64        `xml:"duration,attr"`
+	DurationUnit          string         `xml:"durationUnit,attr"`
+	TotalDistance         float64        `xml:"totalDistance,attr"`
+	TotalDistanceUnit     string         `xml:"totalDistanceUnit,attr"`
+	TotalEnergyBurned     float64        `xml:"totalEnergyBurned,attr"`
+	TotalEnergyBurnedUnit string         `xml:"totalEnergyBurnedUnit,attr"`
+	SourceName            string         `xml:"sourceName,attr"`
+	SourceVersion         string         `xml:"sourceVersion,attr"`
+	CreationDate          types.DateTime `xml:"creationDate,attr" gorm:"unique"`
+	StartDate             types.DateTime `xml:"startDate,attr"`
+	EndDate               types.DateTime `xml:"endDate,attr"`
+	DeviceID              *int
+	Device                *Device         `xml:"device,attr"`
 	MetadataEntries       []MetadataEntry `xml:"MetadataEntry" gorm:"polymorphic:Parent"`
 	Events                []WorkoutEvent  `xml:"WorkoutEvent"`
 	Route                 *WorkoutRoute   `xml:"WorkoutRoute"`
@@ -202,26 +265,6 @@ func (wr *WorkoutRoute) UnmarshalXML(decoder *xml.Decoder, start xml.StartElemen
 		FileReference struct {
 			Path string `xml:"path,attr"`
 		} `xml:"FileReference"`
-		Metadata struct {
-			Time types.DateTime `xml:"time"`
-		} `xml:"metadata"`
-		Track struct {
-			Name    string `xml:"name"`
-			Segment struct {
-				Point []struct {
-					Lon        float64        `xml:"lon,attr"`
-					Lat        float64        `xml:"lat,attr"`
-					Ele        float64        `xml:"ele"`
-					Time       types.DateTime `xml:"time"`
-					Extensions struct {
-						Speed  float64 `xml:"speed"`
-						Course float64 `xml:"course"`
-						HAcc   float64 `xml:"hAcc"`
-						VAcc   float64 `xml:"vAcc"`
-					} `xml:"extensions"`
-				} `xml:"trkpt"`
-			} `xml:"trkseg"`
-		} `xml:"trk"`
 	}
 
 	if err := decoder.DecodeElement(&data, &start); err != nil {

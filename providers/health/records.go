@@ -2,7 +2,7 @@ package health
 
 import "encoding/xml"
 
-func (p *health) parseRecord(data *Data, decoder *xml.Decoder, start *xml.StartElement) error {
+func (p *health) parseRecord(_ *Data, decoder *xml.Decoder, start *xml.StartElement) error {
 	var entry Entry
 
 	if err := decoder.DecodeElement(&entry, start); err != nil {
@@ -14,6 +14,15 @@ func (p *health) parseRecord(data *Data, decoder *xml.Decoder, start *xml.StartE
 		Error
 	if err != nil {
 		return err
+	}
+
+	if entry.Device != nil {
+		err = p.DB().
+			FirstOrCreate(entry.Device, entry.Device.Constraints()).
+			Error
+		if err != nil {
+			return err
+		}
 	}
 
 	for i := range entry.MetadataEntries {
@@ -42,8 +51,6 @@ func (p *health) parseRecord(data *Data, decoder *xml.Decoder, start *xml.StartE
 			return err
 		}
 	}
-
-	data.Entries = append(data.Entries, &entry)
 
 	return p.DB().
 		FirstOrCreate(&entry, entry.Constraints()).
