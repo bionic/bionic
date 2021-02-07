@@ -1,12 +1,15 @@
 package health
 
 import (
+	"archive/zip"
 	"encoding/xml"
+	"errors"
 	"github.com/BionicTeam/bionic/types"
-	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 	"io"
 	"os"
+	"path"
+	"path/filepath"
 )
 
 type Data struct {
@@ -237,7 +240,7 @@ type WorkoutRouteGPX WorkoutRoute
 func (wr *WorkoutRouteGPX) UnmarshalXML(decoder *xml.Decoder, start xml.StartElement) error {
 	type Alias WorkoutRoute
 
-	var data struct {
+	var data = struct {
 		Alias
 		XMLName  xml.Name `xml:"gpx"`
 		Metadata struct {
@@ -252,6 +255,8 @@ func (wr *WorkoutRouteGPX) UnmarshalXML(decoder *xml.Decoder, start xml.StartEle
 				} `xml:"trkpt"`
 			} `xml:"trkseg"`
 		} `xml:"trk"`
+	}{
+		Alias: Alias(*wr),
 	}
 
 	if err := decoder.DecodeElement(&data, &start); err != nil {
@@ -343,8 +348,71 @@ func (e MetadataEntry) Constraints() map[string]interface{} {
 	}
 }
 
-func (p *health) importData(inputPath string) error {
-	var data Data
+func (p *health) importDataFromArchive(inputPath string) error {
+	var data *Data
+
+	r, err := zip.OpenReader(inputPath)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = r.Close()
+	}()
+
+	workoutRouteFiles := map[string]io.ReadCloser{}
+
+	for _, f := range r.File {
+		if filepath.Base(f.Name) == "export.xml" {
+			rc, err := f.Open()
+			if err != nil {
+				return err
+			}
+
+			data, err = p.importExport(rc)
+			if err != nil {
+				return err
+			}
+
+			if err := rc.Close(); err != nil {
+				return err
+			}
+		} else if filepath.Base(filepath.Dir(f.Name)) == "workout-routes" {
+			rc, err := f.Open()
+			if err != nil {
+				return nil
+			}
+
+			workoutRouteFiles[filepath.Base(f.Name)] = rc
+		}
+	}
+
+	if data == nil {
+		return errors.New("no export.xml file found")
+	}
+
+	err = p.importWorkoutRoutes(data, func(name string) io.Reader {
+		workoutRouteFile, ok := workoutRouteFiles[name]
+		if !ok {
+			return nil
+		}
+
+		return workoutRouteFile
+	})
+	if err != nil {
+		return err
+	}
+
+	for _, workoutRouteFile := range workoutRouteFiles {
+		if err := workoutRouteFile.Close(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (p *health) importDataFromDirectory(inputPath string) error {
+	var data *Data
 
 	f, err := os.Open(inputPath)
 	if err != nil {
@@ -354,6 +422,41 @@ func (p *health) importData(inputPath string) error {
 		_ = f.Close()
 	}()
 
+	data, err = p.importExport(f)
+	if err != nil {
+		return err
+	}
+
+	workoutRouteFiles := map[string]io.ReadCloser{}
+
+	if data == nil {
+		return errors.New("no export.xml file found")
+	}
+
+	for _, workout := range data.Workouts {
+		if route := workout.Route; route != nil {
+			rc, err := os.Open(path.Join(path.Dir(inputPath), route.FilePath))
+			if err != nil {
+				return err
+			}
+
+			workoutRouteFiles[filepath.Base(route.FilePath)] = rc
+		}
+	}
+
+	return p.importWorkoutRoutes(data, func(name string) io.Reader {
+		workoutRouteFile, ok := workoutRouteFiles[name]
+		if !ok {
+			return nil
+		}
+
+		return workoutRouteFile
+	})
+}
+
+func (p *health) importExport(f io.Reader) (*Data, error) {
+	var data Data
+
 	decoder := xml.NewDecoder(f)
 
 	for {
@@ -361,7 +464,7 @@ func (p *health) importData(inputPath string) error {
 		if token == nil || err == io.EOF {
 			break
 		} else if err != nil {
-			return err
+			return nil, err
 		}
 
 		switch typ := token.(type) {
@@ -386,66 +489,17 @@ func (p *health) importData(inputPath string) error {
 			}
 
 			if err := parseFn(&data, decoder, &typ); err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
 
-	var g errgroup.Group
-
-	for i := range data.Workouts {
-		workoutRoute := data.Workouts[i].Route
-
-		if workoutRoute != nil {
-			g.Go(func() error {
-				return p.parseWorkoutRoute(inputPath, workoutRoute)
-			})
-		}
-	}
-
-	if err := g.Wait(); err != nil {
-		return err
-	}
-
-	for _, workout := range data.Workouts {
-		if workout.Route == nil {
-			continue
-		}
-
-		err = p.DB().
-			Find(workout.Route, workout.Route.Constraints()).
-			Error
-		if err != nil {
-			return err
-		}
-
-		for i := range workout.Route.TrackPoints {
-			trackPoint := &workout.Route.TrackPoints[i]
-			trackPoint.WorkoutRouteID = workout.Route.ID
-
-			err = p.DB().
-				FirstOrCreate(trackPoint, trackPoint.Constraints()).
-				Error
-			if err != nil {
-				return err
-			}
-		}
-
-		err = p.DB().
-			Session(&gorm.Session{CreateBatchSize: 100}).
-			FirstOrCreate(workout.Route, workout.Route.Constraints()).
-			Error
-		if err != nil {
-			return err
-		}
-	}
-
-	err = p.DB().
+	err := p.DB().
 		FirstOrCreate(&data, data.Constraints()).
 		Error
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &data, nil
 }

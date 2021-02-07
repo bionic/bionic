@@ -43,16 +43,25 @@ func (p *health) Migrate() error {
 }
 
 func (p *health) ImportFns(inputPath string) ([]provider.ImportFn, error) {
-	if !provider.IsPathDir(inputPath) {
-		return nil, provider.ErrInputPathShouldBeDirectory
-	}
-
-	return []provider.ImportFn{
+	directoryProviders := []provider.ImportFn{
 		provider.NewImportFn(
 			"Data",
-			p.importData,
+			p.importDataFromDirectory,
 			path.Join(inputPath, "export.xml"),
 		),
-	}, nil
+	}
+	archiveProviders := []provider.ImportFn{
+		provider.NewImportFn(
+			"Data",
+			p.importDataFromArchive,
+			inputPath,
+		),
+	}
+
+	if provider.IsPathDir(inputPath) {
+		return directoryProviders, nil
+	} else {
+		return archiveProviders, nil
+	}
 }
 
