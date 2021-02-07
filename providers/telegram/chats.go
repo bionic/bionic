@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -208,7 +208,7 @@ func (p *telegram) importChats(inputPath string) error {
 		} `json:"chats"`
 	}
 
-	bytes, err := io.ReadAll(rc)
+	bytes, err := ioutil.ReadAll(rc)
 	if err != nil {
 		return err
 	}
