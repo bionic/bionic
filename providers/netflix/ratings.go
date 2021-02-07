@@ -21,7 +21,7 @@ type Rating struct {
 }
 
 func (r Rating) TableName() string {
-	return "netflix_ratings"
+	return tablePrefix + "ratings"
 }
 
 func (p *netflix) importRatings(inputPath string) error {

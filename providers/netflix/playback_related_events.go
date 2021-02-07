@@ -19,7 +19,7 @@ type PlaybackRelatedEvent struct {
 }
 
 func (r PlaybackRelatedEvent) TableName() string {
-	return "netflix_playback_related_events"
+	return tablePrefix + "playback_related_events"
 }
 
 type Playtrace struct {
@@ -32,7 +32,7 @@ type Playtrace struct {
 }
 
 func (r Playtrace) TableName() string {
-	return "netflix_playtraces"
+	return tablePrefix + "playtraces"
 }
 
 func (p *netflix) importPlaybackRelatedEvents(inputPath string) error {

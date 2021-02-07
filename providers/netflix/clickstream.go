@@ -19,7 +19,7 @@ type ClickstreamAction struct {
 }
 
 func (r ClickstreamAction) TableName() string {
-	return "netflix_clickstream"
+	return tablePrefix + "clickstream"
 }
 
 func (p *netflix) importClickstream(inputPath string) error {

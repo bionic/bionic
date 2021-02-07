@@ -22,7 +22,7 @@ type SearchHistoryItem struct {
 }
 
 func (r SearchHistoryItem) TableName() string {
-	return "netflix_search_history"
+	return tablePrefix + "search_history"
 }
 
 func (p *netflix) importSearchHistory(inputPath string) error {
