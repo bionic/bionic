@@ -38,6 +38,7 @@ func (p *health) Migrate() error {
 		&WorkoutRoute{},
 		&ActivitySummary{},
 		&MetadataEntry{},
+		&WorkoutRouteTrackPoint{},
 	)
 }
 

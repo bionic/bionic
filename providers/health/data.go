@@ -3,20 +3,20 @@ package health
 import (
 	"encoding/xml"
 	"github.com/BionicTeam/bionic/types"
+	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 	"io"
 	"os"
-	"time"
 )
 
 type Data struct {
 	gorm.Model
 	Locale            string
-	ExportDate        types.DateTime    `gorm:"unique"`
-	Me                MeRecord          `xml:"Me"`
-	Entries           []Entry           `gorm:"-"`
-	Workouts          []Workout         `gorm:"-"`
-	ActivitySummaries []ActivitySummary `gorm:"-"`
+	ExportDate        types.DateTime     `gorm:"unique"`
+	Me                MeRecord           `xml:"Me"`
+	Entries           []*Entry           `gorm:"-"`
+	Workouts          []*Workout         `gorm:"-"`
+	ActivitySummaries []*ActivitySummary `gorm:"-"`
 }
 
 func (Data) TableName() string {
@@ -131,7 +131,7 @@ type Workout struct {
 	Device                string          `xml:"device,attr"`
 	MetadataEntries       []MetadataEntry `xml:"MetadataEntry" gorm:"polymorphic:Parent"`
 	Events                []WorkoutEvent  `xml:"WorkoutEvent"`
-	Route                 WorkoutRoute    `xml:"WorkoutRoute"`
+	Route                 *WorkoutRoute   `xml:"WorkoutRoute"`
 }
 
 func (Workout) TableName() string {
@@ -175,6 +175,9 @@ type WorkoutRoute struct {
 	EndDate         types.DateTime  `xml:"endDate,attr"`
 	MetadataEntries []MetadataEntry `xml:"MetadataEntry" gorm:"polymorphic:Parent"`
 	FilePath        string
+	Time            types.DateTime
+	TrackName       string
+	TrackPoints     []WorkoutRouteTrackPoint
 }
 
 func (WorkoutRoute) TableName() string {
@@ -196,6 +199,26 @@ func (wr *WorkoutRoute) UnmarshalXML(decoder *xml.Decoder, start xml.StartElemen
 		FileReference struct {
 			Path string `xml:"path,attr"`
 		} `xml:"FileReference"`
+		Metadata struct {
+			Time types.DateTime `xml:"time"`
+		} `xml:"metadata"`
+		Track struct {
+			Name    string `xml:"name"`
+			Segment struct {
+				Point []struct {
+					Lon        float64        `xml:"lon,attr"`
+					Lat        float64        `xml:"lat,attr"`
+					Ele        float64        `xml:"ele"`
+					Time       types.DateTime `xml:"time"`
+					Extensions struct {
+						Speed  float64 `xml:"speed"`
+						Course float64 `xml:"course"`
+						HAcc   float64 `xml:"hAcc"`
+						VAcc   float64 `xml:"vAcc"`
+					} `xml:"extensions"`
+				} `xml:"trkpt"`
+			} `xml:"trkseg"`
+		} `xml:"trk"`
 	}
 
 	if err := decoder.DecodeElement(&data, &start); err != nil {
@@ -207,6 +230,73 @@ func (wr *WorkoutRoute) UnmarshalXML(decoder *xml.Decoder, start xml.StartElemen
 	wr.FilePath = data.FileReference.Path
 
 	return nil
+}
+
+type WorkoutRouteGPX WorkoutRoute
+
+func (wr *WorkoutRouteGPX) UnmarshalXML(decoder *xml.Decoder, start xml.StartElement) error {
+	type Alias WorkoutRoute
+
+	var data struct {
+		Alias
+		XMLName  xml.Name `xml:"gpx"`
+		Metadata struct {
+			Time types.DateTime `xml:"time"`
+		} `xml:"metadata"`
+		Track struct {
+			Name    string `xml:"name"`
+			Segment struct {
+				Points []struct {
+					WorkoutRouteTrackPoint
+					Extensions WorkoutRouteTrackPointExtensions `xml:"extensions"`
+				} `xml:"trkpt"`
+			} `xml:"trkseg"`
+		} `xml:"trk"`
+	}
+
+	if err := decoder.DecodeElement(&data, &start); err != nil {
+		return err
+	}
+
+	*wr = WorkoutRouteGPX(data.Alias)
+
+	wr.Time = data.Metadata.Time
+	wr.TrackName = data.Track.Name
+	for _, point := range data.Track.Segment.Points {
+		trackPoint := point.WorkoutRouteTrackPoint
+		trackPoint.WorkoutRouteTrackPointExtensions = point.Extensions
+		wr.TrackPoints = append(wr.TrackPoints, trackPoint)
+	}
+
+	return nil
+}
+
+type WorkoutRouteTrackPoint struct {
+	gorm.Model
+	WorkoutRouteID uint           `gorm:"uniqueIndex:health_track_points_key"`
+	Lon            float64        `xml:"lon,attr"`
+	Lat            float64        `xml:"lat,attr"`
+	Ele            float64        `xml:"ele"`
+	Time           types.DateTime `xml:"time" gorm:"uniqueIndex:health_track_points_key"`
+	WorkoutRouteTrackPointExtensions
+}
+
+func (WorkoutRouteTrackPoint) TableName() string {
+	return tablePrefix + "workout_route_track_points"
+}
+
+func (tp WorkoutRouteTrackPoint) Constraints() map[string]interface{} {
+	return map[string]interface{}{
+		"workout_route_id": tp.WorkoutRouteID,
+		"time":             tp.Time,
+	}
+}
+
+type WorkoutRouteTrackPointExtensions struct {
+	Speed  float64 `xml:"speed"`
+	Course float64 `xml:"course"`
+	HAcc   float64 `xml:"hAcc"`
+	VAcc   float64 `xml:"vAcc"`
 }
 
 type ActivitySummary struct {
@@ -301,6 +391,55 @@ func (p *health) importData(inputPath string) error {
 		}
 	}
 
+	var g errgroup.Group
+
+	for i := range data.Workouts {
+		workoutRoute := data.Workouts[i].Route
+
+		if workoutRoute != nil {
+			g.Go(func() error {
+				return p.parseWorkoutRoute(inputPath, workoutRoute)
+			})
+		}
+	}
+
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	for _, workout := range data.Workouts {
+		if workout.Route == nil {
+			continue
+		}
+
+		err = p.DB().
+			Find(workout.Route, workout.Route.Constraints()).
+			Error
+		if err != nil {
+			return err
+		}
+
+		for i := range workout.Route.TrackPoints {
+			trackPoint := &workout.Route.TrackPoints[i]
+			trackPoint.WorkoutRouteID = workout.Route.ID
+
+			err = p.DB().
+				FirstOrCreate(trackPoint, trackPoint.Constraints()).
+				Error
+			if err != nil {
+				return err
+			}
+		}
+
+		err = p.DB().
+			Session(&gorm.Session{CreateBatchSize: 100}).
+			FirstOrCreate(workout.Route, workout.Route.Constraints()).
+			Error
+		if err != nil {
+			return err
+		}
+	}
+
 	err = p.DB().
 		FirstOrCreate(&data, data.Constraints()).
 		Error
@@ -309,153 +448,4 @@ func (p *health) importData(inputPath string) error {
 	}
 
 	return nil
-}
-
-func (p *health) parseHealthData(data *Data, _ *xml.Decoder, start *xml.StartElement) error {
-	data.Locale = start.Attr[0].Value
-
-	return nil
-}
-
-func (p *health) parseExportDate(data *Data, _ *xml.Decoder, start *xml.StartElement) error {
-	if err := data.ExportDate.UnmarshalText([]byte(start.Attr[0].Value)); err != nil {
-		return err
-	}
-
-	err := p.DB().
-		Find(&data, data.Constraints()).
-		Error
-	if err != nil {
-		return err
-	}
-
-	data.Me.DataID = data.ID
-
-	return nil
-}
-
-func (p *health) parseMe(data *Data, decoder *xml.Decoder, start *xml.StartElement) error {
-	if err := decoder.DecodeElement(&data.Me, start); err != nil {
-		return err
-	}
-
-	return p.DB().
-		FirstOrCreate(&data.Me, data.Me.Constraints()).
-		Error
-}
-
-func (p *health) parseRecord(_ *Data, decoder *xml.Decoder, start *xml.StartElement) error {
-	var entry Entry
-
-	if err := decoder.DecodeElement(&entry, start); err != nil {
-		return err
-	}
-
-	err := p.DB().
-		Find(&entry, entry.Constraints()).
-		Error
-	if err != nil {
-		return err
-	}
-
-	for i := range entry.MetadataEntries {
-		metadataEntry := &entry.MetadataEntries[i]
-
-		metadataEntry.ParentID = entry.ID
-		metadataEntry.ParentType = entry.TableName()
-
-		err = p.DB().
-			FirstOrCreate(metadataEntry, metadataEntry.Constraints()).
-			Error
-		if err != nil {
-			return err
-		}
-	}
-
-	for i := range entry.BeatsPerMinutes {
-		beatsPerMinute := &entry.BeatsPerMinutes[i]
-
-		beatsPerMinute.EntryID = entry.ID
-
-		err = p.DB().
-			FirstOrCreate(beatsPerMinute, beatsPerMinute.Constraints()).
-			Error
-		if err != nil {
-			return err
-		}
-	}
-
-	return p.DB().
-		FirstOrCreate(&entry, entry.Constraints()).
-		Error
-}
-
-func (p *health) parseWorkout(_ *Data, decoder *xml.Decoder, start *xml.StartElement) error {
-	var workout Workout
-
-	if err := decoder.DecodeElement(&workout, start); err != nil {
-		return err
-	}
-
-	err := p.DB().
-		Find(&workout, workout.Constraints()).
-		Error
-	if err != nil {
-		return err
-	}
-
-	for i := range workout.MetadataEntries {
-		metadataEntry := &workout.MetadataEntries[i]
-
-		metadataEntry.ParentID = workout.ID
-		metadataEntry.ParentType = workout.TableName()
-
-		err = p.DB().
-			FirstOrCreate(metadataEntry, metadataEntry.Constraints()).
-			Error
-		if err != nil {
-			return err
-		}
-	}
-
-	for i := range workout.Events {
-		event := &workout.Events[i]
-
-		event.WorkoutID = workout.ID
-
-		err = p.DB().
-			FirstOrCreate(event, event.Constraints()).
-			Error
-		if err != nil {
-			return err
-		}
-	}
-
-	route := &workout.Route
-	if !time.Time(route.CreationDate).IsZero() {
-		route.WorkoutID = workout.ID
-
-		err = p.DB().
-			FirstOrCreate(route, route.Constraints()).
-			Error
-		if err != nil {
-			return err
-		}
-	}
-
-	return p.DB().
-		FirstOrCreate(&workout, workout.Constraints()).
-		Error
-}
-
-func (p *health) parseActivitySummary(_ *Data, decoder *xml.Decoder, start *xml.StartElement) error {
-	var activitySummary ActivitySummary
-
-	if err := decoder.DecodeElement(&activitySummary, start); err != nil {
-		return err
-	}
-
-	return p.DB().
-		FirstOrCreate(&activitySummary, activitySummary.Constraints()).
-		Error
 }
