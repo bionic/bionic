@@ -15,7 +15,7 @@
     </EXTENSION>
     <kind value="DIRECTORY" />
     <filePath value="$PROJECT_DIR$" />
-    <package value="github.com/shekhirin/bionic-cli" />
+    <package value="github.com/BionicTeam/bionic" />
     <directory value="$PROJECT_DIR$" />
     <option name="run" value="false" />
     <method v="2" />
