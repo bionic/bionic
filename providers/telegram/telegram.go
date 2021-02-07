@@ -33,7 +33,8 @@ func (p *telegram) Migrate() error {
 		&Message{},
 		&TextAttachment{},
 		&PollAnswer{},
-		&Member{})
+		&Member{},
+	)
 	if err != nil {
 		return err
 	}

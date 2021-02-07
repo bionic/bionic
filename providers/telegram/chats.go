@@ -23,9 +23,9 @@ func (Chat) TableName() string {
 
 type Message struct {
 	gorm.Model
-	ChatID int
-	Chat   Chat
-
+	ChatID                    int
+	Chat                      Chat
+	ID                        int    `json:"id" gorm:"unique"`
 	Action                    string `json:"action"`
 	Actor                     string `json:"actor"`
 	ActorID                   int    `json:"actor_id"`
@@ -46,11 +46,10 @@ type Message struct {
 	GameMessageID             int    `json:"game_message_id"`
 	GameTitle                 string `json:"game_title"`
 	Height                    int    `json:"height"`
-	ID                        int    `json:"id"`
 	Inviter                   string `json:"inviter"`
 	LiveLocationPeriodSeconds int    `json:"live_location_period_seconds"`
 	MediaType                 string `json:"media_type"`
-	MessageID                 int    `json:"message_id" gorm:"unique"`
+	MessageID                 int    `json:"message_id"`
 	MimeType                  string `json:"mime_type"`
 	Performer                 string `json:"performer"`
 	Photo                     string `json:"photo"`
@@ -103,16 +102,11 @@ func (m *Message) UnmarshalJSON(b []byte) error {
 			Longitude float64 `json:"longitude"`
 		} `json:"location_information"`
 		Poll struct {
-			Answers []struct {
-				Chosen bool   `json:"chosen"`
-				Text   string `json:"text"`
-				Voters int    `json:"voters"`
-			} `json:"answers"`
-			Closed      bool   `json:"closed"`
-			Question    string `json:"question"`
-			TotalVoters int    `json:"total_voters"`
+			Answers     []PollAnswer `json:"answers"`
+			Closed      bool         `json:"closed"`
+			Question    string       `json:"question"`
+			TotalVoters int          `json:"total_voters"`
 		} `json:"poll"`
-		Members []string `json:"members"`
 	}
 
 	if err := json.Unmarshal(b, &data); err != nil {
@@ -130,15 +124,7 @@ func (m *Message) UnmarshalJSON(b []byte) error {
 	m.PollClosed = data.Poll.Closed
 	m.PollQuestion = data.Poll.Question
 	m.PollTotalVoters = data.Poll.TotalVoters
-	for _, answer := range data.Poll.Answers {
-		m.PollAnswers = append(
-			m.PollAnswers,
-			PollAnswer{Chosen: answer.Chosen, Text: answer.Text, Voters: answer.Voters})
-
-	}
-	for _, member := range data.Members {
-		m.Members = append(m.Members, Member{Name: member})
-	}
+	m.PollAnswers = data.Poll.Answers
 
 	return nil
 }
@@ -169,6 +155,24 @@ func (PollAnswer) TableName() string {
 	return tablePrefix + "poll_answers"
 }
 
+func (a *PollAnswer) UnmarshalJSON(b []byte) error {
+	var data struct {
+		Chosen bool   `json:"chosen"`
+		Text   string `json:"text"`
+		Voters int    `json:"voters"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	a.Chosen = data.Chosen
+	a.Text = data.Text
+	a.Voters = data.Voters
+
+	return nil
+}
+
 type Member struct {
 	gorm.Model
 	MessageID int
@@ -178,6 +182,17 @@ type Member struct {
 
 func (Member) TableName() string {
 	return tablePrefix + "members"
+}
+
+func (m *Member) UnmarshalJSON(b []byte) error {
+	var name string
+	if err := json.Unmarshal(b, &name); err != nil {
+		return err
+	}
+
+	m.Name = name
+
+	return nil
 }
 
 func (p *telegram) importChats(inputPath string) error {
