@@ -50,11 +50,18 @@ func (p *health) importWorkoutRoutes(data *Data, files map[string]io.ReadCloser)
 			continue
 		}
 
+		err := p.DB().
+			Find(workout.Route, workout.Route.Constraints()).
+			Error
+		if err != nil {
+			return err
+		}
+
 		for i := range workout.Route.TrackPoints {
 			trackPoint := &workout.Route.TrackPoints[i]
 			trackPoint.WorkoutRouteID = workout.Route.ID
 
-			err := p.DB().
+			err = p.DB().
 				FirstOrCreate(trackPoint, trackPoint.Constraints()).
 				Error
 			if err != nil {
@@ -62,8 +69,9 @@ func (p *health) importWorkoutRoutes(data *Data, files map[string]io.ReadCloser)
 			}
 		}
 
-		err := p.DB().
+		err = p.DB().
 			Session(&gorm.Session{CreateBatchSize: 100}).
+			Omit("MetadataEntries", "TrackPoints").
 			Where(workout.Route.Constraints()).
 			Updates(workout.Route).
 			Error
