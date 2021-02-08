@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="import google" type="GoApplicationRunConfiguration" factoryName="Go Application">
-    <module name="bionic-cli" />
+    <module name="bionic" />
     <working_directory value="$PROJECT_DIR$" />
     <parameters value="import google test_data/google" />
     <EXTENSION ID="net.ashald.envfile">

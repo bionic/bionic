@@ -53,7 +53,7 @@ func TestHealth_Import(t *testing.T) {
 }
 
 func assertModels(t *testing.T, db *gorm.DB) {
-	var data []Data
+	var data []DataExport
 	require.NoError(t, db.Preload(clause.Associations).Find(&data).Error)
 	require.Len(t, data, 1)
 	assertData(t, data[0])
@@ -78,7 +78,7 @@ func assertModels(t *testing.T, db *gorm.DB) {
 	assertActivitySummary(t, activitySummaries[0])
 }
 
-func assertData(t *testing.T, data Data) {
+func assertData(t *testing.T, data DataExport) {
 	assert.Equal(t, "en_RU", data.Locale)
 	assert.EqualValues(t, time.Date(2021, 01, 11, 12, 06, 40, 0, tz0300), data.ExportDate)
 	assert.EqualValues(t, time.Date(2000, 07, 19, 0, 0, 0, 0, time.UTC), data.Me.DateOfBirth)

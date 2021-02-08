@@ -29,7 +29,7 @@ func (health) TablePrefix() string {
 
 func (p *health) Migrate() error {
 	return p.DB().AutoMigrate(
-		&Data{},
+		&DataExport{},
 		&MeRecord{},
 		&Device{},
 		&Entry{},
@@ -46,15 +46,15 @@ func (p *health) Migrate() error {
 func (p *health) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 	directoryProviders := []provider.ImportFn{
 		provider.NewImportFn(
-			"Data",
-			p.importDataFromDirectory,
+			"Data Export",
+			p.importDataExportFromDirectory,
 			path.Join(inputPath, "export.xml"),
 		),
 	}
 	archiveProviders := []provider.ImportFn{
 		provider.NewImportFn(
-			"Data",
-			p.importDataFromArchive,
+			"Data Export",
+			p.importDataExportFromArchive,
 			inputPath,
 		),
 	}
@@ -65,4 +65,3 @@ func (p *health) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 		return archiveProviders, nil
 	}
 }
-

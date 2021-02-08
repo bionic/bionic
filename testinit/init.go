@@ -1,3 +1,8 @@
+// Import this file in tests like this:
+// 		import _ "github.com/BionicTeam/bionic/testinit"
+// to switch directory to project root and navigate testdata easier.
+// Solution source: https://brandur.org/fragments/testing-go-project-root
+
 package testinit
 
 import (

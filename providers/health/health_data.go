@@ -2,8 +2,8 @@ package health
 
 import "encoding/xml"
 
-func (p *health) parseHealthData(data *Data, _ *xml.Decoder, start *xml.StartElement) error {
-	data.Locale = start.Attr[0].Value
+func (p *health) parseHealthData(export *DataExport, _ *xml.Decoder, start *xml.StartElement) error {
+	export.Locale = start.Attr[0].Value
 
 	return nil
 }
