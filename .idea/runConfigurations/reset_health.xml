@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="reset netflix" type="GoApplicationRunConfiguration" factoryName="Go Application">
+  <configuration default="false" name="reset health" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="bionic" />
     <working_directory value="$PROJECT_DIR$" />
-    <parameters value="reset netflix" />
+    <parameters value="reset health" />
     <EXTENSION ID="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />
       <option name="IS_SUBST" value="false" />
