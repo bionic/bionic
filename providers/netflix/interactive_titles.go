@@ -20,7 +20,7 @@ type InteractiveTitle struct {
 }
 
 func (r InteractiveTitle) TableName() string {
-	return "netflix_interactive_titles"
+	return tablePrefix + "interactive_titles"
 }
 
 func (p *netflix) importInteractiveTitles(inputPath string) error {

@@ -18,7 +18,7 @@ type IndicatedPreference struct {
 }
 
 func (r IndicatedPreference) TableName() string {
-	return "netflix_indicated_preferences"
+	return tablePrefix + "indicated_preferences"
 }
 
 func (p *netflix) importIndicatedPreferences(inputPath string) error {

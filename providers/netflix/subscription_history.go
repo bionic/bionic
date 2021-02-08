@@ -28,7 +28,7 @@ type SubscriptionHistoryItem struct {
 }
 
 func (r SubscriptionHistoryItem) TableName() string {
-	return "netflix_subscription_history"
+	return tablePrefix + "subscription_history"
 }
 
 func (p *netflix) importSubscriptionsHistory(inputPath string) error {
