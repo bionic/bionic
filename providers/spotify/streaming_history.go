@@ -6,12 +6,11 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"io/ioutil"
-	"log"
 	"path"
-	"strings"
+	"path/filepath"
 )
 
-const historyFilePrefix = "StreamingHistory"
+const historyFileMask = "StreamingHistory*.json"
 
 type StreamingHistoryItem struct {
 	gorm.Model
@@ -26,17 +25,13 @@ func (StreamingHistoryItem) TableName() string {
 }
 
 func (p *spotify) importStreamingHistory(inputPath string) error {
-	files, err := ioutil.ReadDir(inputPath)
+	files, err := filepath.Glob(path.Join(inputPath, historyFileMask))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	for _, f := range files {
-		if !strings.HasPrefix(f.Name(), historyFilePrefix) {
-			continue
-		}
-
-		bytes, err := ioutil.ReadFile(path.Join(inputPath, f.Name()))
+		bytes, err := ioutil.ReadFile(f)
 		if err != nil {
 			return err
 		}
