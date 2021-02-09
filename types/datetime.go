@@ -10,13 +10,8 @@ import (
 
 type DateTime time.Time
 
-func (dt *DateTime) UnmarshalJSON(b []byte) error {
-	var str string
-	if err := json.Unmarshal(b, &str); err != nil {
-		return err
-	}
-
-	t, err := dateparse.ParseStrict(str)
+func (dt *DateTime) UnmarshalText(text []byte) error {
+	t, err := dateparse.ParseStrict(string(text))
 	if err != nil {
 		return err
 	}
@@ -26,19 +21,21 @@ func (dt *DateTime) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func (dt *DateTime) UnmarshalJSON(b []byte) error {
+	var str string
+	if err := json.Unmarshal(b, &str); err != nil {
+		return err
+	}
+
+	return dt.UnmarshalText([]byte(str))
+}
+
 func (dt *DateTime) UnmarshalCSV(csv string) (err error) {
 	if csv == "" {
 		return nil
 	}
 
-	t, err := dateparse.ParseStrict(csv)
-	if err != nil {
-		return err
-	}
-
-	*dt = DateTime(t)
-
-	return nil
+	return dt.UnmarshalText([]byte(csv))
 }
 
 func (dt *DateTime) Scan(src interface{}) error {

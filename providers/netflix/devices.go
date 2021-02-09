@@ -25,7 +25,7 @@ type Device struct {
 }
 
 func (r Device) TableName() string {
-	return "netflix_devices"
+	return tablePrefix + "devices"
 }
 
 func (p *netflix) importDevices(inputPath string) error {

@@ -30,7 +30,7 @@ type BillingHistoryItem struct {
 }
 
 func (r BillingHistoryItem) TableName() string {
-	return "netflix_billing_history"
+	return tablePrefix + "billing_history"
 }
 
 func (p *netflix) importBillingHistory(inputPath string) error {

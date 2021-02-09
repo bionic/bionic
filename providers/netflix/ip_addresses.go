@@ -20,7 +20,7 @@ type IPAddress struct {
 }
 
 func (r IPAddress) TableName() string {
-	return "netflix_ip_addresses"
+	return tablePrefix + "ip_addresses"
 }
 
 func (p *netflix) importIPAddresses(inputPath string) error {

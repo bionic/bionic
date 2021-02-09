@@ -17,7 +17,7 @@ type MyListItem struct {
 }
 
 func (r MyListItem) TableName() string {
-	return "netflix_my_list"
+	return tablePrefix + "my_list"
 }
 
 func (p *netflix) importMyList(inputPath string) error {
