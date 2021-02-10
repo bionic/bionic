@@ -19,6 +19,7 @@ type Action struct {
 	Header        string         `json:"header" gorm:"uniqueIndex:google_activity_key"`
 	Title         string         `json:"title" gorm:"uniqueIndex:google_activity_key"`
 	TitleURL      string         `json:"titleUrl"`
+	Type          string         // Directory of the activity file. Such as "Google Analytics" and "Search".
 	Time          types.DateTime `json:"time" gorm:"uniqueIndex:google_activity_key"`
 	Products      []Product      `json:"products" gorm:"many2many:google_activity_products_assoc"`
 	LocationInfos []LocationInfo `json:"locationInfos"`
@@ -106,6 +107,7 @@ func (p *google) importActivityFromArchive(inputPath string) error {
 
 	for _, f := range r.File {
 		filename := filepath.Base(f.Name)
+		directory := filepath.Base(filepath.Dir(f.Name))
 		if filename != targetFilename {
 			continue
 		}
@@ -113,7 +115,7 @@ func (p *google) importActivityFromArchive(inputPath string) error {
 		if err != nil {
 			return err
 		}
-		if err := p.processActionsFile(rc); err != nil {
+		if err := p.processActionsFile(rc, directory); err != nil {
 			return err
 		}
 		if err := rc.Close(); err != nil {
@@ -139,7 +141,7 @@ func (p *google) importActivityFromDirectory(inputPath string) error {
 				return err
 			}
 
-			err = p.processActionsFile(rc)
+			err = p.processActionsFile(rc, filepath.Base(filepath.Dir(path)))
 			if err != nil {
 				return err
 			}
@@ -152,7 +154,7 @@ func (p *google) importActivityFromDirectory(inputPath string) error {
 	return nil
 }
 
-func (p *google) processActionsFile(rc io.ReadCloser) error {
+func (p *google) processActionsFile(rc io.ReadCloser, directory string) error {
 	decoder := json.NewDecoder(rc)
 	if _, err := decoder.Token(); err != nil {
 		return err
@@ -166,6 +168,8 @@ func (p *google) processActionsFile(rc io.ReadCloser) error {
 		if err != nil {
 			return err
 		}
+
+		action.Type = directory
 
 		batch = append(batch, action)
 		if len(batch) >= actionBatchSize {
