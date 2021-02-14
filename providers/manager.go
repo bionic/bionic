@@ -6,6 +6,7 @@ import (
 	"github.com/BionicTeam/bionic/database"
 	"github.com/BionicTeam/bionic/providers/google"
 	"github.com/BionicTeam/bionic/providers/health"
+	"github.com/BionicTeam/bionic/providers/instagram"
 	"github.com/BionicTeam/bionic/providers/netflix"
 	"github.com/BionicTeam/bionic/providers/provider"
 	"github.com/BionicTeam/bionic/providers/telegram"
@@ -28,6 +29,7 @@ func DefaultProviders(db *gorm.DB) []provider.Provider {
 		google.New(db),
 		telegram.New(db),
 		health.New(db),
+		instagram.New(db),
 	}
 }
 

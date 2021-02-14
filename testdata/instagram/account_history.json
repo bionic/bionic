@@ -1,0 +1,46 @@
+{
+  "login_history": [
+    {
+      "cookie_name": "*************************Oxb",
+      "ip_address": "34.207.117.203",
+      "language_code": "en",
+      "timestamp": "2020-10-31T20:37:21+00:00",
+      "user_agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36",
+      "device_id": "SOME-DEVICE-ID"
+    },
+    {
+      "cookie_name": "*************************VDE",
+      "ip_address": "95.161.223.248",
+      "language_code": "en",
+      "timestamp": "2020-10-31T20:01:39+00:00",
+      "user_agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36",
+      "device_id": ""
+    }
+  ],
+  "registration_info": {
+    "registration_username": "cool_nickname",
+    "ip_address": "91.122.198.16",
+    "registration_time": "1970-01-01T00:00:00+00:00",
+    "registration_email": "admin@gmail.com",
+    "registration_phone_number": "",
+    "device_name": ""
+  },
+  "logout_history": [
+    {
+      "cookie_name": "*************************FJi",
+      "ip_address": "145.255.233.150",
+      "language_code": "en",
+      "timestamp": "2019-04-03T20:55:30+00:00",
+      "user_agent": "Instagram 87.0.0.16.99 (iPhone9,3; iOS 12_1_4; en_RU; en-RU; scale=2.00; gamut=wide; 750x1334; 147928430) AppleWebKit/420+",
+      "device_id": "SOME-DEVICE-ID"
+    },
+    {
+      "cookie_name": "*************************14m",
+      "ip_address": "145.255.233.150",
+      "language_code": "en",
+      "timestamp": "2019-03-28T13:51:00+00:00",
+      "user_agent": "Instagram 52.0.0.8.83 (iPhone; CPU iPhone OS 11_4 like Mac OS X; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/605.1.15",
+      "device_id": null
+    }
+  ]
+}
