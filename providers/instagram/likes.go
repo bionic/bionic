@@ -19,9 +19,9 @@ const (
 type Like struct {
 	gorm.Model
 	Target    LikeTarget
-	Timestamp types.DateTime `gorm:"uniqueIndex:instagram_likes_key"`
-	UserID    uint           `gorm:"uniqueIndex:instagram_likes_key"`
+	UserID    uint `gorm:"uniqueIndex:instagram_likes_key"`
 	User      User
+	Timestamp types.DateTime `gorm:"uniqueIndex:instagram_likes_key"`
 }
 
 func (Like) TableName() string {
