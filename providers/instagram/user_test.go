@@ -14,24 +14,24 @@ func TestExtractUserMentionsFromText(t *testing.T) {
 
 	assert.Equal(t, []UserMention{
 		{
-			User: User{Username: "beginning"},
+			User:    User{Username: "beginning"},
 			FromIdx: 0,
-			ToIdx: 10,
+			ToIdx:   10,
 		},
 		{
-			User: User{Username: "with.dot"},
+			User:    User{Username: "with.dot"},
 			FromIdx: 21,
-			ToIdx: 30,
+			ToIdx:   30,
 		},
 		{
-			User: User{Username: "under_score"},
+			User:    User{Username: "under_score"},
 			FromIdx: 58,
-			ToIdx: 70,
+			ToIdx:   70,
 		},
 		{
-			User: User{Username: "mention"},
+			User:    User{Username: "mention"},
 			FromIdx: 127,
-			ToIdx: 135,
+			ToIdx:   135,
 		},
 	}, userMentions)
 }

@@ -14,27 +14,27 @@ func TestExtractHashtagMentionsFromText(t *testing.T) {
 		{
 			Hashtag: Hashtag{Text: "hashtag"},
 			FromIdx: 0,
-			ToIdx: 8,
+			ToIdx:   8,
 		},
 		{
 			Hashtag: Hashtag{Text: "hash"},
 			FromIdx: 9,
-			ToIdx: 14,
+			ToIdx:   14,
 		},
 		{
 			Hashtag: Hashtag{Text: "tag"},
 			FromIdx: 14,
-			ToIdx: 18,
+			ToIdx:   18,
 		},
 		{
 			Hashtag: Hashtag{Text: "hash"},
 			FromIdx: 29,
-			ToIdx: 34,
+			ToIdx:   34,
 		},
 		{
 			Hashtag: Hashtag{Text: "1tag"},
 			FromIdx: 39,
-			ToIdx: 44,
+			ToIdx:   44,
 		},
 	}, hashtagMentions)
 }
