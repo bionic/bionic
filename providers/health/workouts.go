@@ -31,7 +31,7 @@ func (Workout) TableName() string {
 	return tablePrefix + "workouts"
 }
 
-func (w Workout) Constraints() map[string]interface{} {
+func (w Workout) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"creation_date": w.CreationDate,
 	}
@@ -50,7 +50,7 @@ func (WorkoutEvent) TableName() string {
 	return tablePrefix + "workout_events"
 }
 
-func (e WorkoutEvent) Constraints() map[string]interface{} {
+func (e WorkoutEvent) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"workout_id": e.WorkoutID,
 		"type":       e.Type,
@@ -77,7 +77,7 @@ func (WorkoutRoute) TableName() string {
 	return tablePrefix + "workout_routes"
 }
 
-func (wr WorkoutRoute) Constraints() map[string]interface{} {
+func (wr WorkoutRoute) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"workout_id":    wr.WorkoutID,
 		"creation_date": wr.CreationDate,
@@ -113,7 +113,7 @@ func (p *health) parseWorkout(export *DataExport, decoder *xml.Decoder, start *x
 	}
 
 	err := p.DB().
-		Find(&workout, workout.Constraints()).
+		Find(&workout, workout.Conditions()).
 		Error
 	if err != nil {
 		return err
@@ -121,7 +121,7 @@ func (p *health) parseWorkout(export *DataExport, decoder *xml.Decoder, start *x
 
 	if workout.Device != nil {
 		err = p.DB().
-			FirstOrCreate(workout.Device, workout.Device.Constraints()).
+			FirstOrCreate(workout.Device, workout.Device.Conditions()).
 			Error
 		if err != nil {
 			return err
@@ -135,7 +135,7 @@ func (p *health) parseWorkout(export *DataExport, decoder *xml.Decoder, start *x
 		metadataEntry.ParentType = workout.TableName()
 
 		err = p.DB().
-			FirstOrCreate(metadataEntry, metadataEntry.Constraints()).
+			FirstOrCreate(metadataEntry, metadataEntry.Conditions()).
 			Error
 		if err != nil {
 			return err
@@ -148,7 +148,7 @@ func (p *health) parseWorkout(export *DataExport, decoder *xml.Decoder, start *x
 		event.WorkoutID = workout.ID
 
 		err = p.DB().
-			FirstOrCreate(event, event.Constraints()).
+			FirstOrCreate(event, event.Conditions()).
 			Error
 		if err != nil {
 			return err
@@ -163,6 +163,6 @@ func (p *health) parseWorkout(export *DataExport, decoder *xml.Decoder, start *x
 	export.Workouts = append(export.Workouts, &workout)
 
 	return p.DB().
-		FirstOrCreate(&workout, workout.Constraints()).
+		FirstOrCreate(&workout, workout.Conditions()).
 		Error
 }
