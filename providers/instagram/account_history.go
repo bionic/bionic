@@ -124,7 +124,7 @@ func (p *instagram) importAccountHistory(inputPath string) error {
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).
-		Create(&data.LoginHistory).
+		CreateInBatches(&data.LoginHistory, 100).
 		Error
 	if err != nil {
 		return err
@@ -134,7 +134,7 @@ func (p *instagram) importAccountHistory(inputPath string) error {
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).
-		Create(&data.LogoutHistory).
+		CreateInBatches(&data.LogoutHistory, 100).
 		Error
 	if err != nil {
 		return err
