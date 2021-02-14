@@ -76,7 +76,7 @@ func TestInstagram_importAccountHistory(t *testing.T) {
 	assert.Nil(t, registrationInfo[0].DeviceName)
 }
 
-func assertAccountHistoryItem(t *testing.T, expected AccountHistoryItem, actual AccountHistoryItem) {
+func assertAccountHistoryItem(t *testing.T, expected, actual AccountHistoryItem) {
 	assert.Equal(t, expected.Action, actual.Action)
 	assert.Equal(t, expected.CookieName, actual.CookieName)
 	assert.Equal(t, expected.IPAddress, actual.IPAddress)
