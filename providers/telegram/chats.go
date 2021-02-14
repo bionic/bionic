@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"encoding/json"
+	"github.com/BionicTeam/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"io/ioutil"
@@ -25,45 +26,45 @@ type Message struct {
 	gorm.Model
 	ChatID                    int
 	Chat                      Chat
-	ID                        int    `json:"id" gorm:"unique"`
-	Action                    string `json:"action"`
-	Actor                     string `json:"actor"`
-	ActorID                   int    `json:"actor_id"`
-	Address                   string `json:"address"`
-	Author                    string `json:"author"`
-	ContactVcard              string `json:"contact_vcard"`
-	Date                      string `json:"date"`
-	DiscardReason             string `json:"discard_reason"`
-	Duration                  int    `json:"duration"`
-	DurationSeconds           int    `json:"duration_seconds"`
-	Edited                    string `json:"edited"`
-	File                      string `json:"file"`
-	ForwardedFrom             string `json:"forwarded_from"`
-	From                      string `json:"from"`
-	FromID                    int    `json:"from_id"`
-	GameDescription           string `json:"game_description"`
-	GameLink                  string `json:"game_link"`
-	GameMessageID             int    `json:"game_message_id"`
-	GameTitle                 string `json:"game_title"`
-	Height                    int    `json:"height"`
-	Inviter                   string `json:"inviter"`
-	LiveLocationPeriodSeconds int    `json:"live_location_period_seconds"`
-	MediaType                 string `json:"media_type"`
-	MessageID                 int    `json:"message_id"`
-	MimeType                  string `json:"mime_type"`
-	Performer                 string `json:"performer"`
-	Photo                     string `json:"photo"`
-	PlaceName                 string `json:"place_name"`
-	ReplyToMessageID          int    `json:"reply_to_message_id"`
-	SavedFrom                 string `json:"saved_from"`
-	Score                     int    `json:"score"`
-	SelfDestructPeriodSeconds int    `json:"self_destruct_period_seconds"`
-	StickerEmoji              string `json:"sticker_emoji"`
-	Thumbnail                 string `json:"thumbnail"`
-	Title                     string `json:"title"`
-	Type                      string `json:"type"`
-	ViaBot                    string `json:"via_bot"`
-	Width                     int    `json:"width"`
+	ID                        int            `json:"id" gorm:"unique"`
+	Action                    string         `json:"action"`
+	Actor                     string         `json:"actor"`
+	ActorID                   int            `json:"actor_id"`
+	Address                   string         `json:"address"`
+	Author                    string         `json:"author"`
+	ContactVcard              string         `json:"contact_vcard"`
+	Date                      types.DateTime `json:"date"`
+	DiscardReason             string         `json:"discard_reason"`
+	Duration                  int            `json:"duration"`
+	DurationSeconds           int            `json:"duration_seconds"`
+	Edited                    string         `json:"edited"`
+	File                      string         `json:"file"`
+	ForwardedFrom             string         `json:"forwarded_from"`
+	From                      string         `json:"from"`
+	FromID                    int            `json:"from_id"`
+	GameDescription           string         `json:"game_description"`
+	GameLink                  string         `json:"game_link"`
+	GameMessageID             int            `json:"game_message_id"`
+	GameTitle                 string         `json:"game_title"`
+	Height                    int            `json:"height"`
+	Inviter                   string         `json:"inviter"`
+	LiveLocationPeriodSeconds int            `json:"live_location_period_seconds"`
+	MediaType                 string         `json:"media_type"`
+	MessageID                 int            `json:"message_id"`
+	MimeType                  string         `json:"mime_type"`
+	Performer                 string         `json:"performer"`
+	Photo                     string         `json:"photo"`
+	PlaceName                 string         `json:"place_name"`
+	ReplyToMessageID          int            `json:"reply_to_message_id"`
+	SavedFrom                 string         `json:"saved_from"`
+	Score                     int            `json:"score"`
+	SelfDestructPeriodSeconds int            `json:"self_destruct_period_seconds"`
+	StickerEmoji              string         `json:"sticker_emoji"`
+	Thumbnail                 string         `json:"thumbnail"`
+	Title                     string         `json:"title"`
+	Type                      string         `json:"type"`
+	ViaBot                    string         `json:"via_bot"`
+	Width                     int            `json:"width"`
 
 	Text            string // todo: links, mentions
 	TextAttachments []TextAttachment
