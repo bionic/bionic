@@ -1,6 +1,7 @@
 package instagram
 
 import (
+	"github.com/BionicTeam/bionic/providers/provider"
 	_ "github.com/BionicTeam/bionic/testinit"
 	"github.com/BionicTeam/bionic/types"
 	"github.com/stretchr/testify/assert"
@@ -13,19 +14,14 @@ import (
 
 var someDeviceID = "SOME-DEVICE-ID"
 
-func TestInstagram_Import(t *testing.T) {
+func TestInstagram_importAccountHistory(t *testing.T) {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	require.NoError(t, err)
 
-	provider := New(db)
-	require.NoError(t, provider.Migrate())
+	p := instagram{Database: provider.NewDatabase(db)}
+	require.NoError(t, p.Migrate())
 
-	importFns, err := provider.ImportFns("testdata/instagram")
-	require.NoError(t, err)
-
-	for _, importFn := range importFns {
-		require.NoError(t, importFn.Call(), importFn.Name())
-	}
+	require.NoError(t, p.importAccountHistory("testdata/instagram/account_history.json"))
 
 	var accountHistory []AccountHistoryItem
 	require.NoError(t, db.Find(&accountHistory).Error)
