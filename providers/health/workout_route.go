@@ -65,7 +65,7 @@ func (WorkoutRouteTrackPoint) TableName() string {
 	return tablePrefix + "workout_route_track_points"
 }
 
-func (tp WorkoutRouteTrackPoint) Constraints() map[string]interface{} {
+func (tp WorkoutRouteTrackPoint) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"workout_route_id": tp.WorkoutRouteID,
 		"time":             tp.Time,
@@ -122,7 +122,7 @@ func (p *health) importWorkoutRoutes(export *DataExport, files map[string]io.Rea
 
 		err := p.DB().
 			Select("ID").
-			Find(workout.Route, workout.Route.Constraints()).
+			Find(workout.Route, workout.Route.Conditions()).
 			Error
 		if err != nil {
 			return err
@@ -133,7 +133,7 @@ func (p *health) importWorkoutRoutes(export *DataExport, files map[string]io.Rea
 			trackPoint.WorkoutRouteID = workout.Route.ID
 
 			err = p.DB().
-				FirstOrCreate(trackPoint, trackPoint.Constraints()).
+				FirstOrCreate(trackPoint, trackPoint.Conditions()).
 				Error
 			if err != nil {
 				return err
@@ -143,7 +143,7 @@ func (p *health) importWorkoutRoutes(export *DataExport, files map[string]io.Rea
 		err = p.DB().
 			Session(&gorm.Session{CreateBatchSize: 100}).
 			Omit("MetadataEntries", "TrackPoints").
-			Where(workout.Route.Constraints()).
+			Where(workout.Route.Conditions()).
 			Updates(workout.Route).
 			Error
 		if err != nil {

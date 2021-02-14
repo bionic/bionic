@@ -24,7 +24,7 @@ func (DataExport) TableName() string {
 	return tablePrefix + "data_exports"
 }
 
-func (d DataExport) Constraints() map[string]interface{} {
+func (d DataExport) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"export_date": d.ExportDate,
 	}
@@ -71,7 +71,7 @@ func (p *health) importDataExport(r io.Reader) (*DataExport, error) {
 	}
 
 	err := p.DB().
-		FirstOrCreate(&data, data.Constraints()).
+		FirstOrCreate(&data, data.Conditions()).
 		Error
 	if err != nil {
 		return nil, err

@@ -24,7 +24,7 @@ func (ActivitySummary) TableName() string {
 	return tablePrefix + "activity_summaries"
 }
 
-func (as ActivitySummary) Constraints() map[string]interface{} {
+func (as ActivitySummary) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"date": as.Date,
 	}
@@ -38,6 +38,6 @@ func (p *health) parseActivitySummary(_ *DataExport, decoder *xml.Decoder, start
 	}
 
 	return p.DB().
-		FirstOrCreate(&activitySummary, activitySummary.Constraints()).
+		FirstOrCreate(&activitySummary, activitySummary.Conditions()).
 		Error
 }

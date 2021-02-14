@@ -26,7 +26,7 @@ func (Entry) TableName() string {
 	return tablePrefix + "entries"
 }
 
-func (e Entry) Constraints() map[string]interface{} {
+func (e Entry) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"type":          e.Type,
 		"creation_date": e.CreationDate,
@@ -44,7 +44,7 @@ func (BeatsPerMinute) TableName() string {
 	return tablePrefix + "beats_per_minutes"
 }
 
-func (bpm BeatsPerMinute) Constraints() map[string]interface{} {
+func (bpm BeatsPerMinute) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"entry_id": bpm.EntryID,
 		"time":     bpm.Time,
@@ -80,7 +80,7 @@ func (p *health) parseRecord(_ *DataExport, decoder *xml.Decoder, start *xml.Sta
 	}
 
 	err := p.DB().
-		Find(&entry, entry.Constraints()).
+		Find(&entry, entry.Conditions()).
 		Error
 	if err != nil {
 		return err
@@ -88,7 +88,7 @@ func (p *health) parseRecord(_ *DataExport, decoder *xml.Decoder, start *xml.Sta
 
 	if entry.Device != nil {
 		err = p.DB().
-			FirstOrCreate(entry.Device, entry.Device.Constraints()).
+			FirstOrCreate(entry.Device, entry.Device.Conditions()).
 			Error
 		if err != nil {
 			return err
@@ -102,7 +102,7 @@ func (p *health) parseRecord(_ *DataExport, decoder *xml.Decoder, start *xml.Sta
 		metadataEntry.ParentType = entry.TableName()
 
 		err = p.DB().
-			FirstOrCreate(metadataEntry, metadataEntry.Constraints()).
+			FirstOrCreate(metadataEntry, metadataEntry.Conditions()).
 			Error
 		if err != nil {
 			return err
@@ -115,7 +115,7 @@ func (p *health) parseRecord(_ *DataExport, decoder *xml.Decoder, start *xml.Sta
 		beatsPerMinute.EntryID = entry.ID
 
 		err = p.DB().
-			FirstOrCreate(beatsPerMinute, beatsPerMinute.Constraints()).
+			FirstOrCreate(beatsPerMinute, beatsPerMinute.Conditions()).
 			Error
 		if err != nil {
 			return err
@@ -123,6 +123,6 @@ func (p *health) parseRecord(_ *DataExport, decoder *xml.Decoder, start *xml.Sta
 	}
 
 	return p.DB().
-		FirstOrCreate(&entry, entry.Constraints()).
+		FirstOrCreate(&entry, entry.Conditions()).
 		Error
 }

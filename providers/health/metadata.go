@@ -14,7 +14,7 @@ func (MetadataEntry) TableName() string {
 	return tablePrefix + "metadata_entries"
 }
 
-func (e MetadataEntry) Constraints() map[string]interface{} {
+func (e MetadataEntry) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"parent_id":   e.ParentID,
 		"parent_type": e.ParentType,
