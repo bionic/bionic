@@ -18,7 +18,7 @@ const (
 type Comment struct {
 	gorm.Model
 	Target          CommentTarget `gorm:"uniqueIndex:instagram_comments_key"`
-	UserID          uint          `gorm:"uniqueIndex:instagram_comments_key"`
+	UserID          int          `gorm:"uniqueIndex:instagram_comments_key"`
 	User            User
 	Text            string           `gorm:"uniqueIndex:instagram_comments_key"`
 	UserMentions    []UserMention    `gorm:"polymorphic:Parent"`

@@ -24,9 +24,9 @@ func (u User) Conditions() map[string]interface{} {
 
 type UserMention struct {
 	gorm.Model
-	ParentID   uint   `gorm:"uniqueIndex:instagram_user_mentions_key"`
+	ParentID   int   `gorm:"uniqueIndex:instagram_user_mentions_key"`
 	ParentType string `gorm:"uniqueIndex:instagram_user_mentions_key"`
-	UserID     uint   `gorm:"uniqueIndex:instagram_user_mentions_key"`
+	UserID     int   `gorm:"uniqueIndex:instagram_user_mentions_key"`
 	User       User
 	FromIdx    int `gorm:"uniqueIndex:instagram_user_mentions_key"`
 	ToIdx      int `gorm:"uniqueIndex:instagram_user_mentions_key"`

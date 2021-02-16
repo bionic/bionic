@@ -28,9 +28,9 @@ func (h Hashtag) Conditions() map[string]interface{} {
 
 type HashtagMention struct {
 	gorm.Model
-	ParentID   uint   `gorm:"uniqueIndex:instagram_hashtag_mentions_key"`
+	ParentID   int   `gorm:"uniqueIndex:instagram_hashtag_mentions_key"`
 	ParentType string `gorm:"uniqueIndex:instagram_hashtag_mentions_key"`
-	HashtagID  uint   `gorm:"uniqueIndex:instagram_hashtag_mentions_key"`
+	HashtagID  int   `gorm:"uniqueIndex:instagram_hashtag_mentions_key"`
 	Hashtag    Hashtag
 	FromIdx    int `gorm:"uniqueIndex:instagram_hashtag_mentions_key"`
 	ToIdx      int `gorm:"uniqueIndex:instagram_hashtag_mentions_key"`
