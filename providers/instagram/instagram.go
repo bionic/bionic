@@ -32,9 +32,9 @@ func (p *instagram) Migrate() error {
 		&AccountHistoryItem{},
 		&RegistrationInfo{},
 		&User{},
-		&UserMention{},
+		&CommentUserMention{},
 		&Hashtag{},
-		&HashtagMention{},
+		&CommentHashtagMention{},
 		&Like{},
 		&Comment{},
 	)

@@ -23,27 +23,9 @@ func (u User) Conditions() map[string]interface{} {
 }
 
 type UserMention struct {
-	gorm.Model
-	ParentID   int   `gorm:"uniqueIndex:instagram_user_mentions_key"`
-	ParentType string `gorm:"uniqueIndex:instagram_user_mentions_key"`
-	UserID     int   `gorm:"uniqueIndex:instagram_user_mentions_key"`
-	User       User
-	FromIdx    int `gorm:"uniqueIndex:instagram_user_mentions_key"`
-	ToIdx      int `gorm:"uniqueIndex:instagram_user_mentions_key"`
-}
-
-func (UserMention) TableName() string {
-	return tablePrefix + "user_mentions"
-}
-
-func (um UserMention) Conditions() map[string]interface{} {
-	return map[string]interface{}{
-		"parent_id":   um.ParentID,
-		"parent_type": um.ParentType,
-		"user_id":     um.User.ID,
-		"from_idx":    um.FromIdx,
-		"to_idx":      um.ToIdx,
-	}
+	Username string
+	FromIdx  int
+	ToIdx    int
 }
 
 func extractUserMentionsFromText(text string) []UserMention {
@@ -57,11 +39,9 @@ func extractUserMentionsFromText(text string) []UserMention {
 		}
 
 		userMentions = append(userMentions, UserMention{
-			User: User{
-				Username: text[bounds[4]:bounds[5]],
-			},
-			FromIdx: bounds[2],
-			ToIdx:   bounds[3],
+			Username: text[bounds[4]:bounds[5]],
+			FromIdx:  bounds[2],
+			ToIdx:    bounds[3],
 		})
 	}
 

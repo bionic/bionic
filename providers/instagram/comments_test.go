@@ -37,9 +37,8 @@ func TestInstagram_importComments(t *testing.T) {
 			Username: "shekhirin",
 		},
 		Text: "@shekhirin nice #look dude. You look almost like @sevazhidkov",
-		UserMentions: []UserMention{
+		UserMentions: []CommentUserMention{
 			{
-				ParentType: Comment{}.TableName(),
 				User: User{
 					Username: "shekhirin",
 				},
@@ -47,7 +46,6 @@ func TestInstagram_importComments(t *testing.T) {
 				ToIdx:   10,
 			},
 			{
-				ParentType: Comment{}.TableName(),
 				User: User{
 					Username: "sevazhidkov",
 				},
@@ -55,9 +53,8 @@ func TestInstagram_importComments(t *testing.T) {
 				ToIdx:   61,
 			},
 		},
-		HashtagMentions: []HashtagMention{
+		HashtagMentions: []CommentHashtagMention{
 			{
-				ParentType: Comment{}.TableName(),
 				Hashtag: Hashtag{
 					Text: "look",
 				},
@@ -77,26 +74,24 @@ func assertComment(t *testing.T, expected, actual Comment) {
 
 	require.Equal(t, len(expected.UserMentions), len(actual.UserMentions))
 	for i := range expected.UserMentions {
-		assertUserMention(t, expected.UserMentions[i], actual.UserMentions[i])
+		assertCommentUserMention(t, expected.UserMentions[i], actual.UserMentions[i])
 	}
 
 	require.Equal(t, len(expected.HashtagMentions), len(actual.HashtagMentions))
 	for i := range expected.HashtagMentions {
-		assertHashtagMention(t, expected.HashtagMentions[i], actual.HashtagMentions[i])
+		assertCommentHashtagMention(t, expected.HashtagMentions[i], actual.HashtagMentions[i])
 	}
 
 	assert.Equal(t, expected.Timestamp, actual.Timestamp)
 }
 
-func assertUserMention(t *testing.T, expected, actual UserMention) {
-	assert.Equal(t, expected.ParentType, actual.ParentType)
+func assertCommentUserMention(t *testing.T, expected, actual CommentUserMention) {
 	assert.Equal(t, expected.User.Username, actual.User.Username)
 	assert.Equal(t, expected.FromIdx, actual.FromIdx)
 	assert.Equal(t, expected.ToIdx, actual.ToIdx)
 }
 
-func assertHashtagMention(t *testing.T, expected, actual HashtagMention) {
-	assert.Equal(t, expected.ParentType, actual.ParentType)
+func assertCommentHashtagMention(t *testing.T, expected, actual CommentHashtagMention) {
 	assert.Equal(t, expected.Hashtag.Text, actual.Hashtag.Text)
 	assert.Equal(t, expected.FromIdx, actual.FromIdx)
 	assert.Equal(t, expected.ToIdx, actual.ToIdx)

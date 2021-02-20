@@ -27,27 +27,9 @@ func (h Hashtag) Conditions() map[string]interface{} {
 }
 
 type HashtagMention struct {
-	gorm.Model
-	ParentID   int   `gorm:"uniqueIndex:instagram_hashtag_mentions_key"`
-	ParentType string `gorm:"uniqueIndex:instagram_hashtag_mentions_key"`
-	HashtagID  int   `gorm:"uniqueIndex:instagram_hashtag_mentions_key"`
-	Hashtag    Hashtag
-	FromIdx    int `gorm:"uniqueIndex:instagram_hashtag_mentions_key"`
-	ToIdx      int `gorm:"uniqueIndex:instagram_hashtag_mentions_key"`
-}
-
-func (HashtagMention) TableName() string {
-	return tablePrefix + "hashtag_mentions"
-}
-
-func (hm HashtagMention) Conditions() map[string]interface{} {
-	return map[string]interface{}{
-		"parent_id":   hm.ParentID,
-		"parent_type": hm.ParentType,
-		"hashtag_id":  hm.Hashtag.ID,
-		"from_idx":    hm.FromIdx,
-		"to_idx":      hm.ToIdx,
-	}
+	Hashtag string
+	FromIdx int
+	ToIdx   int
 }
 
 func extractHashtagMentionsFromText(text string) []HashtagMention {
@@ -61,9 +43,7 @@ func extractHashtagMentionsFromText(text string) []HashtagMention {
 		}
 
 		hashtagMentions = append(hashtagMentions, HashtagMention{
-			Hashtag: Hashtag{
-				Text: text[bounds[2]:bounds[3]],
-			},
+			Hashtag: text[bounds[2]:bounds[3]],
 			FromIdx: bounds[0],
 			ToIdx:   bounds[1],
 		})
