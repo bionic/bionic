@@ -17,9 +17,9 @@ type Entry struct {
 	EndDate         types.DateTime `xml:"endDate,attr"`
 	Value           string         `xml:"value,attr"`
 	DeviceID        *int
-	Device          *Device          `xml:"device,attr"`
-	MetadataEntries []MetadataEntry  `xml:"MetadataEntry" gorm:"polymorphic:Parent"`
-	BeatsPerMinutes []BeatsPerMinute `xml:"HeartRateVariabilityMetadataList"`
+	Device          *Device             `xml:"device,attr"`
+	MetadataEntries []EntryMetadataItem `xml:"MetadataEntry"`
+	BeatsPerMinutes []BeatsPerMinute    `xml:"HeartRateVariabilityMetadataList"`
 }
 
 func (Entry) TableName() string {
@@ -30,6 +30,24 @@ func (e Entry) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"type":          e.Type,
 		"creation_date": e.CreationDate,
+	}
+}
+
+type EntryMetadataItem struct {
+	gorm.Model
+	EntryID uint   `gorm:"uniqueIndex:health_entry_metadata_key"`
+	Key     string `xml:"key,attr" gorm:"uniqueIndex:health_entry_metadata_key"`
+	Value   string `xml:"value,attr"`
+}
+
+func (EntryMetadataItem) TableName() string {
+	return tablePrefix + "entry_metadata"
+}
+
+func (m EntryMetadataItem) Conditions() map[string]interface{} {
+	return map[string]interface{}{
+		"entry_id": m.EntryID,
+		"key":      m.Key,
 	}
 }
 
@@ -98,8 +116,7 @@ func (p *health) parseRecord(_ *DataExport, decoder *xml.Decoder, start *xml.Sta
 	for i := range entry.MetadataEntries {
 		metadataEntry := &entry.MetadataEntries[i]
 
-		metadataEntry.ParentID = entry.ID
-		metadataEntry.ParentType = entry.TableName()
+		metadataEntry.EntryID = entry.ID
 
 		err = p.DB().
 			FirstOrCreate(metadataEntry, metadataEntry.Conditions()).
