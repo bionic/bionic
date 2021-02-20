@@ -4,7 +4,7 @@ import (
 	"archive/zip"
 	"encoding/xml"
 	"errors"
-	"github.com/BionicTeam/bionic/types"
+	"github.com/bionic-dev/bionic/types"
 	"gorm.io/gorm"
 	"io"
 	"os"

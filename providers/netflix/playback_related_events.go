@@ -1,7 +1,7 @@
 package netflix
 
 import (
-	"github.com/BionicTeam/bionic/types"
+	"github.com/bionic-dev/bionic/types"
 	"github.com/gocarina/gocsv"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"

@@ -1,7 +1,7 @@
 package health
 
 import (
-	_ "github.com/BionicTeam/bionic/testinit"
+	_ "github.com/bionic-dev/bionic/testinit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/sqlite"
