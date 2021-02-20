@@ -21,10 +21,10 @@ type Workout struct {
 	StartDate             types.DateTime `xml:"startDate,attr"`
 	EndDate               types.DateTime `xml:"endDate,attr"`
 	DeviceID              *int
-	Device                *Device         `xml:"device,attr"`
-	MetadataEntries       []MetadataEntry `xml:"MetadataEntry" gorm:"polymorphic:Parent"`
-	Events                []WorkoutEvent  `xml:"WorkoutEvent"`
-	Route                 *WorkoutRoute   `xml:"WorkoutRoute"`
+	Device                *Device               `xml:"device,attr"`
+	MetadataEntries       []WorkoutMetadataItem `xml:"MetadataEntry"`
+	Events                []WorkoutEvent        `xml:"WorkoutEvent"`
+	Route                 *WorkoutRoute         `xml:"WorkoutRoute"`
 }
 
 func (Workout) TableName() string {
@@ -34,6 +34,24 @@ func (Workout) TableName() string {
 func (w Workout) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"creation_date": w.CreationDate,
+	}
+}
+
+type WorkoutMetadataItem struct {
+	gorm.Model
+	WorkoutID uint   `gorm:"uniqueIndex:health_workout_metadata_key"`
+	Key       string `xml:"key,attr" gorm:"uniqueIndex:health_workout_metadata_key"`
+	Value     string `xml:"value,attr"`
+}
+
+func (WorkoutMetadataItem) TableName() string {
+	return tablePrefix + "workout_metadata"
+}
+
+func (m WorkoutMetadataItem) Conditions() map[string]interface{} {
+	return map[string]interface{}{
+		"workout_id": m.WorkoutID,
+		"key":        m.Key,
 	}
 }
 
@@ -60,13 +78,13 @@ func (e WorkoutEvent) Conditions() map[string]interface{} {
 
 type WorkoutRoute struct {
 	gorm.Model
-	WorkoutID       uint            `gorm:"uniqueIndex:health_workout_routes_key"`
-	SourceName      string          `xml:"sourceName,attr"`
-	SourceVersion   string          `xml:"sourceVersion,attr"`
-	CreationDate    types.DateTime  `xml:"creationDate,attr" gorm:"uniqueIndex:health_workout_routes_key"`
-	StartDate       types.DateTime  `xml:"startDate,attr"`
-	EndDate         types.DateTime  `xml:"endDate,attr"`
-	MetadataEntries []MetadataEntry `xml:"MetadataEntry" gorm:"polymorphic:Parent"`
+	WorkoutID       uint                       `gorm:"uniqueIndex:health_workout_routes_key"`
+	SourceName      string                     `xml:"sourceName,attr"`
+	SourceVersion   string                     `xml:"sourceVersion,attr"`
+	CreationDate    types.DateTime             `xml:"creationDate,attr" gorm:"uniqueIndex:health_workout_routes_key"`
+	StartDate       types.DateTime             `xml:"startDate,attr"`
+	EndDate         types.DateTime             `xml:"endDate,attr"`
+	MetadataEntries []WorkoutRouteMetadataItem `xml:"MetadataEntry"`
 	FilePath        string
 	Time            types.DateTime
 	TrackName       string
@@ -81,6 +99,24 @@ func (wr WorkoutRoute) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"workout_id":    wr.WorkoutID,
 		"creation_date": wr.CreationDate,
+	}
+}
+
+type WorkoutRouteMetadataItem struct {
+	gorm.Model
+	WorkoutRouteID uint   `gorm:"uniqueIndex:health_workout_route_metadata_key"`
+	Key            string `xml:"key,attr" gorm:"uniqueIndex:health_workout_route_metadata_key"`
+	Value          string `xml:"value,attr"`
+}
+
+func (WorkoutRouteMetadataItem) TableName() string {
+	return tablePrefix + "workout_route_metadata"
+}
+
+func (m WorkoutRouteMetadataItem) Conditions() map[string]interface{} {
+	return map[string]interface{}{
+		"workout_route_id": m.WorkoutRouteID,
+		"key":              m.Key,
 	}
 }
 
@@ -131,8 +167,7 @@ func (p *health) parseWorkout(export *DataExport, decoder *xml.Decoder, start *x
 	for i := range workout.MetadataEntries {
 		metadataEntry := &workout.MetadataEntries[i]
 
-		metadataEntry.ParentID = workout.ID
-		metadataEntry.ParentType = workout.TableName()
+		metadataEntry.WorkoutID = workout.ID
 
 		err = p.DB().
 			FirstOrCreate(metadataEntry, metadataEntry.Conditions()).

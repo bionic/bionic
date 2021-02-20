@@ -33,12 +33,14 @@ func (p *health) Migrate() error {
 		&MeRecord{},
 		&Device{},
 		&Entry{},
+		&EntryMetadataItem{},
 		&BeatsPerMinute{},
 		&Workout{},
+		&WorkoutMetadataItem{},
 		&WorkoutEvent{},
 		&WorkoutRoute{},
+		&WorkoutRouteMetadataItem{},
 		&ActivitySummary{},
-		&MetadataEntry{},
 		&WorkoutRouteTrackPoint{},
 	)
 }

@@ -98,9 +98,9 @@ func assertDevice(t *testing.T, device *Device) {
 	assert.Equal(t, "5.1.2", device.Software)
 }
 
-func assertMetadataEntry(t *testing.T, entry MetadataEntry) {
-	assert.Equal(t, "HKMetadataKeySyncVersion", entry.Key)
-	assert.Equal(t, "2", entry.Value)
+func assertMetadataEntry(t *testing.T, key, value string) {
+	assert.Equal(t, "HKMetadataKeySyncVersion", key)
+	assert.Equal(t, "2", value)
 }
 
 func assertEntry(t *testing.T, entry Entry) {
@@ -114,7 +114,7 @@ func assertEntry(t *testing.T, entry Entry) {
 	assert.Equal(t, "35.7133", entry.Value)
 	assertDevice(t, entry.Device)
 	require.Len(t, entry.MetadataEntries, 1)
-	assertMetadataEntry(t, entry.MetadataEntries[0])
+	assertMetadataEntry(t, entry.MetadataEntries[0].Key, entry.MetadataEntries[0].Value)
 	require.Len(t, entry.BeatsPerMinutes, 1)
 	assert.Equal(t, 70, entry.BeatsPerMinutes[0].BPM)
 	assert.Equal(t, "4:56:15,46 PM", entry.BeatsPerMinutes[0].Time)
@@ -135,7 +135,7 @@ func assertWorkout(t *testing.T, workout Workout) {
 	assert.EqualValues(t, endDate, workout.EndDate)
 	assertDevice(t, workout.Device)
 	require.Len(t, workout.MetadataEntries, 1)
-	assertMetadataEntry(t, workout.MetadataEntries[0])
+	assertMetadataEntry(t, workout.MetadataEntries[0].Key, workout.MetadataEntries[0].Value)
 	require.Len(t, workout.Events, 1)
 	assert.Equal(t, "HKWorkoutEventTypeSegment", workout.Events[0].Type)
 	assert.EqualValues(t, time.Date(2019, 01, 22, 20, 20, 16, 0, tz0300), workout.Events[0].Date)
@@ -153,7 +153,7 @@ func assertWorkoutRoute(t *testing.T, route *WorkoutRoute) {
 	assert.EqualValues(t, startDate, route.StartDate)
 	assert.EqualValues(t, endDate, route.EndDate)
 	require.Len(t, route.MetadataEntries, 1)
-	assertMetadataEntry(t, route.MetadataEntries[0])
+	assertMetadataEntry(t, route.MetadataEntries[0].Key, route.MetadataEntries[0].Value)
 	assert.Equal(t, "/workout-routes/route_2019-01-22_8.32pm.gpx", route.FilePath)
 	assert.EqualValues(t, time.Date(2021, 01, 11, 9, 07, 01, 0, time.UTC), route.Time)
 	assert.Equal(t, "Route 2019-01-22 8:32pm", route.TrackName)
