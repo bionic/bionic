@@ -118,6 +118,9 @@ func (p *instagram) importMedia(inputPath string) error {
 			}).
 			Create(data.Profile).
 			Error
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := p.insertMedia(data.Stories, MediaStory); err != nil {
