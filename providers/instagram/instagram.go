@@ -37,6 +37,10 @@ func (p *instagram) Migrate() error {
 		&CommentHashtagMention{},
 		&Like{},
 		&Comment{},
+		&MediaItem{},
+		&MediaUserMention{},
+		&MediaHashtagMention{},
+		&ProfilePhoto{},
 	)
 	if err != nil {
 		return err
@@ -71,6 +75,13 @@ func (p *instagram) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 			return provider.NewImportFn(
 				"Likes",
 				p.importLikes,
+				path,
+			)
+		},
+		"media.json": func(path string) provider.ImportFn {
+			return provider.NewImportFn(
+				"Media",
+				p.importMedia,
 				path,
 			)
 		},

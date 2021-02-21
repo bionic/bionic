@@ -1,6 +1,7 @@
 package instagram
 
 import (
+	"github.com/bionic-dev/bionic/pkg/ptr"
 	"github.com/bionic-dev/bionic/providers/provider"
 	_ "github.com/bionic-dev/bionic/testinit"
 	"github.com/bionic-dev/bionic/types"
@@ -11,8 +12,6 @@ import (
 	"testing"
 	"time"
 )
-
-var someDeviceID = "SOME-DEVICE-ID"
 
 func TestInstagram_importAccountHistory(t *testing.T) {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
@@ -34,7 +33,7 @@ func TestInstagram_importAccountHistory(t *testing.T) {
 		LanguageCode: "en",
 		Timestamp:    types.DateTime(time.Date(2020, 10, 31, 20, 37, 21, 0, time.UTC)),
 		UserAgent:    "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36",
-		DeviceID:     &someDeviceID,
+		DeviceID:     ptr.String("SOME-DEVICE-ID"),
 	}, accountHistory[0])
 	assertAccountHistoryItem(t, AccountHistoryItem{
 		Action:       AccountHistoryLogin,
@@ -52,7 +51,7 @@ func TestInstagram_importAccountHistory(t *testing.T) {
 		LanguageCode: "en",
 		Timestamp:    types.DateTime(time.Date(2019, 4, 3, 20, 55, 30, 0, time.UTC)),
 		UserAgent:    "Instagram 87.0.0.16.99 (iPhone9,3; iOS 12_1_4; en_RU; en-RU; scale=2.00; gamut=wide; 750x1334; 147928430) AppleWebKit/420+",
-		DeviceID:     &someDeviceID,
+		DeviceID:     ptr.String("SOME-DEVICE-ID"),
 	}, accountHistory[2])
 	assertAccountHistoryItem(t, AccountHistoryItem{
 		Action:       AccountHistoryLogout,
