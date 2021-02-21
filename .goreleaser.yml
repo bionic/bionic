@@ -20,8 +20,8 @@ builds:
 
 brews:
   - tap:
-      owner: shekhirin
-      name: homebrew-bionic-cli
+      owner: bionic-dev
+      name: homebrew-bionic
       token: "{{ .Env.API_GITHUB_TOKEN }}"
     folder: Formula
-    homepage: https://github.com/shekhirin/bionic-cli
+    homepage: https://github.com/bionic-dev/bionic
