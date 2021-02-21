@@ -1,24 +1,37 @@
 package twitter
 
 import (
-	"github.com/shekhirin/bionic-cli/providers/provider"
+	"encoding/json"
+	"github.com/bionic-dev/bionic/providers/provider"
 	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
+	"io/ioutil"
 	"path"
+	"strings"
 )
 
+const name = "twitter"
+const tablePrefix = "twitter_"
+
 type twitter struct {
-	db *gorm.DB
+	provider.Database
 }
 
 func New(db *gorm.DB) provider.Provider {
 	return &twitter{
-		db: db,
+		Database: provider.NewDatabase(db),
 	}
 }
 
-func (p *twitter) Models() []schema.Tabler {
-	return []schema.Tabler{
+func (twitter) Name() string {
+	return name
+}
+
+func (twitter) TablePrefix() string {
+	return tablePrefix
+}
+
+func (p *twitter) Migrate() error {
+	return p.DB().AutoMigrate(
 		&Like{},
 		&URL{},
 		&Conversation{},
@@ -30,23 +43,80 @@ func (p *twitter) Models() []schema.Tabler {
 		&TweetMedia{},
 		&TweetUserMention{},
 		&TweetURL{},
-	}
+		&PersonalizationRecord{},
+		&LanguageRecord{},
+		&GenderInfo{},
+		&InterestRecord{},
+		&AudienceAndAdvertiserRecord{},
+		&Advertiser{},
+		&Show{},
+		&Location{},
+		&InferredAgeInfoRecord{},
+		&AgeInfoRecord{},
+		&AdImpression{},
+		&DeviceInfo{},
+		&TargetingCriterion{},
+		&Account{},
+		&ScreenNameChange{},
+		&EmailAddressChange{},
+		&LoginIP{},
+	)
 }
 
-func (p *twitter) Process(inputPath string) error {
+func (p *twitter) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 	if !provider.IsPathDir(inputPath) {
-		return provider.ErrInputPathShouldBeDirectory
+		return nil, provider.ErrInputPathShouldBeDirectory
 	}
 
-	if err := p.processLikes(path.Join(inputPath, "data", "like.js")); err != nil {
+	return []provider.ImportFn{
+		provider.NewImportFn(
+			"Likes",
+			p.importLikes,
+			path.Join(inputPath, "data", "like.js"),
+		),
+		provider.NewImportFn(
+			"Direct Messages",
+			p.importDirectMessages,
+			path.Join(inputPath, "data", "direct-messages.js"),
+		),
+		provider.NewImportFn(
+			"Tweets",
+			p.importTweets,
+			path.Join(inputPath, "data", "tweet.js"),
+		),
+		provider.NewImportFn(
+			"Personalization",
+			p.importPersonalization,
+			path.Join(inputPath, "data", "personalization.js"),
+		),
+		provider.NewImportFn(
+			"Age Info",
+			p.importAgeInfo,
+			path.Join(inputPath, "data", "ageinfo.js"),
+		),
+		provider.NewImportFn(
+			"Ad Impressions",
+			p.importAdImpressions,
+			path.Join(inputPath, "data", "ad-impressions.js"),
+		),
+		provider.NewImportFn(
+			"Account",
+			p.importAccount,
+			path.Join(inputPath, "data"),
+		),
+	}, nil
+}
+
+func readJSON(path string, prefix string, dst interface{}) error {
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
 		return err
 	}
 
-	if err := p.processDirectMessages(path.Join(inputPath, "data", "direct-messages.js")); err != nil {
-		return err
-	}
+	data := string(bytes)
+	data = strings.TrimPrefix(data, prefix)
 
-	if err := p.processTweets(path.Join(inputPath, "data", "tweet.js")); err != nil {
+	if err := json.Unmarshal([]byte(data), &dst); err != nil {
 		return err
 	}
 

@@ -2,35 +2,61 @@ package twitter
 
 import (
 	"encoding/json"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"io/ioutil"
-	"strings"
 )
 
-func (p *twitter) processLikes(inputPath string) error {
-	var fileData []struct {
-		Like Like `json:"like"`
+type Like struct {
+	gorm.Model
+	TweetID     int `json:"tweetId,string" gorm:"unique"`
+	Tweet       Tweet
+	FullText    string `json:"fullText"`
+	ExpandedURL string `json:"expandedUrl"`
+}
+
+func (Like) TableName() string {
+	return tablePrefix + "likes"
+}
+
+func (l *Like) UnmarshalJSON(b []byte) error {
+	type alias Like
+
+	var data struct {
+		Like alias `json:"like"`
 	}
 
-	bytes, err := ioutil.ReadFile(inputPath)
-	if err != nil {
+	if err := json.Unmarshal(b, &data); err != nil {
 		return err
 	}
 
-	data := string(bytes)
-	data = strings.TrimPrefix(data, "window.YTD.like.part0 = ")
+	*l = Like(data.Like)
 
-	if err := json.Unmarshal([]byte(data), &fileData); err != nil {
-		return err
-	}
+	return nil
+}
 
+func (p *twitter) importLikes(inputPath string) error {
 	var likes []Like
 
-	for _, entry := range fileData {
-		likes = append(likes, entry.Like)
+	if err := readJSON(
+		inputPath,
+		"window.YTD.like.part0 = ",
+		&likes,
+	); err != nil {
+		return err
 	}
 
-	err = p.db.
+	for i, like := range likes {
+		err := p.DB().
+			FirstOrCreate(&likes[i].Tweet, map[string]interface{}{
+				"id": like.TweetID,
+			}).
+			Error
+		if err != nil {
+			return err
+		}
+	}
+
+	err := p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

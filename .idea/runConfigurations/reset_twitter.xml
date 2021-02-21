@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="reset twitter" type="GoApplicationRunConfiguration" factoryName="Go Application">
-    <module name="bionic-cli" />
+    <module name="bionic" />
     <working_directory value="$PROJECT_DIR$" />
     <parameters value="reset twitter" />
     <EXTENSION ID="net.ashald.envfile">
@@ -15,7 +15,7 @@
     </EXTENSION>
     <kind value="DIRECTORY" />
     <filePath value="$PROJECT_DIR$/main.go" />
-    <package value="github.com/shekhirin/bionic-cli" />
+    <package value="github.com/BionicTeam/bionic" />
     <directory value="$PROJECT_DIR$" />
     <method v="2" />
   </configuration>

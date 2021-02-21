@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"os"
@@ -11,7 +10,7 @@ import (
 var dbPath string
 
 var rootCmd = &cobra.Command{
-	Use:   "bionic-cli",
+	Use:   "bionic",
 	Short: "A brief description of your application",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
@@ -23,7 +22,6 @@ to quickly create a Cobra application.`,
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
 }

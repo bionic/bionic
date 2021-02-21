@@ -1,8 +1,8 @@
 package netflix
 
 import (
+	"github.com/bionic-dev/bionic/types"
 	"github.com/gocarina/gocsv"
-	"github.com/shekhirin/bionic-cli/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"os"
@@ -10,11 +10,11 @@ import (
 
 type ViewingAction struct {
 	gorm.Model
-	ProfileName           string         `csv:"Profile Name" gorm:"uniqueIndex:idx_action"`
-	StartTime             types.DateTime `csv:"Start Time" gorm:"uniqueIndex:idx_action"`
+	ProfileName           string         `csv:"Profile Name" gorm:"uniqueIndex:netflix_viewing_activity_key"`
+	StartTime             types.DateTime `csv:"Start Time" gorm:"uniqueIndex:netflix_viewing_activity_key"`
 	Duration              Duration       `csv:"Duration"`
 	Attributes            string         `csv:"Attributes"`
-	Title                 string         `csv:"Title" gorm:"uniqueIndex:idx_action"`
+	Title                 string         `csv:"Title" gorm:"uniqueIndex:netflix_viewing_activity_key"`
 	SupplementalVideoType string         `csv:"Supplemental Video Type"`
 	DeviceType            string         `csv:"Device Type"`
 	Bookmark              Duration       `csv:"Bookmark"`
@@ -23,10 +23,14 @@ type ViewingAction struct {
 }
 
 func (r ViewingAction) TableName() string {
-	return "netflix_viewing_activity"
+	return tablePrefix + "viewing_activity"
 }
 
-func (p *netflix) processViewingActivity(inputPath string) error {
+func (p *netflix) importViewingActivity(inputPath string) error {
+	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
+		return nil
+	}
+
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -34,11 +38,11 @@ func (p *netflix) processViewingActivity(inputPath string) error {
 
 	var actions []ViewingAction
 
-	if err := gocsv.UnmarshalFile(file, &actions); err != nil { // Load clients from file
+	if err := gocsv.UnmarshalFile(file, &actions); err != nil {
 		return err
 	}
 
-	err = p.db.
+	err = p.DB().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

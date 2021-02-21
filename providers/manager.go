@@ -3,12 +3,17 @@ package providers
 import (
 	"errors"
 	"fmt"
-	"github.com/shekhirin/bionic-cli/database"
-	"github.com/shekhirin/bionic-cli/providers/netflix"
-	"github.com/shekhirin/bionic-cli/providers/provider"
-	"github.com/shekhirin/bionic-cli/providers/twitter"
+	"github.com/bionic-dev/bionic/database"
+	"github.com/bionic-dev/bionic/providers/google"
+	"github.com/bionic-dev/bionic/providers/health"
+	"github.com/bionic-dev/bionic/providers/instagram"
+	"github.com/bionic-dev/bionic/providers/netflix"
+	"github.com/bionic-dev/bionic/providers/provider"
+	"github.com/bionic-dev/bionic/providers/spotify"
+	"github.com/bionic-dev/bionic/providers/telegram"
+	"github.com/bionic-dev/bionic/providers/twitter"
 	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
+	"gorm.io/gorm/clause"
 )
 
 var ErrProviderNotFound = errors.New("provider not found")
@@ -18,27 +23,43 @@ type Manager struct {
 	providers map[string]provider.Provider
 }
 
-func NewManager(dbPath string) (*Manager, error) {
-	db, err := database.New(dbPath)
-	if err != nil {
-		return nil, err
+func DefaultProviders(db *gorm.DB) []provider.Provider {
+	return []provider.Provider{
+		twitter.New(db),
+		netflix.New(db),
+		google.New(db),
+		telegram.New(db),
+		health.New(db),
+		spotify.New(db),
+		instagram.New(db),
 	}
+}
 
+func NewManager(db *gorm.DB, providers []provider.Provider) (*Manager, error) {
 	manager := &Manager{
-		db: db,
-		providers: map[string]provider.Provider{
-			"twitter": twitter.New(db),
-			"netflix": netflix.New(db),
-		},
+		db:        db,
+		providers: map[string]provider.Provider{},
 	}
 
-	for _, p := range manager.providers {
-		if err := manager.migrate(manager.db, p); err != nil {
-			return nil, err
-		}
+	for _, p := range providers {
+		manager.providers[p.Name()] = p
 	}
 
 	return manager, nil
+}
+
+func (m Manager) Migrate() error {
+	if err := m.db.AutoMigrate(&database.Import{}); err != nil {
+		return err
+	}
+
+	for _, p := range m.providers {
+		if err := p.Migrate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (m Manager) GetByName(name string) (provider.Provider, error) {
@@ -51,27 +72,46 @@ func (m Manager) GetByName(name string) (provider.Provider, error) {
 }
 
 func (m Manager) Reset(p provider.Provider) error {
-	return m.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Migrator().DropTable(tablersToInterfaces(p.Models())...); err != nil {
+	err := m.db.Transaction(func(tx *gorm.DB) error {
+		err := tx.
+			Where("provider = ?", p.Name()).
+			Delete(&database.Import{}).
+			Error
+		if err != nil {
 			return err
 		}
 
-		if err := m.migrate(tx, p); err != nil {
+		rows, err := tx.
+			Table("sqlite_master").
+			Select("name").
+			Where("type = 'table' AND name LIKE ?", p.TablePrefix()+"%").
+			Rows()
+		if err != nil {
 			return err
+		}
+
+		var tables []string
+
+		for rows.Next() {
+			var name string
+			if err := rows.Scan(&name); err != nil {
+				return err
+			}
+
+			tables = append(tables, name)
+		}
+
+		for _, table := range tables {
+			if err := tx.Exec("DROP TABLE IF EXISTS ?", clause.Table{Name: table}).Error; err != nil {
+				return err
+			}
 		}
 
 		return nil
 	})
-}
-
-func (m Manager) migrate(db *gorm.DB, p provider.Provider) error {
-	return db.AutoMigrate(tablersToInterfaces(p.Models())...)
-}
-
-func tablersToInterfaces(tablers []schema.Tabler) []interface{} {
-	interfaces := make([]interface{}, len(tablers))
-	for i, tabler := range tablers {
-		interfaces[i] = tabler
+	if err != nil {
+		return err
 	}
-	return interfaces
+
+	return p.Migrate()
 }
