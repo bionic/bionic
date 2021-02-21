@@ -32,7 +32,11 @@ func (p *instagram) Migrate() error {
 		&AccountHistoryItem{},
 		&RegistrationInfo{},
 		&User{},
+		&CommentUserMention{},
+		&Hashtag{},
+		&CommentHashtagMention{},
 		&Like{},
+		&Comment{},
 	)
 	if err != nil {
 		return err
@@ -53,6 +57,13 @@ func (p *instagram) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 			return provider.NewImportFn(
 				"Account History",
 				p.importAccountHistory,
+				path,
+			)
+		},
+		"comments.json": func(path string) provider.ImportFn {
+			return provider.NewImportFn(
+				"Comments",
+				p.importComments,
 				path,
 			)
 		},
