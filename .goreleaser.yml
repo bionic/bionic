@@ -76,7 +76,7 @@ builds:
 brews:
   - tap:
       owner: bionic-dev
-      name: homebrew-bionic
+      name: homebrew-tap
       token: "{{ .Env.API_GITHUB_TOKEN }}"
     folder: Formula
-    homepage: https://github.com/bionic-dev/bionic
+    homepage: https://bionic.dev
