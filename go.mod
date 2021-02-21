@@ -1,4 +1,4 @@
-module github.com/BionicTeam/bionic
+module github.com/bionic-dev/bionic
 
 go 1.15
 

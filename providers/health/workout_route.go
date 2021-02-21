@@ -2,7 +2,7 @@ package health
 
 import (
 	"encoding/xml"
-	"github.com/BionicTeam/bionic/types"
+	"github.com/bionic-dev/bionic/types"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 	"io"
