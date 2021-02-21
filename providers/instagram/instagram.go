@@ -77,7 +77,7 @@ func (p *instagram) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 		},
 		"stories_activities.json": func(path string) provider.ImportFn {
 			return provider.NewImportFn(
-				"Stories Activity",
+				"Stories Activities",
 				p.importStoriesActivities,
 				path,
 			)
