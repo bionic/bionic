@@ -1,7 +1,7 @@
 package netflix
 
 import (
-	"github.com/BionicTeam/bionic/providers/provider"
+	"github.com/bionic-dev/bionic/providers/provider"
 	"gorm.io/gorm"
 	"path"
 )

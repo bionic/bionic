@@ -1,8 +1,8 @@
 package views
 
 import (
-	"github.com/BionicTeam/bionic/views/google"
-	"github.com/BionicTeam/bionic/views/view"
+	"github.com/bionic-dev/bionic/views/google"
+	"github.com/bionic-dev/bionic/views/view"
 	"gorm.io/gorm"
 )
 

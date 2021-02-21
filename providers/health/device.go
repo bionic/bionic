@@ -18,7 +18,7 @@ func (Device) TableName() string {
 	return tablePrefix + "devices"
 }
 
-func (d Device) Constraints() map[string]interface{} {
+func (d Device) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"name":         d.Name,
 		"manufacturer": d.Manufacturer,

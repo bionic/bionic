@@ -1,7 +1,7 @@
 package twitter
 
 import (
-	"github.com/BionicTeam/bionic/types"
+	"github.com/bionic-dev/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"path"
