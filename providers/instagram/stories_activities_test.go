@@ -22,50 +22,50 @@ func TestInstagram_importStoriesActivities(t *testing.T) {
 
 	require.NoError(t, p.importStoriesActivities("testdata/instagram/stories_activities.json"))
 
-	var storyActivity []StoryActivityItem
-	require.NoError(t, db.Preload(clause.Associations).Find(&storyActivity).Error)
-	require.Len(t, storyActivity, 5)
+	var storiesActivity []StoriesActivityItem
+	require.NoError(t, db.Preload(clause.Associations).Find(&storiesActivity).Error)
+	require.Len(t, storiesActivity, 5)
 
-	assertStoryActivity(t, StoryActivityItem{
-		Type: StoryActivityPoll,
+	assertStoriesActivity(t, StoriesActivityItem{
+		Type: StoriesActivityPoll,
 		User: User{
 			Username: "shekhirin",
 		},
 		Timestamp: types.DateTime(time.Date(2021, 1, 3, 12, 36, 33, 0, time.UTC)),
-	}, storyActivity[0])
-	assertStoryActivity(t, StoryActivityItem{
-		Type: StoryActivityEmojiSlider,
+	}, storiesActivity[0])
+	assertStoriesActivity(t, StoriesActivityItem{
+		Type: StoriesActivityEmojiSlider,
 		User: User{
 			Username: "sevazhidkov",
 		},
 		Timestamp: types.DateTime(time.Date(2020, 8, 24, 13, 48, 53, 0, time.UTC)),
-	}, storyActivity[1])
-	assertStoryActivity(t, StoryActivityItem{
-		Type: StoryActivityQuestion,
+	}, storiesActivity[1])
+	assertStoriesActivity(t, StoriesActivityItem{
+		Type: StoriesActivityQuestion,
 		User: User{
 			Username: "lexfridman",
 		},
 		Timestamp: types.DateTime(time.Date(2019, 4, 25, 18, 55, 34, 0, time.UTC)),
-	}, storyActivity[2])
-	assertStoryActivity(t, StoryActivityItem{
-		Type: StoryActivityCountdown,
+	}, storiesActivity[2])
+	assertStoriesActivity(t, StoriesActivityItem{
+		Type: StoriesActivityCountdown,
 		User: User{
 			Username: "zuck",
 		},
 		Timestamp: types.DateTime(time.Date(2019, 5, 6, 19, 0, 45, 0, time.UTC)),
-	}, storyActivity[3])
-	assertStoryActivity(t, StoryActivityItem{
-		Type: StoryActivityQuiz,
+	}, storiesActivity[3])
+	assertStoriesActivity(t, StoriesActivityItem{
+		Type: StoriesActivityQuiz,
 		User: User{
 			Username: "shekhirin",
 		},
 		Timestamp: types.DateTime(time.Date(2020, 12, 27, 12, 10, 23, 0, time.UTC)),
-	}, storyActivity[4])
+	}, storiesActivity[4])
 
-	assert.Equal(t, storyActivity[0].UserID, storyActivity[4].UserID)
+	assert.Equal(t, storiesActivity[0].UserID, storiesActivity[4].UserID)
 }
 
-func assertStoryActivity(t *testing.T, expected, actual StoryActivityItem) {
+func assertStoriesActivity(t *testing.T, expected, actual StoriesActivityItem) {
 	assert.Equal(t, expected.Type, actual.Type)
 	assert.Equal(t, expected.User.Username, actual.User.Username)
 	assert.Equal(t, expected.Timestamp, actual.Timestamp)

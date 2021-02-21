@@ -9,29 +9,29 @@ import (
 	"io/ioutil"
 )
 
-type StoryActivityType string
+type StoriesActivityType string
 
 const (
-	StoryActivityPoll        StoryActivityType = "poll"
-	StoryActivityEmojiSlider StoryActivityType = "emoji_slider"
-	StoryActivityQuestion    StoryActivityType = "question"
-	StoryActivityCountdown   StoryActivityType = "countdown"
-	StoryActivityQuiz        StoryActivityType = "quiz"
+	StoriesActivityPoll        StoriesActivityType = "poll"
+	StoriesActivityEmojiSlider StoriesActivityType = "emoji_slider"
+	StoriesActivityQuestion    StoriesActivityType = "question"
+	StoriesActivityCountdown   StoriesActivityType = "countdown"
+	StoriesActivityQuiz        StoriesActivityType = "quiz"
 )
 
-type StoryActivityItem struct {
+type StoriesActivityItem struct {
 	gorm.Model
-	Type      StoryActivityType `gorm:"uniqueIndex:instagram_story_activities_key"`
-	UserID    int               `gorm:"uniqueIndex:instagram_story_activities_key"`
+	Type      StoriesActivityType `gorm:"uniqueIndex:instagram_stories_activities_key"`
+	UserID    int                 `gorm:"uniqueIndex:instagram_stories_activities_key"`
 	User      User
-	Timestamp types.DateTime `gorm:"uniqueIndex:instagram_story_activities_key"`
+	Timestamp types.DateTime `gorm:"uniqueIndex:instagram_stories_activities_key"`
 }
 
-func (StoryActivityItem) TableName() string {
-	return tablePrefix + "story_activities"
+func (StoriesActivityItem) TableName() string {
+	return tablePrefix + "stories_activities"
 }
 
-func (sai *StoryActivityItem) UnmarshalJSON(b []byte) error {
+func (sai *StoriesActivityItem) UnmarshalJSON(b []byte) error {
 	var data []string
 
 	if err := json.Unmarshal(b, &data); err != nil {
@@ -53,11 +53,11 @@ func (sai *StoryActivityItem) UnmarshalJSON(b []byte) error {
 
 func (p *instagram) importStoriesActivities(inputPath string) error {
 	var data struct {
-		Polls        []StoryActivityItem `json:"polls"`
-		EmojiSliders []StoryActivityItem `json:"emoji_sliders"`
-		Questions    []StoryActivityItem `json:"questions"`
-		Countdowns   []StoryActivityItem `json:"countdowns"`
-		Quizzes      []StoryActivityItem `json:"quizzes"`
+		Polls        []StoriesActivityItem `json:"polls"`
+		EmojiSliders []StoriesActivityItem `json:"emoji_sliders"`
+		Questions    []StoriesActivityItem `json:"questions"`
+		Countdowns   []StoriesActivityItem `json:"countdowns"`
+		Quizzes      []StoriesActivityItem `json:"quizzes"`
 	}
 
 	bytes, err := ioutil.ReadFile(inputPath)
@@ -69,30 +69,30 @@ func (p *instagram) importStoriesActivities(inputPath string) error {
 		return err
 	}
 
-	if err := p.insertStoryActivities(data.Polls, StoryActivityPoll); err != nil {
+	if err := p.insertStoriesActivities(data.Polls, StoriesActivityPoll); err != nil {
 		return err
 	}
 
-	if err := p.insertStoryActivities(data.EmojiSliders, StoryActivityEmojiSlider); err != nil {
+	if err := p.insertStoriesActivities(data.EmojiSliders, StoriesActivityEmojiSlider); err != nil {
 		return err
 	}
 
-	if err := p.insertStoryActivities(data.Questions, StoryActivityQuestion); err != nil {
+	if err := p.insertStoriesActivities(data.Questions, StoriesActivityQuestion); err != nil {
 		return err
 	}
 
-	if err := p.insertStoryActivities(data.Countdowns, StoryActivityCountdown); err != nil {
+	if err := p.insertStoriesActivities(data.Countdowns, StoriesActivityCountdown); err != nil {
 		return err
 	}
 
-	if err := p.insertStoryActivities(data.Quizzes, StoryActivityQuiz); err != nil {
+	if err := p.insertStoriesActivities(data.Quizzes, StoriesActivityQuiz); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (p *instagram) insertStoryActivities(activities []StoryActivityItem, activityType StoryActivityType) error {
+func (p *instagram) insertStoriesActivities(activities []StoriesActivityItem, activityType StoriesActivityType) error {
 	for i := range activities {
 		activities[i].Type = activityType
 

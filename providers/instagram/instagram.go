@@ -37,7 +37,7 @@ func (p *instagram) Migrate() error {
 		&CommentHashtagMention{},
 		&Like{},
 		&Comment{},
-		&StoryActivityItem{},
+		&StoriesActivityItem{},
 	)
 	if err != nil {
 		return err
