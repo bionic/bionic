@@ -2,7 +2,7 @@ package health
 
 import (
 	"encoding/xml"
-	"github.com/BionicTeam/bionic/types"
+	"github.com/bionic-dev/bionic/types"
 	"gorm.io/gorm"
 )
 
@@ -20,7 +20,7 @@ func (MeRecord) TableName() string {
 	return tablePrefix + "me_records"
 }
 
-func (m MeRecord) Constraints() map[string]interface{} {
+func (m MeRecord) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"data_export_id": m.DataExportID,
 	}
@@ -32,6 +32,6 @@ func (p *health) parseMe(export *DataExport, decoder *xml.Decoder, start *xml.St
 	}
 
 	return p.DB().
-		FirstOrCreate(&export.Me, export.Me.Constraints()).
+		FirstOrCreate(&export.Me, export.Me.Conditions()).
 		Error
 }

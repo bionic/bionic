@@ -1,6 +1,6 @@
 package google
 
-import "github.com/BionicTeam/bionic/views/view"
+import "github.com/bionic-dev/bionic/views/view"
 
 const tablePrefix = "google_"
 

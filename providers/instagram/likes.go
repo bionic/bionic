@@ -3,7 +3,7 @@ package instagram
 import (
 	"encoding/json"
 	"errors"
-	"github.com/BionicTeam/bionic/types"
+	"github.com/bionic-dev/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"io/ioutil"
