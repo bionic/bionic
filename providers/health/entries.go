@@ -2,7 +2,7 @@ package health
 
 import (
 	"encoding/xml"
-	"github.com/BionicTeam/bionic/types"
+	"github.com/bionic-dev/bionic/types"
 	"gorm.io/gorm"
 )
 
@@ -17,19 +17,37 @@ type Entry struct {
 	EndDate         types.DateTime `xml:"endDate,attr"`
 	Value           string         `xml:"value,attr"`
 	DeviceID        *int
-	Device          *Device          `xml:"device,attr"`
-	MetadataEntries []MetadataEntry  `xml:"MetadataEntry" gorm:"polymorphic:Parent"`
-	BeatsPerMinutes []BeatsPerMinute `xml:"HeartRateVariabilityMetadataList"`
+	Device          *Device             `xml:"device,attr"`
+	MetadataEntries []EntryMetadataItem `xml:"MetadataEntry"`
+	BeatsPerMinutes []BeatsPerMinute    `xml:"HeartRateVariabilityMetadataList"`
 }
 
 func (Entry) TableName() string {
 	return tablePrefix + "entries"
 }
 
-func (e Entry) Constraints() map[string]interface{} {
+func (e Entry) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"type":          e.Type,
 		"creation_date": e.CreationDate,
+	}
+}
+
+type EntryMetadataItem struct {
+	gorm.Model
+	EntryID uint   `gorm:"uniqueIndex:health_entry_metadata_key"`
+	Key     string `xml:"key,attr" gorm:"uniqueIndex:health_entry_metadata_key"`
+	Value   string `xml:"value,attr"`
+}
+
+func (EntryMetadataItem) TableName() string {
+	return tablePrefix + "entry_metadata"
+}
+
+func (m EntryMetadataItem) Conditions() map[string]interface{} {
+	return map[string]interface{}{
+		"entry_id": m.EntryID,
+		"key":      m.Key,
 	}
 }
 
@@ -44,7 +62,7 @@ func (BeatsPerMinute) TableName() string {
 	return tablePrefix + "beats_per_minutes"
 }
 
-func (bpm BeatsPerMinute) Constraints() map[string]interface{} {
+func (bpm BeatsPerMinute) Conditions() map[string]interface{} {
 	return map[string]interface{}{
 		"entry_id": bpm.EntryID,
 		"time":     bpm.Time,
@@ -80,7 +98,7 @@ func (p *health) parseRecord(_ *DataExport, decoder *xml.Decoder, start *xml.Sta
 	}
 
 	err := p.DB().
-		Find(&entry, entry.Constraints()).
+		Find(&entry, entry.Conditions()).
 		Error
 	if err != nil {
 		return err
@@ -88,7 +106,7 @@ func (p *health) parseRecord(_ *DataExport, decoder *xml.Decoder, start *xml.Sta
 
 	if entry.Device != nil {
 		err = p.DB().
-			FirstOrCreate(entry.Device, entry.Device.Constraints()).
+			FirstOrCreate(entry.Device, entry.Device.Conditions()).
 			Error
 		if err != nil {
 			return err
@@ -98,11 +116,10 @@ func (p *health) parseRecord(_ *DataExport, decoder *xml.Decoder, start *xml.Sta
 	for i := range entry.MetadataEntries {
 		metadataEntry := &entry.MetadataEntries[i]
 
-		metadataEntry.ParentID = entry.ID
-		metadataEntry.ParentType = entry.TableName()
+		metadataEntry.EntryID = entry.ID
 
 		err = p.DB().
-			FirstOrCreate(metadataEntry, metadataEntry.Constraints()).
+			FirstOrCreate(metadataEntry, metadataEntry.Conditions()).
 			Error
 		if err != nil {
 			return err
@@ -115,7 +132,7 @@ func (p *health) parseRecord(_ *DataExport, decoder *xml.Decoder, start *xml.Sta
 		beatsPerMinute.EntryID = entry.ID
 
 		err = p.DB().
-			FirstOrCreate(beatsPerMinute, beatsPerMinute.Constraints()).
+			FirstOrCreate(beatsPerMinute, beatsPerMinute.Conditions()).
 			Error
 		if err != nil {
 			return err
@@ -123,6 +140,6 @@ func (p *health) parseRecord(_ *DataExport, decoder *xml.Decoder, start *xml.Sta
 	}
 
 	return p.DB().
-		FirstOrCreate(&entry, entry.Constraints()).
+		FirstOrCreate(&entry, entry.Conditions()).
 		Error
 }

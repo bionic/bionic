@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/BionicTeam/bionic/database"
-	"github.com/BionicTeam/bionic/internal/progress"
-	"github.com/BionicTeam/bionic/views"
+	"github.com/bionic-dev/bionic/database"
+	"github.com/bionic-dev/bionic/internal/progress"
+	"github.com/bionic-dev/bionic/views"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
