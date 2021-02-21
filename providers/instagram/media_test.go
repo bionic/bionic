@@ -37,10 +37,10 @@ func TestInstagram_importMedia(t *testing.T) {
 	require.Len(t, profilePhoto, 1)
 
 	assertMedia(t, MediaItem{
-		Type: MediaStory,
+		Type:    MediaStory,
 		Caption: ptr.String("how do you like my #outfit? it's @asos"),
 		TakenAt: types.DateTime(time.Date(2021, 1, 5, 17, 35, 26, 0, time.UTC)),
-		Path: "stories/202101/7707a9ca67f53984bf7e26eb64c41e21.jpg",
+		Path:    "stories/202101/7707a9ca67f53984bf7e26eb64c41e21.jpg",
 		UserMentions: []MediaUserMention{
 			{
 				User: User{
@@ -62,10 +62,10 @@ func TestInstagram_importMedia(t *testing.T) {
 	}, media[0])
 
 	assertMedia(t, MediaItem{
-		Type: MediaVideo,
+		Type:    MediaVideo,
 		Caption: ptr.String("#istanbul is beautiful! @sevazhidkov"),
 		TakenAt: types.DateTime(time.Date(2020, 8, 2, 20, 35, 46, 0, time.UTC)),
-		Path: "videos/202008/8458fe5533068d764783ba3904fd2fea.mp4",
+		Path:    "videos/202008/8458fe5533068d764783ba3904fd2fea.mp4",
 		UserMentions: []MediaUserMention{
 			{
 				User: User{
@@ -87,11 +87,11 @@ func TestInstagram_importMedia(t *testing.T) {
 	}, media[1])
 
 	assertMedia(t, MediaItem{
-		Type: MediaPhoto,
-		Caption: ptr.String("i'm in #turkey now with @sevazhidkov"),
-		TakenAt: types.DateTime(time.Date(2020, 9, 27, 18, 37, 9, 0, time.UTC)),
+		Type:     MediaPhoto,
+		Caption:  ptr.String("i'm in #turkey now with @sevazhidkov"),
+		TakenAt:  types.DateTime(time.Date(2020, 9, 27, 18, 37, 9, 0, time.UTC)),
 		Location: ptr.String("Emirgân Korusu"),
-		Path: "photos/202009/1b31609a81d7749a1462e38ee425ea55.jpg",
+		Path:     "photos/202009/1b31609a81d7749a1462e38ee425ea55.jpg",
 		UserMentions: []MediaUserMention{
 			{
 				User: User{
