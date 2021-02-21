@@ -1,9 +1,9 @@
 package instagram
 
 import (
-	"github.com/BionicTeam/bionic/providers/provider"
-	_ "github.com/BionicTeam/bionic/testinit"
-	"github.com/BionicTeam/bionic/types"
+	"github.com/bionic-dev/bionic/providers/provider"
+	_ "github.com/bionic-dev/bionic/testinit"
+	"github.com/bionic-dev/bionic/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/sqlite"
