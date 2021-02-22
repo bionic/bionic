@@ -38,6 +38,23 @@ func (mi MediaItem) Conditions() map[string]interface{} {
 	}
 }
 
+func (mi *MediaItem) UnmarshalJSON(b []byte) error {
+	type alias MediaItem
+	var data alias
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	*mi = MediaItem(data)
+
+	if mi.Caption != nil && *mi.Caption == "" {
+		mi.Caption = nil
+	}
+
+	return nil
+}
+
 type MediaUserMention struct {
 	gorm.Model
 	MediaID uint `gorm:"uniqueIndex:instagram_media_user_mentions_key"`
@@ -149,66 +166,12 @@ func (p *instagram) insertMedia(media []MediaItem, mediaType MediaType) error {
 			return err
 		}
 
-		if media[i].Caption != nil {
-			if *media[i].Caption == "" {
-				media[i].Caption = nil
-			} else {
-				for _, userMention := range extractUserMentionsFromText(*media[i].Caption) {
-					mediaUserMention := MediaUserMention{
-						User: User{
-							Username: userMention.Username,
-						},
-						FromIdx: userMention.FromIdx,
-						ToIdx:   userMention.ToIdx,
-					}
+		if err := p.insertMediaUserMentions(&media[i]); err != nil {
+			return err
+		}
 
-					mediaUserMention.MediaID = media[i].ID
-
-					err = p.DB().
-						FirstOrCreate(&mediaUserMention.User, mediaUserMention.User.Conditions()).
-						Error
-					if err != nil {
-						return err
-					}
-
-					err = p.DB().
-						FirstOrCreate(&mediaUserMention, mediaUserMention.Conditions()).
-						Error
-					if err != nil {
-						return err
-					}
-
-					media[i].UserMentions = append(media[i].UserMentions, mediaUserMention)
-				}
-
-				for _, hashtagMention := range extractHashtagMentionsFromText(*media[i].Caption) {
-					mediaHashtagMention := MediaHashtagMention{
-						Hashtag: Hashtag{
-							Text: hashtagMention.Hashtag,
-						},
-						FromIdx: hashtagMention.FromIdx,
-						ToIdx:   hashtagMention.ToIdx,
-					}
-
-					mediaHashtagMention.MediaID = media[i].ID
-
-					err = p.DB().
-						FirstOrCreate(&mediaHashtagMention.Hashtag, mediaHashtagMention.Hashtag.Conditions()).
-						Error
-					if err != nil {
-						return err
-					}
-
-					err = p.DB().
-						FirstOrCreate(&mediaHashtagMention, mediaHashtagMention.Conditions()).
-						Error
-					if err != nil {
-						return err
-					}
-
-					media[i].HashtagMentions = append(media[i].HashtagMentions, mediaHashtagMention)
-				}
-			}
+		if err := p.insertMediaHashtagMentions(&media[i]); err != nil {
+			return err
 		}
 
 		err = p.DB().
@@ -218,6 +181,78 @@ func (p *instagram) insertMedia(media []MediaItem, mediaType MediaType) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (p *instagram) insertMediaUserMentions(media *MediaItem) error {
+	if media.Caption == nil {
+		return nil
+	}
+
+	for _, userMention := range extractUserMentionsFromText(*media.Caption) {
+		mediaUserMention := MediaUserMention{
+			User: User{
+				Username: userMention.Username,
+			},
+			FromIdx: userMention.FromIdx,
+			ToIdx:   userMention.ToIdx,
+		}
+
+		mediaUserMention.MediaID = media.ID
+
+		err := p.DB().
+			FirstOrCreate(&mediaUserMention.User, mediaUserMention.User.Conditions()).
+			Error
+		if err != nil {
+			return err
+		}
+
+		err = p.DB().
+			FirstOrCreate(&mediaUserMention, mediaUserMention.Conditions()).
+			Error
+		if err != nil {
+			return err
+		}
+
+		media.UserMentions = append(media.UserMentions, mediaUserMention)
+	}
+
+	return nil
+}
+
+func (p *instagram) insertMediaHashtagMentions(media *MediaItem) error {
+	if media.Caption == nil {
+		return nil
+	}
+
+	for _, hashtagMention := range extractHashtagMentionsFromText(*media.Caption) {
+		mediaHashtagMention := MediaHashtagMention{
+			Hashtag: Hashtag{
+				Text: hashtagMention.Hashtag,
+			},
+			FromIdx: hashtagMention.FromIdx,
+			ToIdx:   hashtagMention.ToIdx,
+		}
+
+		mediaHashtagMention.MediaID = media.ID
+
+		err := p.DB().
+			FirstOrCreate(&mediaHashtagMention.Hashtag, mediaHashtagMention.Hashtag.Conditions()).
+			Error
+		if err != nil {
+			return err
+		}
+
+		err = p.DB().
+			FirstOrCreate(&mediaHashtagMention, mediaHashtagMention.Conditions()).
+			Error
+		if err != nil {
+			return err
+		}
+
+		media.HashtagMentions = append(media.HashtagMentions, mediaHashtagMention)
 	}
 
 	return nil
