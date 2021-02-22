@@ -8,7 +8,7 @@ import (
 
 var hashtagMentionsRegexp = regexp.MustCompile(fmt.Sprintf(
 	"#([^{%s}]+)",
-	regexp.QuoteMeta(`\"$%&'()*+,-./:;<=>?[\]^`+"`"+`{|}~\n#@ `),
+	regexp.QuoteMeta(`\"$%&'()*+,-./:;<=>?[\]^`+"`"+`{|}~#@ `)+`\n`,
 ))
 
 type Hashtag struct {
