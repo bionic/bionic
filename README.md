@@ -1,5 +1,6 @@
 # Bionic
-Bionic is a command line tool to load your personal data exports from different services to a single SQLite database.
+Bionic is a command line tool to load your personal data exports from different services to a single SQLite database. 
+Bionic currently supports data exports from Google, Apple Health, Spotify, Telegram and Netflix.
 
 ![Example of bionic usage](https://user-images.githubusercontent.com/6896447/108770008-dc6c4b80-756a-11eb-97ae-b6b84b21831f.png)
 
@@ -8,8 +9,6 @@ Bionic is a command line tool to load your personal data exports from different 
 **Research**: if you research human behaviour, subjective metrics could heavily impact your findings. If your respondents are able to run Bionic and send you aggregated results from their data, you can collect new objectives datasets describing important parts of life: transportation, social media, knowledge work and others.
 
 **Education**: you can include Bionic exercises in your articles, courses or books. Learning to process data on personal records is much more exciting than processing artificial datasets. 
-
-Bionic currently supports data exports from Google, Apple Health, Spotify, Telegram and Netflix.
 
 ## Install
 
@@ -32,7 +31,7 @@ sqlite> select * from netflix_playback_related_events limit 1;
 1|2021-01-22 20:46:21.696934+03:00|2021-01-22 20:46:21.696934+03:00||Seva|How I Met Your Mother: Season 1: "Come On"|Apple iPhone XR|RU|2020-12-30 20:14:21+00:00
 ```
 
-Alternatively, you can use [datasette](https://github.com/simonw/datasette) to build a web ui to view and query data:
+Alternatively, you can use [datasette](https://github.com/simonw/datasette) to build a web UI to view and query data:
 
 ```bash
 $ datasette serve db.sqlite
