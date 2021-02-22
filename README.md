@@ -22,7 +22,7 @@ Bionic currently supports data exports from Google, Apple Health, Spotify, Teleg
 
 ### Query
 
-You can query data with  ```sqlite3``` client:
+You can query the database with  ```sqlite3``` client:
 ```bash
 $ sqlite3 db.sqlite                                               
 SQLite version 3.28.0 2019-04-15 14:49:49
