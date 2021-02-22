@@ -57,26 +57,6 @@ func (c *Comment) UnmarshalJSON(b []byte) error {
 	c.Text = data[1]
 	c.User.Username = data[2]
 
-	for _, userMention := range extractUserMentionsFromText(c.Text) {
-		c.UserMentions = append(c.UserMentions, CommentUserMention{
-			User: User{
-				Username: userMention.Username,
-			},
-			FromIdx: userMention.FromIdx,
-			ToIdx:   userMention.ToIdx,
-		})
-	}
-
-	for _, hashtagMention := range extractHashtagMentionsFromText(c.Text) {
-		c.HashtagMentions = append(c.HashtagMentions, CommentHashtagMention{
-			Hashtag: Hashtag{
-				Text: hashtagMention.Hashtag,
-			},
-			FromIdx: hashtagMention.FromIdx,
-			ToIdx:   hashtagMention.ToIdx,
-		})
-	}
-
 	return nil
 }
 
@@ -157,44 +137,60 @@ func (p *instagram) importComments(inputPath string) error {
 			return err
 		}
 
-		for j := range mediaComment.UserMentions {
-			userMention := &mediaComment.UserMentions[j]
+		for _, userMention := range extractUserMentionsFromText(mediaComment.Text) {
+			commentUserMention := CommentUserMention{
+				User: User{
+					Username: userMention.Username,
+				},
+				FromIdx: userMention.FromIdx,
+				ToIdx:   userMention.ToIdx,
+			}
 
-			userMention.CommentID = mediaComment.ID
+			commentUserMention.CommentID = mediaComment.ID
 
 			err = p.DB().
-				FirstOrCreate(&userMention.User, userMention.User.Conditions()).
+				FirstOrCreate(&commentUserMention.User, commentUserMention.User.Conditions()).
 				Error
 			if err != nil {
 				return err
 			}
 
 			err = p.DB().
-				FirstOrCreate(userMention, userMention.Conditions()).
+				FirstOrCreate(&commentUserMention, commentUserMention.Conditions()).
 				Error
 			if err != nil {
 				return err
 			}
+
+			mediaComment.UserMentions = append(mediaComment.UserMentions, commentUserMention)
 		}
 
-		for j := range mediaComment.HashtagMentions {
-			hashtagMention := &mediaComment.HashtagMentions[j]
+		for _, hashtagMention := range extractHashtagMentionsFromText(mediaComment.Text) {
+			commentHashtagMention := CommentHashtagMention{
+				Hashtag: Hashtag{
+					Text: hashtagMention.Hashtag,
+				},
+				FromIdx: hashtagMention.FromIdx,
+				ToIdx:   hashtagMention.ToIdx,
+			}
 
-			hashtagMention.CommentID = mediaComment.ID
+			commentHashtagMention.CommentID = mediaComment.ID
 
 			err = p.DB().
-				FirstOrCreate(&hashtagMention.Hashtag, hashtagMention.Hashtag.Conditions()).
+				FirstOrCreate(&commentHashtagMention.Hashtag, commentHashtagMention.Hashtag.Conditions()).
 				Error
 			if err != nil {
 				return err
 			}
 
 			err = p.DB().
-				FirstOrCreate(hashtagMention, hashtagMention.Conditions()).
+				FirstOrCreate(&commentHashtagMention, commentHashtagMention.Conditions()).
 				Error
 			if err != nil {
 				return err
 			}
+
+			mediaComment.HashtagMentions = append(mediaComment.HashtagMentions, commentHashtagMention)
 		}
 
 		err = p.DB().
