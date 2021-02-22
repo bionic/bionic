@@ -37,6 +37,7 @@ func (p *instagram) Migrate() error {
 		&CommentHashtagMention{},
 		&Like{},
 		&Comment{},
+		&StoriesActivityItem{},
 	)
 	if err != nil {
 		return err
@@ -71,6 +72,13 @@ func (p *instagram) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 			return provider.NewImportFn(
 				"Likes",
 				p.importLikes,
+				path,
+			)
+		},
+		"stories_activities.json": func(path string) provider.ImportFn {
+			return provider.NewImportFn(
+				"Stories Activities",
+				p.importStoriesActivities,
 				path,
 			)
 		},
