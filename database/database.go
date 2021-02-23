@@ -1,8 +1,11 @@
 package database
 
 import (
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"os"
 	"path"
 )
@@ -22,7 +25,15 @@ func New(dbPath string) (*gorm.DB, error) {
 		}
 	}
 
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	loggerConfig := logger.Config{LogLevel: logger.Silent}
+
+	if viper.GetBool("verbose") {
+		loggerConfig.LogLevel = logger.Warn
+	}
+
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
+		Logger: logger.New(logrus.StandardLogger(), loggerConfig),
+	})
 	if err != nil {
 		return nil, err
 	}
