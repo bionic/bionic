@@ -1,7 +1,7 @@
 # Bionic
 Bionic is a command line tool to load your personal data exports from different services to a single SQLite database. Bionic currently supports data exports from Google, Apple Health, Spotify, Telegram and Netflix.
 
-![Example of bionic usage](https://user-images.githubusercontent.com/6896447/108770008-dc6c4b80-756a-11eb-97ae-b6b84b21831f.png)
+![Example of bionic usage](https://user-images.githubusercontent.com/6896447/108840862-f9932f80-75e7-11eb-9014-70afc55ff302.png)
 
 **Fun**: you can use Bionic to explore your own data and discover insights about yourself. Join tables between different sources to create reports like "Songs I listen in different locations" or dive deep into a single source to create "How amount of Telegram messages per week with different people changed over time" report.
 
