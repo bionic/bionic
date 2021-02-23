@@ -4,6 +4,6 @@
 
 test_data/*/**
 
-build
+dist
 
 !/**/.gitkeep

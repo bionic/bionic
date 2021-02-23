@@ -9,7 +9,7 @@ func (p *health) parseExportDate(export *DataExport, _ *xml.Decoder, start *xml.
 
 	err := p.DB().
 		Select("ID").
-		Find(&export, export.Constraints()).
+		Find(&export, export.Conditions()).
 		Error
 	if err != nil {
 		return err

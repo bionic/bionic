@@ -1,0 +1,32 @@
+{
+  "stories": [
+    {
+      "caption": "how do you like my #outfit? it's @asos",
+      "taken_at": "2021-01-05T17:35:26+00:00",
+      "path": "stories/202101/7707a9ca67f53984bf7e26eb64c41e21.jpg"
+    }
+  ],
+  "videos": [
+    {
+      "caption": "#istanbul is beautiful! @sevazhidkov",
+      "taken_at": "2020-08-02T20:35:46+00:00",
+      "path": "videos/202008/8458fe5533068d764783ba3904fd2fea.mp4"
+    }
+  ],
+  "profile": [
+    {
+      "caption": "",
+      "taken_at": "2020-10-07T08:57:48+00:00",
+      "is_active_profile": true,
+      "path": "profile/202010/fd47638085821857192d11805bd71898.jpg"
+    }
+  ],
+  "photos": [
+    {
+      "caption": "i'm in #turkey now with @sevazhidkov",
+      "taken_at": "2020-09-27T18:37:09+00:00",
+      "location": "Emirgân Korusu",
+      "path": "photos/202009/1b31609a81d7749a1462e38ee425ea55.jpg"
+    }
+  ]
+}
