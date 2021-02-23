@@ -1,6 +1,5 @@
 # Bionic
-Bionic is a command line tool to load your personal data exports from different services to a single SQLite database. 
-Bionic currently supports data exports from Google, Apple Health, Spotify, Telegram and Netflix.
+Bionic is a command line tool to load your personal data exports from different services to a single SQLite database. Bionic currently supports data exports from Google, Apple Health, Spotify, Telegram and Netflix.
 
 ![Example of bionic usage](https://user-images.githubusercontent.com/6896447/108770008-dc6c4b80-756a-11eb-97ae-b6b84b21831f.png)
 
@@ -43,7 +42,7 @@ INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
 
 ![datasette screenshot](https://user-images.githubusercontent.com/6896447/108776053-eb56fc00-7572-11eb-9081-1732cdc4a3bd.png)
 
-You can also use Python and pandas to process data:
+You can also use Python and [pandas](https://pandas.pydata.org/) to process data:
 ```python
 import pandas as pd
 import sqlite3
@@ -57,10 +56,16 @@ messages_df = pd.read_sql('select * from telegram_messages;', con=db_connection)
 ## Supported exports
 
 
-## Package
+## As a package
 
 ## Contributing
 
-We need help!
+We appreciate contributions a lot! Here are some of the ways you can contribute:
 
-providers => views scheme
+* **Providers**. You can create new sources of data. Check out [#new-provider issues](https://github.com/bionic-dev/bionic/issues?q=is%3Aissue+is%3Aopen+label%3Anew-provider) and [an example PR with a new provider](https://github.com/bionic-dev/bionic/pull/41). Many existing providers lack some of the data: for example, the Google provider only proccesses a small subset of the Google export. Feel free to change it! We also target to test all providers and adding tests (especially, with unusual corner cases you found in your data) could be a very helpful contribution.
+* **Views**. Views are additional SQL tables based on data from providers. Check out [an example PR with new views](https://github.com/bionic-dev/bionic/pull/29/files).
+* **Docs**. 
+* **Recipes**.
+* **Ecosystem**. Create and release your own tools based on Bionic databases. Think a web UI to visualize life or a custom Spotify Year In Review report generator.
+
+When contributing, feel free to create issues and discussions with any questions. We promise to be helpful and kind!
