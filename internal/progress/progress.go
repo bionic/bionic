@@ -3,6 +3,8 @@ package progress
 import (
 	"fmt"
 	"github.com/gosuri/uilive"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"sync"
 )
 
@@ -61,13 +63,22 @@ func (p *Progress) add(name string, state State) {
 }
 
 func (p *Progress) Init(name string) {
-	p.add(name, InitState)
+	if !viper.GetBool("verbose") {
+		p.add(name, InitState)
+	}
+	logrus.Debugf("%s transitioned to Init state", name)
 }
 
 func (p *Progress) Error(name string) {
-	p.add(name, ErrorState)
+	if !viper.GetBool("verbose") {
+		p.add(name, ErrorState)
+	}
+	logrus.Debugf("%s transitioned to Error state", name)
 }
 
 func (p *Progress) Success(name string) {
-	p.add(name, SuccessState)
+	if !viper.GetBool("verbose") {
+		p.add(name, SuccessState)
+	}
+	logrus.Debugf("%s transitioned to Success state", name)
 }

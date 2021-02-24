@@ -10,7 +10,9 @@ require (
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/sirupsen/logrus v1.2.0
 	github.com/spf13/cobra v1.1.1
+	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys v0.0.0-20210105210732-16f7687f5001 // indirect
