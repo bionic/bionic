@@ -13,8 +13,6 @@ var resetCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		providerName := args[0]
 
-		dbPath := rootCmd.PersistentFlags().Lookup("db").Value.String()
-
 		db, err := database.New(dbPath)
 		if err != nil {
 			return err

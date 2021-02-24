@@ -13,8 +13,6 @@ var viewsCmd = &cobra.Command{
 	Use:   "generate-views",
 	Short: "Create derivative SQL tables and materialized views based on raw imported data",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		dbPath := rootCmd.PersistentFlags().Lookup("db").Value.String()
-
 		db, err := database.New(dbPath)
 		if err != nil {
 			return err

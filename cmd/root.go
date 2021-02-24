@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
-	"path"
 )
 
 var dbPath string
@@ -34,14 +32,8 @@ func Execute() {
 }
 
 func init() {
-	homeDir, err := homedir.Dir()
-	if err != nil {
-		panic(err)
-	}
-
-	defaultDbPath := path.Join(homeDir, ".bionic", "db.sqlite")
-
-	rootCmd.PersistentFlags().StringVar(&dbPath, "db", defaultDbPath, "db path (default is $HOME/.bionic/db.sqlite)")
+	rootCmd.PersistentFlags().StringVar(&dbPath, "db", "", "db path")
+	panicOnErr(rootCmd.MarkPersistentFlagRequired("db"))
 
 	rootCmd.PersistentFlags().Bool("verbose", false, "verbose output")
 	panicOnErr(viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose")))
