@@ -6,7 +6,6 @@ import (
 	"github.com/bionic-dev/bionic/views"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -40,20 +39,14 @@ var viewsCmd = &cobra.Command{
 			viewProgress.Init(name)
 		}
 
-		if !viper.GetBool("verbose") {
-			viewProgress.Draw()
-		}
+		viewProgress.Draw()
 
 		for _, view := range manager.Views {
 			name := view.TableName()
 			fn := view.Update
 
 			errs.Go(func() error {
-				defer func() {
-					if !viper.GetBool("verbose") {
-						viewProgress.Draw()
-					}
-				}()
+				defer viewProgress.Draw()
 
 				err := fn(db)
 
