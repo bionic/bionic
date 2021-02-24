@@ -170,7 +170,7 @@ type PlaceVisit struct {
 	DurationEndTimestampMs   types.DateTime `gorm:"uniqueIndex:google_place_visits_key"`
 	DurationStartTimestampMs types.DateTime `gorm:"uniqueIndex:google_place_visits_key"`
 
-	EditConfirmationStatus string `json:"editConfirmationStatus" gorm:"uniqueIndex:google_place_visits_key"`
+	EditConfirmationStatus string
 
 	LocationAddress             string
 	LocationLatitudeE7          int
@@ -190,11 +190,21 @@ type PlaceVisit struct {
 	ChildVisits []*PlaceVisit `json:"childVisits"`
 
 	PlaceVisit   *PlaceVisit
-	PlaceVisitID int `gorm:"uniqueIndex:google_place_visits_key"`
+	PlaceVisitID int
 }
 
 func (PlaceVisit) TableName() string {
 	return tablePrefix + "place_visits"
+}
+
+func (p PlaceVisit) Conditions() map[string]interface{} {
+	return map[string]interface{}{
+		"center_lat_e7":               p.CenterLatE7,
+		"center_lng_e7":               p.CenterLngE7,
+		"duration_end_timestamp_ms":   p.DurationEndTimestampMs,
+		"duration_start_timestamp_ms": p.DurationStartTimestampMs,
+		"location_place_id":           p.LocationPlaceID,
+	}
 }
 
 func (p *PlaceVisit) UnmarshalJSON(b []byte) error {
@@ -374,6 +384,17 @@ func (p *google) processSemanticLocationFile(rc io.ReadCloser) error {
 		Error
 	if err != nil {
 		return err
+	}
+
+	for i, visit := range placeVisits {
+		for j := range visit.ChildVisits {
+			err := p.DB().
+				FirstOrCreate(&placeVisits[i].ChildVisits[j], placeVisits[i].ChildVisits[j].Conditions()).
+				Error
+			if err != nil {
+				return err
+			}
+		}
 	}
 	err = p.DB().
 		Clauses(clause.OnConflict{
