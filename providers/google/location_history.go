@@ -3,7 +3,7 @@ package google
 import (
 	"archive/zip"
 	"encoding/json"
-	"github.com/BionicTeam/bionic/types"
+	"github.com/bionic-dev/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"io"
@@ -11,8 +11,6 @@ import (
 	"os"
 	"path/filepath"
 )
-
-const locationHistoryFile = "Location History.json"
 
 type LocationHistoryItem struct {
 	gorm.Model
@@ -33,8 +31,8 @@ func (LocationHistoryItem) TableName() string {
 
 type LocationActivity struct {
 	gorm.Model
-	LocationHistoryItem   LocationHistoryItem
 	LocationHistoryItemID int
+	LocationHistoryItem   LocationHistoryItem
 	TypeCandidates        []LocationActivityTypeCandidate `json:"activity"`
 	Time                  types.DateTime                  `json:"timestampMs"`
 }
@@ -43,12 +41,28 @@ func (LocationActivity) TableName() string {
 	return tablePrefix + "location_activity"
 }
 
+type LocationActivityType string
+
+const (
+	LocationActivityExitingVehicle LocationActivityType = "EXITING_VEHICLE"
+	LocationActivityInRailVehicle  LocationActivityType = "IN_RAIL_VEHICLE"
+	LocationActivityInRoadVehicle  LocationActivityType = "IN_ROAD_VEHICLE"
+	LocationActivityInVehicle      LocationActivityType = "IN_VEHICLE"
+	LocationActivityOnBicycle      LocationActivityType = "ON_BICYCLE"
+	LocationActivityOnFoot         LocationActivityType = "ON_FOOT"
+	LocationActivityRunning        LocationActivityType = "RUNNING"
+	LocationActivityStill          LocationActivityType = "STILL"
+	LocationActivityTilting        LocationActivityType = "TILTING"
+	LocationActivityUnknown        LocationActivityType = "UNKNOWN"
+	LocationActivityWalking        LocationActivityType = "WALKING"
+)
+
 type LocationActivityTypeCandidate struct {
 	gorm.Model
-	LocationActivity   LocationActivity
 	LocationActivityID int
-	Confidence         int    `json:"confidence"`
-	Type               string `json:"type"`
+	LocationActivity   LocationActivity
+	Confidence         int                  `json:"confidence"`
+	Type               LocationActivityType `json:"type"`
 }
 
 func (LocationActivityTypeCandidate) TableName() string {

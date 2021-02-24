@@ -3,7 +3,7 @@ package google
 import (
 	"archive/zip"
 	"encoding/json"
-	"github.com/BionicTeam/bionic/types"
+	"github.com/bionic-dev/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"io"
@@ -11,8 +11,6 @@ import (
 	"os"
 	"path/filepath"
 )
-
-const semanticDirectoryName = "Semantic Location History"
 
 type ActivitySegment struct {
 	gorm.Model
@@ -289,7 +287,7 @@ func (p *google) importSemanticLocationHistoryFromArchive(inputPath string) erro
 	for _, f := range r.File {
 		// files are located in 2-nd level directories: Semantic Location History/2020/*.json
 		dataTypeDirectory := filepath.Base(filepath.Dir(filepath.Dir(f.Name)))
-		if dataTypeDirectory != semanticDirectoryName {
+		if dataTypeDirectory != semanticLocationDirectoryName {
 			continue
 		}
 		if filepath.Ext(f.Name) != ".json" {
@@ -316,7 +314,7 @@ func (p *google) importSemanticLocationHistoryFromDirectory(inputPath string) er
 			if err != nil {
 				return err
 			}
-			if filepath.Ext(info.Name()) != "json" {
+			if filepath.Ext(info.Name()) != ".json" {
 				return nil
 			}
 
@@ -381,7 +379,7 @@ func (p *google) processSemanticLocationFile(rc io.ReadCloser) error {
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).
-		CreateInBatches(placeVisits, 1).
+		CreateInBatches(placeVisits, 100).
 		Error
 	if err != nil {
 		return err

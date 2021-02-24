@@ -9,6 +9,9 @@ import (
 const name = "google"
 const tablePrefix = "google_"
 
+const locationHistoryFile = "Location History.json"
+const semanticLocationDirectoryName = "Semantic Location History"
+
 type google struct {
 	provider.Database
 }
@@ -69,11 +72,10 @@ func (p *google) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 			p.importLocationHistoryFromFile,
 			path.Join(inputPath, "Location History", locationHistoryFile),
 		),
-
 		provider.NewImportFn(
 			"Semantic Location History",
 			p.importSemanticLocationHistoryFromDirectory,
-			path.Join(inputPath, "Semantic Location History"),
+			path.Join(inputPath, "Location History", semanticLocationDirectoryName),
 		),
 	}
 	archiveProviders := []provider.ImportFn{
