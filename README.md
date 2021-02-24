@@ -15,6 +15,17 @@ According to GDPR, every service has to allow users to export their data in a ma
 
 ## Install
 
+### Homebrew
+
+```bash
+brew install bionic-dev/tap/bionic
+```
+
+### cURL
+
+```bash
+curl -L https://raw.githubusercontent.com/bionic-dev/bionic/main/install.sh | bash -s -- -b /usr/local/bin
+```
 
 ## Usage
 

@@ -80,3 +80,4 @@ brews:
       token: "{{ .Env.API_GITHUB_TOKEN }}"
     folder: Formula
     homepage: https://bionic.dev
+    install: bin.install "bionic"
