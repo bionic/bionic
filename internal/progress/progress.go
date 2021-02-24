@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gosuri/uilive"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"sync"
 )
 
@@ -44,10 +43,6 @@ func New() Progress {
 }
 
 func (p *Progress) Draw() {
-	if viper.GetBool("verbose") {
-		return
-	}
-
 	var output string
 	for _, name := range p.names {
 		output += fmt.Sprintf("%s %s\n", p.states[name], name)

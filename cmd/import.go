@@ -6,6 +6,7 @@ import (
 	"github.com/bionic-dev/bionic/providers"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -55,14 +56,20 @@ var importCmd = &cobra.Command{
 			importProgress.Init(name)
 		}
 
-		importProgress.Draw()
+		if !viper.GetBool("verbose") {
+			importProgress.Draw()
+		}
 
 		for _, importFn := range importFns {
 			name := importFn.Name()
 			fn := importFn.Call
 
 			errs.Go(func() error {
-				defer importProgress.Draw()
+				defer func() {
+					if !viper.GetBool("verbose") {
+						importProgress.Draw()
+					}
+				}()
 
 				err := fn()
 
