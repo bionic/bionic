@@ -15,8 +15,6 @@ var importCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		providerName, inputPath := args[0], args[1]
 
-		dbPath := rootCmd.PersistentFlags().Lookup("db").Value.String()
-
 		db, err := database.New(dbPath)
 		if err != nil {
 			return err
