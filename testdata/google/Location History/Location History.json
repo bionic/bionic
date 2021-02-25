@@ -1,0 +1,58 @@
+{"locations": [
+  {
+    "timestampMs" : "1414852039656",
+    "latitudeE7" : 570799566,
+    "longitudeE7" : 539860481,
+    "accuracy" : 65
+  },
+  {
+    "timestampMs" : "1515383554970",
+    "latitudeE7" : 555904294,
+    "longitudeE7" : 372740438,
+    "accuracy" : 1217,
+    "activity" : [ {
+      "timestampMs" : "1515383494838",
+      "activity" : [ {
+        "type" : "UNKNOWN",
+        "confidence" : 31
+      }, {
+        "type" : "STILL",
+        "confidence" : 18
+      } ]
+    } ]
+  }, {
+  "timestampMs" : "1515383639035",
+  "latitudeE7" : 556148023,
+  "longitudeE7" : 372820195,
+  "accuracy" : 800,
+  "activity" : [ {
+    "timestampMs" : "1515383639709",
+    "activity" : [ {
+      "type" : "IN_VEHICLE",
+      "confidence" : 41
+    }, {
+      "type" : "IN_ROAD_VEHICLE",
+      "confidence" : 41
+    } ]
+  }, {
+    "timestampMs" : "1515383668502",
+    "activity" : [ {
+      "type" : "UNKNOWN",
+      "confidence" : 30
+    }, {
+      "type" : "IN_VEHICLE",
+      "confidence" : 24
+    } ]
+  } ]
+},
+  {
+    "timestampMs" : "1610015600458",
+    "latitudeE7" : 557463742,
+    "longitudeE7" : 376261118,
+    "accuracy" : 17,
+    "velocity" : 1,
+    "heading" : 95,
+    "altitude" : 127,
+    "verticalAccuracy" : 23
+  }
+]}
