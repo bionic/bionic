@@ -27,6 +27,10 @@ func (telegram) TablePrefix() string {
 	return tablePrefix
 }
 
+func (telegram) ExportDescription() string {
+	return "Desktop App (https://desktop.telegram.org/ only): Settings => Advanced => Export Telegram data"
+}
+
 func (p *telegram) Migrate() error {
 	err := p.DB().AutoMigrate(
 		&Chat{},

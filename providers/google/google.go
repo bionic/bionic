@@ -27,6 +27,10 @@ func (google) TablePrefix() string {
 	return tablePrefix
 }
 
+func (google) ExportDescription() string {
+	return "https://takeout.google.com/"
+}
+
 func (p *google) Migrate() error {
 	err := p.DB().AutoMigrate(
 		&Action{},

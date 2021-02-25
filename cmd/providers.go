@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/bionic-dev/bionic/providers"
+	"github.com/bionic-dev/bionic/providers/provider"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 	"os"
@@ -10,33 +11,17 @@ import (
 	"text/tabwriter"
 )
 
-var providerDescriptions = map[string]string{
-	"airbnb":    "https://www.airbnb.com/privacy/manage-your-data",
-	"amazon":    "https://www.amazon.com/gp/privacycentral/dsar/preview.html",
-	"apple":     "https://privacy.apple.com/ => \"Get a copy of your data\"",
-	"duolingo":  "https://drive-thru.duolingo.com/",
-	"ebay":      "https://www.sarweb.ebay.com/sar",
-	"facebook":  "https://www.facebook.com/dyi",
-	"google":    "https://takeout.google.com/",
-	"instagram": "https://www.instagram.com/download/request/",
-	"reddit":    "https://www.reddit.com/settings/data-request",
-	"snapchat":  "https://accounts.snapchat.com/accounts/downloadmydata",
-	"telegram":  "Desktop App (https://desktop.telegram.org/ only): Settings => Advanced => Export Telegram data",
-	"tiktok":    "Mobile App: Settings => Privacy => Personalization & Data",
-	"tinder":    "https://account.gotinder.com/data",
-}
-
 var providersCmd = &cobra.Command{
 	Use:   "providers",
 	Short: fmt.Sprintf("List providers available for importing using \"bionic %s\"", importCmd.Use),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var lines []string
 
-		for _, provider := range providers.DefaultProviders(nil) {
-			if desc, ok := providerDescriptions[provider.Name()]; ok {
-				lines = append(lines, fmt.Sprintf("%s\t%s\n", provider.Name(), desc))
+		for _, p := range providers.DefaultProviders(nil) {
+			if describer, ok := p.(provider.ExportDescriber); ok {
+				lines = append(lines, fmt.Sprintf("%s\t%s\n", p.Name(), describer.ExportDescription()))
 			} else {
-				lines = append(lines, fmt.Sprintf("%s\t\n", provider.Name()))
+				lines = append(lines, fmt.Sprintf("%s\t\n", p.Name()))
 			}
 		}
 
