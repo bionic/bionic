@@ -24,14 +24,17 @@ var providersCmd = &cobra.Command{
 			scanner := bufio.NewScanner(resp.Body)
 			for scanner.Scan() {
 				line := scanner.Text()
-				if name := strings.TrimPrefix(line, "### "); name != line {
-					line = ""
-					for line == "" && scanner.Scan() {
-						line = scanner.Text()
-					}
-					if line != "" {
-						githubProviders[strings.ToLower(name)] = line
-					}
+				name := strings.TrimPrefix(line, "### ")
+				if name == line {
+					continue
+				}
+
+				var description string
+				for description == "" && scanner.Scan() {
+					description = scanner.Text()
+				}
+				if description != "" {
+					githubProviders[strings.ToLower(name)] = description
 				}
 			}
 
