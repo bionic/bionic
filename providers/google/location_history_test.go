@@ -24,8 +24,6 @@ func TestGoogle_importLocationHistoryFromFile(t *testing.T) {
 	require.NoError(t, db.Preload("Activities.TypeCandidates").Find(&locationHistory).Error)
 	require.Len(t, locationHistory, 4)
 
-	// Sat Nov 01 2014 14:27:19
-
 	assertLocationHistoryItem(t, LocationHistoryItem{
 		Accuracy:    65,
 		Activities:  nil,
