@@ -3,8 +3,8 @@
 !.idea/runConfigurations/
 
 test_data/*/**
+!/**/.gitkeep
 
 dist
 build
-
-!/**/.gitkeep
+db.sqlite

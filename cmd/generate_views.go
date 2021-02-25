@@ -9,7 +9,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var viewsCmd = &cobra.Command{
+var generateViewsCmd = &cobra.Command{
 	Use:   "generate-views",
 	Short: "Create derivative SQL tables and materialized views based on raw imported data",
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -65,9 +65,8 @@ var viewsCmd = &cobra.Command{
 
 		return nil
 	},
-	Args: cobra.MinimumNArgs(0),
 }
 
 func init() {
-	rootCmd.AddCommand(viewsCmd)
+	rootCmd.AddCommand(generateViewsCmd)
 }

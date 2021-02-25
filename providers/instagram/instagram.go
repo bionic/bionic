@@ -27,6 +27,10 @@ func (instagram) TablePrefix() string {
 	return tablePrefix
 }
 
+func (instagram) ExportDescription() string {
+	return "https://www.instagram.com/download/request/"
+}
+
 func (p *instagram) Migrate() error {
 	err := p.DB().AutoMigrate(
 		&AccountHistoryItem{},
