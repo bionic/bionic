@@ -6,6 +6,7 @@ import (
 )
 
 var ErrInputPathShouldBeDirectory = errors.New("input path should be directory")
+var ErrInputPathShouldBeFile = errors.New("input path should be file")
 
 type ImportFn struct {
 	name      string
