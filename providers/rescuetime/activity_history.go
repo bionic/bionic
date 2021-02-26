@@ -11,7 +11,7 @@ import (
 type ActivityHistoryItem struct {
 	gorm.Model `csv:"-"`
 	Activity   string `gorm:"uniqueIndex:rescuetime_activity_history_key"`
-	Details    string `gorm:"uniqueIndex:rescuetime_activity_history_key"`
+	Details    *string `gorm:"uniqueIndex:rescuetime_activity_history_key"`
 	Category   string
 	Class      string
 	Duration   int
@@ -43,14 +43,19 @@ func (p *rescuetime) importActivityHistory(inputPath string) error {
 	var activityHistory []ActivityHistoryItem
 
 	for _, item := range rawActivityHistory {
-		activityHistory = append(activityHistory, ActivityHistoryItem{
+		activityHistoryItem := ActivityHistoryItem{
 			Activity:  item.Activity,
-			Details:   item.Details,
 			Category:  item.Category,
 			Class:     item.Class,
 			Duration:  item.Duration,
 			Timestamp: item.Timestamp,
-		})
+		}
+
+		if item.Details != "No Details" {
+			activityHistoryItem.Details = &item.Details
+		}
+
+		activityHistory = append(activityHistory, activityHistoryItem)
 	}
 
 	err = p.DB().
