@@ -127,17 +127,18 @@ func TestDefaultProviders(t *testing.T) {
 	})
 }
 
-// From https://stackoverflow.com/questions/19374219/how-to-find-the-difference-between-two-slices-of-strings
 func sliceDiff(slice1, slice2 []string) []string {
-	mb := make(map[string]struct{}, len(slice2))
+	sliceMapping := make(map[string]bool, len(slice2))
 	for _, x := range slice2 {
-		mb[x] = struct{}{}
+		sliceMapping[x] = true
 	}
+
 	var diff []string
-	for _, x := range slice1 {
-		if _, found := mb[x]; !found {
-			diff = append(diff, x)
+	for _, value := range slice1 {
+		if !sliceMapping[value] {
+			diff = append(diff, value)
 		}
 	}
+
 	return diff
 }
