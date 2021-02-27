@@ -125,10 +125,10 @@ type ActivityPathPoint struct {
 	gorm.Model
 	ActivitySegment   ActivitySegment
 	ActivitySegmentID int
-	AccuracyMeters    int    `json:"accuracyMeters"`
-	LatE7             int    `json:"latE7"`
-	LngE7             int    `json:"lngE7"`
-	Time              string `json:"timestampMs"`
+	AccuracyMeters    int            `json:"accuracyMeters"`
+	LatE7             int            `json:"latE7"`
+	LngE7             int            `json:"lngE7"`
+	Time              types.DateTime `json:"timestampMs"`
 }
 
 func (ActivityPathPoint) TableName() string {

@@ -1,0 +1,71 @@
+{
+ "timelineObjects": [
+   {"placeVisit": {
+     "location": {"latitudeE7": 340165480, "longitudeE7": -1184961984, "placeId": "ChIJFwxnxM-kwoARewIypbH6UsU", "address": "1351 3rd Street Promenade\nSanta Monica, CA 90401\nUSA", "name": "Downtown Santa Monica", "sourceInfo": {"deviceTag": 59293564}, "locationConfidence": 55.464928},
+     "duration": {"startTimestampMs": "1580837952182", "endTimestampMs": "1580839964675"},
+     "placeConfidence": "MEDIUM_CONFIDENCE",
+     "childVisits": [
+       {
+         "location": {
+           "latitudeE7": 340157520, "longitudeE7": -1184872646, "placeId": "ChIJD0XpyNKkwoARDAiHsXtjcvg", "address": "1654 Lincoln Blvd\nSanta Monica, CA 90404\nUSA", "name": "Box 'N Burn Santa monica Boxing Fitness gym", "sourceInfo": {"deviceTag": 59293564}, "locationConfidence": 25.894972},
+         "duration": {
+           "startTimestampMs": "1580837952182", "endTimestampMs": "1580839964675"},
+         "placeConfidence": "LOW_CONFIDENCE",
+         "centerLatE7": 340154991,
+         "centerLngE7": -1184860798,
+         "visitConfidence": 75,
+         "otherCandidateLocations": [
+           {"latitudeE7": 340154424, "longitudeE7": -1184863484, "placeId": "ChIJj0JGzdKkwoARw0F60V1_eQE", "locationConfidence": 11.792331}
+         ],
+         "editConfirmationStatus": "NOT_CONFIRMED"
+       }],
+     "centerLatE7": 340154991,
+     "centerLngE7": -1184860798,
+     "visitConfidence": 75,
+     "otherCandidateLocations": [],
+     "editConfirmationStatus": "NOT_CONFIRMED",
+     "simplifiedRawPath": {"points": [
+       {"latE7": 340470606, "lngE7": -1185254605, "timestampMs": "1581443654505", "accuracyMeters": 24}
+     ]}
+   }},
+   {"activitySegment": {
+     "startLocation": {
+       "latitudeE7": 340902329, "longitudeE7": -1184383023
+     },
+     "endLocation": {
+       "latitudeE7": 340322573, "longitudeE7": -1184817511
+     },
+     "duration": {
+       "startTimestampMs": "1580584934623",
+       "endTimestampMs": "1580587303307"
+     },
+     "distance": 13958,
+     "activityType": "IN_PASSENGER_VEHICLE",
+     "confidence": "HIGH",
+     "activities": [
+       {"activityType": "IN_PASSENGER_VEHICLE", "probability": 93.55993270874023}
+     ],
+     "waypointPath": {
+       "waypoints": [
+         {"latE7": 340902481, "lngE7": -1184381866}
+       ]
+     },
+     "simplifiedRawPath": {
+       "points": [
+         {"latE7": 340779839, "lngE7": -1184296112, "timestampMs": "1580585205571", "accuracyMeters": 65}
+       ]
+     },
+     "parkingEvent": {
+       "timestampMs": "1580587460047",
+       "location": {"latitudeE7": 340320032, "longitudeE7": -1184827155, "accuracyMetres": 125}
+     },
+     "transitPath": {
+       "transitStops": [
+         {"latitudeE7": 339888109, "longitudeE7": -1184626624, "placeId": "ChIJZYma8pW6woARV34ul5SMRSk", "name": "Venice / Abbot Kinney"}
+       ],
+       "name": "33",
+       "hexRgbColor": "ED7D31"
+     }
+   }}
+ ]
+}

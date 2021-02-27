@@ -2,6 +2,7 @@ package google
 
 import (
 	"github.com/bionic-dev/bionic/providers/provider"
+	_ "github.com/bionic-dev/bionic/testinit"
 	"github.com/bionic-dev/bionic/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -79,6 +80,11 @@ func TestGoogle_importLocationHistoryFromFile(t *testing.T) {
 		LongitudeE7:      376261118,
 		Time:             types.DateTime(time.Date(2021, 1, 7, 10, 33, 20, 458000000, time.UTC)),
 	}, locationHistory[3])
+
+	locationHistory = nil
+	require.NoError(t, p.importLocationHistoryFromFile("testdata/google/Location History/Location History.json"))
+	require.NoError(t, db.Preload("Activities.TypeCandidates").Find(&locationHistory).Error)
+	require.Len(t, locationHistory, 4)
 }
 
 func assertLocationHistoryItem(t *testing.T, expected, actual LocationHistoryItem) {
