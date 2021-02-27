@@ -9,7 +9,7 @@ import (
 )
 
 type ActivityHistoryItem struct {
-	gorm.Model `csv:"-"`
+	gorm.Model
 	Activity   string `gorm:"uniqueIndex:rescuetime_activity_history_key"`
 	Details    *string `gorm:"uniqueIndex:rescuetime_activity_history_key"`
 	Category   string
