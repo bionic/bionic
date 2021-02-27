@@ -42,9 +42,25 @@ func TestInstagram_importAccountHistory(t *testing.T) {
 		Duration:  33,
 		Timestamp: types.DateTime(time.Date(2017, 9, 22, 13, 0, 0, 0, time.FixedZone("", -25200))),
 	}, activityHistory[1])
+
+	require.NoError(t, p.importActivityHistory("testdata/rescuetime/rescuetime-activity-history.csv"))
+
+	var newActivityHistory []ActivityHistoryItem
+	require.NoError(t, db.Find(&newActivityHistory).Error)
+	assertActivityHistories(t, activityHistory, newActivityHistory)
 }
 
 func assertActivityHistoryItem(t *testing.T, expected, actual ActivityHistoryItem) {
+	expected.Model = gorm.Model{}
 	actual.Model = gorm.Model{}
+
 	assert.EqualValues(t, expected, actual)
+}
+
+func assertActivityHistories(t *testing.T, expected, actual []ActivityHistoryItem) {
+	require.Equal(t, len(expected), len(actual))
+
+	for i := range expected {
+		assertActivityHistoryItem(t, expected[i], actual[i])
+	}
 }
