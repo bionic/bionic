@@ -1,25 +1,45 @@
 package rescuetime
 
 import (
+	"bytes"
+	"database/sql"
 	"github.com/bionic-dev/bionic/types"
 	"github.com/gocarina/gocsv"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"io"
 	"os"
 )
 
 type ActivityHistoryItem struct {
 	gorm.Model
-	Activity   string `gorm:"uniqueIndex:rescuetime_activity_history_key"`
-	Details    *string `gorm:"uniqueIndex:rescuetime_activity_history_key"`
-	Category   string
-	Class      string
-	Duration   int
-	Timestamp  types.DateTime `gorm:"uniqueIndex:rescuetime_activity_history_key"`
+	Activity  string                 `csv:"activity" gorm:"uniqueIndex:rescuetime_activity_history_key"`
+	Details   ActivityHistoryDetails `csv:"details" gorm:"uniqueIndex:rescuetime_activity_history_key"`
+	Category  string                 `csv:"category"`
+	Class     string                 `csv:"class"`
+	Duration  int                    `csv:"duration"`
+	Timestamp types.DateTime         `csv:"timestamp" gorm:"uniqueIndex:rescuetime_activity_history_key"`
 }
 
 func (ActivityHistoryItem) TableName() string {
 	return tablePrefix + "activity_history"
+}
+
+type ActivityHistoryDetails struct {
+	sql.NullString
+}
+
+func (ahd *ActivityHistoryDetails) UnmarshalText(text []byte) error {
+	str := string(text)
+
+	if str == "No Details" {
+		return nil
+	}
+
+	ahd.Valid = true
+	ahd.String = str
+
+	return nil
 }
 
 func (p *rescuetime) importActivityHistory(inputPath string) error {
@@ -28,34 +48,14 @@ func (p *rescuetime) importActivityHistory(inputPath string) error {
 		return err
 	}
 
-	var rawActivityHistory []struct {
-		Timestamp types.DateTime
-		Activity  string
-		Details   string
-		Category  string
-		Class     string
-		Duration  int `json:",string"`
-	}
-	if err := gocsv.UnmarshalWithoutHeaders(file, &rawActivityHistory); err != nil {
-		return err
-	}
+	reader := io.MultiReader(
+		bytes.NewBufferString(`"timestamp","activity","details","category","class","duration"`+"\n"),
+		file,
+	)
 
 	var activityHistory []ActivityHistoryItem
-
-	for _, item := range rawActivityHistory {
-		activityHistoryItem := ActivityHistoryItem{
-			Activity:  item.Activity,
-			Category:  item.Category,
-			Class:     item.Class,
-			Duration:  item.Duration,
-			Timestamp: item.Timestamp,
-		}
-
-		if item.Details != "No Details" {
-			activityHistoryItem.Details = &item.Details
-		}
-
-		activityHistory = append(activityHistory, activityHistoryItem)
+	if err := gocsv.Unmarshal(reader, &activityHistory); err != nil {
+		return err
 	}
 
 	err = p.DB().

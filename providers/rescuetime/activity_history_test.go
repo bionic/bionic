@@ -1,7 +1,7 @@
 package rescuetime
 
 import (
-	"github.com/bionic-dev/bionic/pkg/ptr"
+	"database/sql"
 	"github.com/bionic-dev/bionic/providers/provider"
 	_ "github.com/bionic-dev/bionic/testinit"
 	"github.com/bionic-dev/bionic/types"
@@ -28,7 +28,7 @@ func TestInstagram_importAccountHistory(t *testing.T) {
 
 	assertActivityHistoryItem(t, ActivityHistoryItem{
 		Activity:  "telegram",
-		Details:   nil,
+		Details:   ActivityHistoryDetails{sql.NullString{Valid: false}},
 		Category:  "Communication & Scheduling",
 		Class:     "Instant Message",
 		Duration:  526,
@@ -36,7 +36,7 @@ func TestInstagram_importAccountHistory(t *testing.T) {
 	}, activityHistory[0])
 	assertActivityHistoryItem(t, ActivityHistoryItem{
 		Activity:  "tripadvisor.com",
-		Details:   ptr.String("The Top 10 Things to Do in Budapest 2017"),
+		Details:   ActivityHistoryDetails{sql.NullString{String: "The Top 10 Things to Do in Budapest 2017", Valid: true}},
 		Category:  "Reference & Learning",
 		Class:     "Travel & Outdoors",
 		Duration:  33,
