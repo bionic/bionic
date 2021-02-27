@@ -388,7 +388,7 @@ func (p *google) processSemanticLocationFile(rc io.ReadCloser) error {
 
 	for i, visit := range placeVisits {
 		for j := range visit.ChildVisits {
-			err := p.DB().
+			err := p.DB().Debug().
 				FirstOrCreate(&placeVisits[i].ChildVisits[j], placeVisits[i].ChildVisits[j].Conditions()).
 				Error
 			if err != nil {
@@ -396,7 +396,7 @@ func (p *google) processSemanticLocationFile(rc io.ReadCloser) error {
 			}
 		}
 	}
-	err = p.DB().
+	err = p.DB().Debug().
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).

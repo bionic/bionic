@@ -27,7 +27,7 @@ func TestGoogle_importSemanticLocationHistoryFromDirectory(t *testing.T) {
 		Preload("OtherCandidateLocations").
 		Preload("SimplifiedRawPathPoints").
 		Preload("ChildVisits.OtherCandidateLocations").
-		Order("place_visit_id asc").
+		Order("id desc").
 		Find(&placeVisits).
 		Error)
 	require.NoError(t, db.
@@ -82,20 +82,14 @@ func TestGoogle_importSemanticLocationHistoryFromDirectory(t *testing.T) {
 			},
 		},
 	}
-	placeVisits[0].Model = gorm.Model{}
-	placeVisits[0].SimplifiedRawPathPoints[0].Model = gorm.Model{}
-	placeVisits[0].SimplifiedRawPathPoints[0].PlaceVisitID = 0
-	placeVisits[0].SimplifiedRawPathPoints[0].PlaceVisit = PlaceVisit{}
-	placeVisits[0].ChildVisits[0].Model = gorm.Model{}
-	placeVisits[0].ChildVisits[0].PlaceVisitID = 0
-	placeVisits[0].ChildVisits[0].PlaceVisit = nil
-	placeVisits[0].ChildVisits[0].OtherCandidateLocations[0].Model = gorm.Model{}
-	placeVisits[0].ChildVisits[0].OtherCandidateLocations[0].PlaceVisitID = 0
-	assert.EqualValues(t, expectedPlaceVisit, placeVisits[0])
+	assertPlaceVisit(t, expectedPlaceVisit, placeVisits[0])
 
 	expectedActivitySegment := ActivitySegment{
 		Activities: []ActivityTypeCandidate{
-			{ActivityType: "IN_PASSENGER_VEHICLE", Probability: 93.55993270874023},
+			{
+				ActivityType: "IN_PASSENGER_VEHICLE",
+				Probability:  93.55993270874023,
+			},
 		},
 		ActivityType:                       "IN_PASSENGER_VEHICLE",
 		Confidence:                         "HIGH",
@@ -129,26 +123,85 @@ func TestGoogle_importSemanticLocationHistoryFromDirectory(t *testing.T) {
 			{LatE7: 340902481, LngE7: -1184381866},
 		},
 	}
-	activitySegments[0].Model = gorm.Model{}
-	activitySegments[0].Activities[0].Model = gorm.Model{}
-	activitySegments[0].Activities[0].ActivitySegmentID = 0
-	activitySegments[0].Activities[0].ActivitySegment = ActivitySegment{}
-	activitySegments[0].SimplifiedRawPathPoints[0].Model = gorm.Model{}
-	activitySegments[0].SimplifiedRawPathPoints[0].ActivitySegmentID = 0
-	activitySegments[0].SimplifiedRawPathPoints[0].ActivitySegment = ActivitySegment{}
-	activitySegments[0].TransitStops[0].Model = gorm.Model{}
-	activitySegments[0].TransitStops[0].ActivitySegmentID = 0
-	activitySegments[0].TransitStops[0].ActivitySegment = ActivitySegment{}
-	activitySegments[0].Waypoints[0].Model = gorm.Model{}
-	activitySegments[0].Waypoints[0].ActivitySegmentID = 0
-	activitySegments[0].Waypoints[0].ActivitySegment = ActivitySegment{}
-	assert.EqualValues(t, expectedActivitySegment, activitySegments[0])
+	assertActivitySegments(t, expectedActivitySegment, activitySegments[0])
 
-	placeVisits = nil
-	activitySegments = nil
+	var newPlaceVisits []PlaceVisit
+	var newActivitySegments []ActivitySegment
 	require.NoError(t, p.importSemanticLocationHistoryFromDirectory("testdata/google/Location History/Semantic Location History/"))
-	require.NoError(t, db.Find(&placeVisits).Error)
-	require.NoError(t, db.Find(&activitySegments).Error)
-	require.Len(t, placeVisits, 2)
-	require.Len(t, activitySegments, 1)
+	require.NoError(t, db.
+		Preload("OtherCandidateLocations").
+		Preload("SimplifiedRawPathPoints").
+		Preload("ChildVisits.OtherCandidateLocations").
+		Order("id desc").
+		Find(&newPlaceVisits).
+		Error)
+	require.NoError(t, db.
+		Preload("Activities").
+		Preload("SimplifiedRawPathPoints").
+		Preload("TransitStops").
+		Preload("Waypoints").
+		Find(&newActivitySegments).
+		Error)
+	require.Len(t, newPlaceVisits, 2)
+	assertPlaceVisit(t, placeVisits[0], newPlaceVisits[0])
+	require.Len(t, newActivitySegments, 1)
+	assertActivitySegments(t, activitySegments[0], newActivitySegments[0])
+
+}
+
+func assertPlaceVisit(t *testing.T, expected, actual PlaceVisit) {
+	expected = convertPlaceVisit(expected)
+	actual = convertPlaceVisit(actual)
+	assert.EqualValues(t, expected, actual)
+}
+
+func convertPlaceVisit(visit PlaceVisit) PlaceVisit {
+	visit.Model = gorm.Model{}
+	visit.PlaceVisitID = 0
+	for i := range visit.SimplifiedRawPathPoints {
+		visit.SimplifiedRawPathPoints[i].Model = gorm.Model{}
+		visit.SimplifiedRawPathPoints[i].PlaceVisitID = 0
+		visit.SimplifiedRawPathPoints[i].PlaceVisit = PlaceVisit{}
+	}
+	for i := range visit.OtherCandidateLocations {
+		visit.OtherCandidateLocations[i].Model = gorm.Model{}
+		visit.OtherCandidateLocations[i].PlaceVisitID = 0
+	}
+	for i, childVisit := range visit.ChildVisits {
+		newChildVisit := convertPlaceVisit(*childVisit)
+		visit.ChildVisits[i] = &newChildVisit
+	}
+
+	return visit
+}
+
+func assertActivitySegments(t *testing.T, expected, actual ActivitySegment) {
+	expected = convertActivitySegment(expected)
+	actual = convertActivitySegment(actual)
+	assert.EqualValues(t, expected, actual)
+}
+
+func convertActivitySegment(segment ActivitySegment) ActivitySegment {
+	segment.Model = gorm.Model{}
+	for i := range segment.Activities {
+		segment.Activities[i].Model = gorm.Model{}
+		segment.Activities[i].ActivitySegmentID = 0
+		segment.Activities[i].ActivitySegment = ActivitySegment{}
+	}
+	for i := range segment.SimplifiedRawPathPoints {
+		segment.SimplifiedRawPathPoints[i].Model = gorm.Model{}
+		segment.SimplifiedRawPathPoints[i].ActivitySegmentID = 0
+		segment.SimplifiedRawPathPoints[i].ActivitySegment = ActivitySegment{}
+	}
+	for i := range segment.TransitStops {
+		segment.TransitStops[i].Model = gorm.Model{}
+		segment.TransitStops[i].ActivitySegmentID = 0
+		segment.TransitStops[i].ActivitySegment = ActivitySegment{}
+	}
+	for i := range segment.Waypoints {
+		segment.Waypoints[i].Model = gorm.Model{}
+		segment.Waypoints[i].ActivitySegmentID = 0
+		segment.Waypoints[i].ActivitySegment = ActivitySegment{}
+	}
+	return segment
 }
