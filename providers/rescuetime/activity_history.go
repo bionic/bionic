@@ -15,7 +15,7 @@ type ActivityHistoryItem struct {
 	gorm.Model
 	Activity string `csv:"activity" gorm:"uniqueIndex:rescuetime_activity_history_key"`
 	// Workaround for NULL in unique index: https://stackoverflow.com/a/8289327
-	Details   ActivityHistoryDetails `csv:"details" gorm:"index:rescuetime_activity_history_key,unique,expression:COALESCE(details\, '')"`
+	Details   ActivityHistoryDetails `csv:"details" gorm:"uniqueIndex:rescuetime_activity_history_key,expression:COALESCE(details\\, '')"`
 	Category  string                 `csv:"category"`
 	Class     string                 `csv:"class"`
 	Duration  int                    `csv:"duration"`
