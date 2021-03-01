@@ -57,7 +57,10 @@ func TestGoogle_importSemanticLocationHistoryFromDirectory(t *testing.T) {
 		PlaceConfidence:             "MEDIUM_CONFIDENCE",
 		VisitConfidence:             75,
 		SimplifiedRawPathPoints: []PlacePathPoint{
-			{AccuracyMeters: 24, LatE7: 340470606, LngE7: -1185254605, Time: types.DateTime(time.Date(2020, 2, 11, 17, 54, 14, 505000000, time.UTC))},
+			{
+				AccuracyMeters: 24, LatE7: 340470606, LngE7: -1185254605,
+				Time: types.DateTime(time.Date(2020, 2, 11, 17, 54, 14, 505000000, time.UTC)),
+			},
 		},
 		OtherCandidateLocations: []CandidateLocation{},
 		ChildVisits: []*PlaceVisit{
