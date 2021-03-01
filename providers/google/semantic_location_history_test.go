@@ -27,7 +27,7 @@ func TestGoogle_importSemanticLocationHistoryFromDirectory(t *testing.T) {
 		Preload("OtherCandidateLocations").
 		Preload("SimplifiedRawPathPoints").
 		Preload("ChildVisits.OtherCandidateLocations").
-		Order("id desc").
+		Order("id asc").
 		Find(&placeVisits).
 		Error)
 	require.NoError(t, db.
@@ -132,7 +132,7 @@ func TestGoogle_importSemanticLocationHistoryFromDirectory(t *testing.T) {
 		Preload("OtherCandidateLocations").
 		Preload("SimplifiedRawPathPoints").
 		Preload("ChildVisits.OtherCandidateLocations").
-		Order("id desc").
+		Order("id asc").
 		Find(&newPlaceVisits).
 		Error)
 	require.NoError(t, db.

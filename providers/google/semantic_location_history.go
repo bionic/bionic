@@ -42,6 +42,14 @@ type ActivitySegment struct {
 	Waypoints []Waypoint
 }
 
+func (s ActivitySegment) Conditions() map[string]interface{} {
+	return map[string]interface{}{
+		"start_location_latitude_e7":  s.StartLocationLatitudeE7,
+		"start_location_longitude_e7": s.StartLocationLongitudeE7,
+		"duration_start_timestamp_ms": s.DurationStartTimestampMs,
+	}
+}
+
 func (ActivitySegment) TableName() string {
 	return tablePrefix + "activity_segments"
 }
@@ -364,46 +372,56 @@ func (p *google) processSemanticLocationFile(rc io.ReadCloser) error {
 		return err
 	}
 
-	var activitySegments []ActivitySegment
-	var placeVisits []PlaceVisit
-
 	for _, timelineObject := range data.TimelineObjects {
 		if timelineObject.ActivitySegment != nil {
-			activitySegments = append(activitySegments, *timelineObject.ActivitySegment)
-		}
-		if timelineObject.PlaceVisit != nil {
-			placeVisits = append(placeVisits, *timelineObject.PlaceVisit)
-		}
-	}
+			var prevActivitySegment ActivitySegment
 
-	err = p.DB().
-		Clauses(clause.OnConflict{
-			DoNothing: true,
-		}).
-		CreateInBatches(activitySegments, 100).
-		Error
-	if err != nil {
-		return err
-	}
-
-	for i, visit := range placeVisits {
-		for j := range visit.ChildVisits {
-			err := p.DB().Debug().
-				FirstOrCreate(&placeVisits[i].ChildVisits[j], placeVisits[i].ChildVisits[j].Conditions()).
+			activitySegment := *timelineObject.ActivitySegment
+			err := p.DB().
+				Limit(1).
+				Find(&prevActivitySegment, activitySegment.Conditions()).
 				Error
 			if err != nil {
 				return err
 			}
+
+			if prevActivitySegment.ID == 0 {
+				err = p.DB().
+					Clauses(clause.OnConflict{
+						DoNothing: true,
+					}).
+					Create(&activitySegment).
+					Error
+				if err != nil {
+					return err
+				}
+			}
 		}
-	}
-	err = p.DB().Debug().
-		Clauses(clause.OnConflict{
-			DoNothing: true,
-		}).
-		CreateInBatches(placeVisits, 100).
-		Error
-	if err != nil {
-		return err
+
+		if timelineObject.PlaceVisit != nil {
+			var prevPlaceVisit PlaceVisit
+
+			placeVisit := *timelineObject.PlaceVisit
+			err := p.DB().
+				Limit(1).
+				Find(&prevPlaceVisit, placeVisit.Conditions()).
+				Error
+			if err != nil {
+				return err
+			}
+
+			if prevPlaceVisit.ID == 0 {
+				err = p.DB().
+					Clauses(clause.OnConflict{
+						DoNothing: true,
+					}).
+					FirstOrCreate(&placeVisit).
+					Error
+				if err != nil {
+					return err
+				}
+			}
+		}
 	}
 
 	return nil
