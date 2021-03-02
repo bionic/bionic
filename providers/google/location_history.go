@@ -3,6 +3,7 @@ package google
 import (
 	"archive/zip"
 	"encoding/json"
+	"github.com/bionic-dev/bionic/providers/provider"
 	"github.com/bionic-dev/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -99,6 +100,10 @@ func (p *google) importLocationHistoryFromArchive(inputPath string) error {
 }
 
 func (p *google) importLocationHistoryFromFile(inputPath string) error {
+	if !provider.IsPathExists(inputPath) {
+		return nil
+	}
+
 	rc, err := os.Open(inputPath)
 	if err != nil {
 		return err
