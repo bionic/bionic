@@ -149,7 +149,6 @@ func TestGoogle_importSemanticLocationHistoryFromDirectory(t *testing.T) {
 	assertPlaceVisit(t, placeVisits[0], newPlaceVisits[0])
 	require.Len(t, newActivitySegments, 1)
 	assertActivitySegments(t, activitySegments[0], newActivitySegments[0])
-
 }
 
 func assertPlaceVisit(t *testing.T, expected, actual PlaceVisit) {
