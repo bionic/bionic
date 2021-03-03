@@ -9,6 +9,9 @@ import (
 const name = "google"
 const tablePrefix = "google_"
 
+const locationHistoryFile = "Location History.json"
+const semanticLocationDirectoryName = "Semantic Location History"
+
 type google struct {
 	provider.Database
 }
@@ -38,6 +41,17 @@ func (p *google) Migrate() error {
 		&LocationInfo{},
 		&Subtitle{},
 		&Detail{},
+		&LocationHistoryItem{},
+		&LocationActivity{},
+		&LocationActivityTypeCandidate{},
+		&ActivitySegment{},
+		&ActivityTypeCandidate{},
+		&ActivityPathPoint{},
+		&TransitStop{},
+		&Waypoint{},
+		&PlaceVisit{},
+		&PlacePathPoint{},
+		&CandidateLocation{},
 	)
 	if err != nil {
 		return err
@@ -57,11 +71,31 @@ func (p *google) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 			p.importActivityFromDirectory,
 			path.Join(inputPath, "My Activity"),
 		),
+		provider.NewImportFn(
+			"Location History",
+			p.importLocationHistoryFromFile,
+			path.Join(inputPath, "Location History", locationHistoryFile),
+		),
+		provider.NewImportFn(
+			"Semantic Location History",
+			p.importSemanticLocationHistoryFromDirectory,
+			path.Join(inputPath, "Location History", semanticLocationDirectoryName),
+		),
 	}
 	archiveProviders := []provider.ImportFn{
 		provider.NewImportFn(
 			"Activity",
 			p.importActivityFromArchive,
+			inputPath,
+		),
+		provider.NewImportFn(
+			"Location History",
+			p.importLocationHistoryFromArchive,
+			inputPath,
+		),
+		provider.NewImportFn(
+			"Semantic Location History",
+			p.importSemanticLocationHistoryFromArchive,
 			inputPath,
 		),
 	}

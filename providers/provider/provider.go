@@ -46,3 +46,8 @@ func IsPathDir(inputPath string) bool {
 
 	return info.IsDir()
 }
+
+func IsPathExists(inputPath string) bool {
+	_, err := os.Stat(inputPath)
+	return err == nil
+}

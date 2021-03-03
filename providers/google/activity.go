@@ -3,6 +3,7 @@ package google
 import (
 	"archive/zip"
 	"encoding/json"
+	"github.com/bionic-dev/bionic/providers/provider"
 	"github.com/bionic-dev/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -127,6 +128,10 @@ func (p *google) importActivityFromArchive(inputPath string) error {
 }
 
 func (p *google) importActivityFromDirectory(inputPath string) error {
+	if !provider.IsPathDir(inputPath) {
+		return nil
+	}
+
 	err := filepath.Walk(inputPath,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
