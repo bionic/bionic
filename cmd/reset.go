@@ -32,4 +32,3 @@ var resetCmd = &cobra.Command{
 	},
 	Args: cobra.MinimumNArgs(1),
 }
-
