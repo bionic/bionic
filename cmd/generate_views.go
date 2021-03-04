@@ -66,4 +66,3 @@ var generateViewsCmd = &cobra.Command{
 		return nil
 	},
 }
-

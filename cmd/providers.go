@@ -38,4 +38,3 @@ var providersCmd = &cobra.Command{
 	},
 	DisableFlagParsing: true,
 }
-
