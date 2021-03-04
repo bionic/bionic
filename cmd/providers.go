@@ -39,6 +39,3 @@ var providersCmd = &cobra.Command{
 	DisableFlagParsing: true,
 }
 
-func init() {
-	rootCmd.AddCommand(providersCmd)
-}

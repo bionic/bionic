@@ -36,6 +36,8 @@ func init() {
 		Use:    "no-help",
 		Hidden: true,
 	})
+
+	rootCmd.AddCommand(importCmd, resetCmd, generateViewsCmd, providersCmd)
 }
 
 func panicOnErr(err error) {
