@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"github.com/bionic-dev/bionic/database"
+	"github.com/bionic-dev/bionic/imports"
 	"github.com/bionic-dev/bionic/internal/progress"
-	"github.com/bionic-dev/bionic/providers"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
@@ -20,7 +20,7 @@ var importCmd = &cobra.Command{
 			return err
 		}
 
-		manager, err := providers.NewManager(db, providers.DefaultProviders(db))
+		manager, err := imports.NewManager(db, imports.DefaultProviders(db))
 		if err != nil {
 			return err
 		}
@@ -80,7 +80,7 @@ var importCmd = &cobra.Command{
 		}
 
 		err = provider.DB().
-			Create(&database.Import{
+			Create(&imports.Import{
 				Provider: provider.Name(),
 			}).
 			Error

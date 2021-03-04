@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/bionic-dev/bionic/providers"
-	"github.com/bionic-dev/bionic/providers/provider"
+	"github.com/bionic-dev/bionic/imports"
+	"github.com/bionic-dev/bionic/imports/providers/provider"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 	"os"
@@ -11,13 +11,13 @@ import (
 	"text/tabwriter"
 )
 
-var providersCmd = &cobra.Command{
-	Use:   "providers",
+var importProvidersCmd = &cobra.Command{
+	Use:   "import-providers",
 	Short: fmt.Sprintf("List providers available for importing using \"bionic %s\"", importCmd.Use),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var lines []string
 
-		for _, p := range providers.DefaultProviders(nil) {
+		for _, p := range imports.DefaultProviders(nil) {
 			if describer, ok := p.(provider.ExportDescriber); ok {
 				lines = append(lines, fmt.Sprintf("%s\t%s\n", p.Name(), describer.ExportDescription()))
 			} else {
@@ -40,5 +40,5 @@ var providersCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(providersCmd)
+	rootCmd.AddCommand(importProvidersCmd)
 }
