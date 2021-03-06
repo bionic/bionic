@@ -1,6 +1,8 @@
 # Bionic
 Bionic is a tool to convert data exports from web apps to a single SQLite database. Bionic currently supports data exports from Google, Apple Health, Spotify, Telegram, RescueTime, Instagram, Twitter and Netflix.
 
+[Schema and demo data](https://bionic-db.vercel.app/db_public).
+
 ![Example of bionic usage](https://user-images.githubusercontent.com/6896447/108840862-f9932f80-75e7-11eb-9014-70afc55ff302.png)
 
 **Fun**: you can use Bionic to explore your own data and discover insights about yourself. Join tables between different sources to create reports like "Songs I listen in different locations" or dive deep into a single source to create "How amount of Telegram messages per week with different people changed over time" report.
@@ -9,9 +11,7 @@ Bionic is a tool to convert data exports from web apps to a single SQLite databa
 
 **Development**: you can use Bionic as a Go package to implement personal data import in your apps.
 
-**Education**: you can include Bionic exercises in your articles, courses or books. Learning to process data on personal records is much more exciting than processing artificial datasets. 
-
-[Schema and demo data](https://bionic-db.vercel.app/db_public).
+**Education**: you can include Bionic exercises in your articles, courses or books. Learning to process data on personal records is much more exciting than processing artificial datasets.
 
 ## Install
 
