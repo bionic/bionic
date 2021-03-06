@@ -21,6 +21,12 @@ According to GDPR, every service has to allow users to export their data in a ma
 brew install bionic-dev/tap/bionic
 ```
 
+Update:
+
+```bash
+brew upgrade bionic-dev/tap/bionic
+```
+
 ### cURL
 
 ```bash
