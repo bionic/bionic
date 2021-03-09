@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/araddon/dateparse"
+	"github.com/mattn/go-sqlite3"
 	"time"
 )
 
@@ -54,5 +55,5 @@ func (dt DateTime) Value() (driver.Value, error) {
 		return nil, nil
 	}
 
-	return time.Time(dt), nil
+	return time.Time(dt).Format(sqlite3.SQLiteTimestampFormats[0]), nil
 }
