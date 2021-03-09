@@ -66,7 +66,3 @@ var generateViewsCmd = &cobra.Command{
 		return nil
 	},
 }
-
-func init() {
-	rootCmd.AddCommand(generateViewsCmd)
-}
