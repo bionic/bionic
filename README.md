@@ -60,7 +60,7 @@ but filtered only to include search queries and altered to have the search query
 
 To generate or update views run:
 ```bash
-bionic views
+bionic generate-views --db db.sqlite
 ```
 
 ### Query
