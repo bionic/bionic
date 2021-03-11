@@ -8,7 +8,7 @@ import (
 
 func (p *markdown) googlePlaceVisits() error {
 	var data []struct {
-		Date   string
+		Date     string
 		Location string
 	}
 

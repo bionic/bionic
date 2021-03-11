@@ -69,4 +69,3 @@ func TestManager_GetByName(t *testing.T) {
 		assert.True(t, errors.Is(err, ErrProviderNotFound))
 	})
 }
-
