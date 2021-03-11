@@ -140,10 +140,11 @@ func (p *google) processLocationHistoryFile(rc io.ReadCloser) error {
 
 func (p *google) saveLocationHistory(items []LocationHistoryItem) error {
 	err := p.DB().
+		Session(&gorm.Session{CreateBatchSize: 1000}).
 		Clauses(clause.OnConflict{
 			DoNothing: true,
 		}).
-		CreateInBatches(items, 1000).
+		Create(items).
 		Error
 	return err
 }

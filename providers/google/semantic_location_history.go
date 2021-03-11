@@ -420,7 +420,7 @@ func (p *google) processSemanticLocationFile(rc io.ReadCloser) error {
 					Clauses(clause.OnConflict{
 						DoNothing: true,
 					}).
-					FirstOrCreate(&placeVisit).
+					FirstOrCreate(&placeVisit, placeVisit.Conditions()).
 					Error
 				if err != nil {
 					return err
