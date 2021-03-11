@@ -37,7 +37,7 @@ func init() {
 		Hidden: true,
 	})
 
-	rootCmd.AddCommand(importCmd, resetCmd, generateViewsCmd, providersCmd)
+	rootCmd.AddCommand(importCmd, resetCmd, generateViewsCmd, providersCmd, exportCmd)
 }
 
 func panicOnErr(err error) {

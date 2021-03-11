@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/bionic-dev/bionic/database"
-	"github.com/bionic-dev/bionic/providers"
+	"github.com/bionic-dev/bionic/imports"
 
 	"github.com/spf13/cobra"
 )
@@ -18,7 +18,7 @@ var resetCmd = &cobra.Command{
 			return err
 		}
 
-		manager, err := providers.NewManager(db, providers.DefaultProviders(db))
+		manager, err := imports.NewManager(db, imports.DefaultProviders(db))
 		if err != nil {
 			return err
 		}
