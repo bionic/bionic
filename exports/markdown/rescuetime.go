@@ -8,7 +8,7 @@ import (
 
 func (p *markdown) rescueTime() error {
 	var data []struct {
-		Date string
+		Date     string
 		Category string
 		Class    string
 	}

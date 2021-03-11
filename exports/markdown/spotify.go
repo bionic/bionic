@@ -37,7 +37,7 @@ func (p *markdown) spotify() error {
 		artistName := strings.TrimLeft(item.Artist, "#")
 
 		if !artists[artistName] {
-			p.pages = append(p.pages,  &Page{
+			p.pages = append(p.pages, &Page{
 				Title: artistName,
 				Tag:   "artist",
 			})

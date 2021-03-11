@@ -20,8 +20,12 @@ func (ct ChildType) String() string {
 	switch ct {
 	case ChildSpotify:
 		return "Spotify"
+	case ChildRescueTime:
+		return "RescueTime"
+	case ChildGooglePlaceVisit:
+		return "Google Places"
 	default:
-		return ""
+		panic("unknown child type")
 	}
 }
 
