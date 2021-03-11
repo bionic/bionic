@@ -9,7 +9,6 @@ import (
 func (p *markdown) rescueTime() error {
 	var data []struct {
 		Date string
-		//Activity string
 		Category string
 		Class    string
 	}
@@ -23,8 +22,8 @@ func (p *markdown) rescueTime() error {
 		).
 		Find(&data)
 
-	categoryPages := map[string]*Page{}
-	classPages := map[string]*Page{}
+	categories := map[string]bool{}
+	classes := map[string]bool{}
 
 	for _, item := range data {
 		date, err := time.Parse("2006-01-02", item.Date)
@@ -34,32 +33,20 @@ func (p *markdown) rescueTime() error {
 
 		datePage := p.pageForDate(date)
 
-		var categoryPage *Page
-
-		if page, ok := categoryPages[item.Category]; ok {
-			categoryPage = page
-		} else {
-			categoryPage = &Page{
+		if !categories[item.Category] {
+			p.pages = append(p.pages, &Page{
 				Title: item.Category,
 				Tag:   "category",
-			}
-
-			categoryPages[item.Category] = categoryPage
-			p.pages = append(p.pages, categoryPage)
+			})
+			categories[item.Category] = true
 		}
 
-		var classPage *Page
-
-		if page, ok := classPages[item.Class]; ok {
-			classPage = page
-		} else {
-			classPage = &Page{
+		if !classes[item.Class] {
+			p.pages = append(p.pages, &Page{
 				Title: item.Class,
 				Tag:   "class",
-			}
-
-			classPages[item.Class] = classPage
-			p.pages = append(p.pages, classPage)
+			})
+			classes[item.Class] = true
 		}
 
 		datePage.Children = append(datePage.Children, Child{

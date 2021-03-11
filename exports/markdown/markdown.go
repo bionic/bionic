@@ -1,44 +1,14 @@
 package markdown
 
 import (
-	"fmt"
+	"context"
 	"github.com/bionic-dev/bionic/exports/provider"
 	"github.com/bionic-dev/bionic/internal/provider/database"
+	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 	"os"
-	"path"
-	"sort"
-	"strings"
 	"time"
 )
-
-type ChildType int
-
-const (
-	ChildSpotify ChildType = iota + 1
-	ChildRescueTime
-	ChildGooglePlaceVisit
-)
-
-func (ct ChildType) String() string {
-	switch ct {
-	case ChildSpotify:
-		return "Spotify"
-	default:
-		return ""
-	}
-}
-
-type Page struct {
-	Title    string
-	Children []Child
-	Tag      string
-}
-
-type Child struct {
-	String string
-	Type   ChildType
-}
 
 type markdown struct {
 	database.Database
@@ -77,36 +47,16 @@ func (p *markdown) Export(outputPath string) error {
 		return err
 	}
 
+	errs, _ := errgroup.WithContext(context.Background())
+
 	for _, page := range p.pages {
-		title := strings.Replace(page.Title, "/", "\\", -1)
-
-		file, err := os.OpenFile(path.Join(outputPath, fmt.Sprintf("%s.md", title)), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-		if err != nil {
-			return err
-		}
-
-		sort.Slice(page.Children, func(i, j int) bool {
-			return page.Children[i].Type < page.Children[j].Type
+		page := page
+		errs.Go(func() error {
+			return page.Write(outputPath)
 		})
-
-		var previousChildren ChildType
-
-		for _, children := range page.Children {
-			if children.Type != previousChildren {
-				file.WriteString(fmt.Sprintf("# %s\n", children.Type))
-				previousChildren = children.Type
-			}
-			file.WriteString(fmt.Sprintf("- %s\n", strings.Replace(children.String, "/", "\\", -1)))
-		}
-
-		if page.Tag != "" {
-			file.WriteString(fmt.Sprintf("\n#%s", page.Tag))
-		}
-
-		file.Close()
 	}
 
-	return nil
+	return errs.Wait()
 }
 
 func (p *markdown) pageForDate(date time.Time) *Page {

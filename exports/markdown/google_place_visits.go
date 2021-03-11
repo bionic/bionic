@@ -20,7 +20,7 @@ func (p *markdown) googlePlaceVisits() error {
 		).
 		Find(&data)
 
-	locationPages := map[string]*Page{}
+	locations := map[string]bool{}
 
 	for _, item := range data {
 		date, err := time.Parse("2006-01-02", item.Date)
@@ -30,18 +30,12 @@ func (p *markdown) googlePlaceVisits() error {
 
 		datePage := p.pageForDate(date)
 
-		var locationPage *Page
-
-		if page, ok := locationPages[item.Location]; ok {
-			locationPage = page
-		} else {
-			locationPage = &Page{
+		if !locations[item.Location] {
+			p.pages = append(p.pages, &Page{
 				Title: item.Location,
 				Tag:   "location",
-			}
-
-			locationPages[item.Location] = locationPage
-			p.pages = append(p.pages, locationPage)
+			})
+			locations[item.Location] = true
 		}
 
 		datePage.Children = append(datePage.Children, Child{

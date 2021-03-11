@@ -23,8 +23,8 @@ func (p *markdown) spotify() error {
 		).
 		Find(&data)
 
-	artistPages := map[string]*Page{}
-	trackPages := map[string]*Page{}
+	artists := map[string]bool{}
+	tracks := map[string]bool{}
 
 	for _, item := range data {
 		date, err := time.Parse("2006-01-02", item.Date)
@@ -34,30 +34,20 @@ func (p *markdown) spotify() error {
 
 		datePage := p.pageForDate(date)
 
-		var artistPage *Page
-
 		artistName := strings.TrimLeft(item.Artist, "#")
 
-		if page, ok := artistPages[artistName]; ok {
-			artistPage = page
-		} else {
-			artistPage = &Page{
+		if !artists[artistName] {
+			p.pages = append(p.pages,  &Page{
 				Title: artistName,
 				Tag:   "artist",
-			}
-
-			artistPages[artistName] = artistPage
-			p.pages = append(p.pages, artistPage)
+			})
+			artists[artistName] = true
 		}
-
-		var trackPage *Page
 
 		trackName := fmt.Sprintf("%s – %s", artistName, item.Track)
 
-		if page, ok := trackPages[trackName]; ok {
-			trackPage = page
-		} else {
-			trackPage = &Page{
+		if !tracks[trackName] {
+			p.pages = append(p.pages, &Page{
 				Title: trackName,
 				Tag:   "track",
 				Children: []Child{
@@ -65,10 +55,8 @@ func (p *markdown) spotify() error {
 						String: fmt.Sprintf("[[%s]]", artistName),
 					},
 				},
-			}
-
-			trackPages[trackName] = trackPage
-			p.pages = append(p.pages, trackPage)
+			})
+			tracks[trackName] = true
 		}
 
 		datePage.Children = append(datePage.Children, Child{
