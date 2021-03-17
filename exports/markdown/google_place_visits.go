@@ -7,39 +7,27 @@ import (
 )
 
 func (p *markdown) googlePlaceVisits() error {
-	var data []struct {
-		Date     string
-		Location string
-	}
+	var visits []google.PlaceVisit
 
 	p.DB().
 		Model(google.PlaceVisit{}).
-		Distinct(
-			"STRFTIME('%Y-%m-%d', duration_start_timestamp_ms) date",
-			"location_name location",
-		).
-		Find(&data)
+		Find(&visits)
 
 	locations := map[string]bool{}
 
-	for _, item := range data {
-		date, err := time.Parse("2006-01-02", item.Date)
-		if err != nil {
-			return err
-		}
+	for _, visit := range visits {
+		datePage := p.pageForDate(time.Time(visit.DurationStartTimestampMs))
 
-		datePage := p.pageForDate(date)
-
-		if !locations[item.Location] {
+		if !locations[visit.LocationName] {
 			p.pages = append(p.pages, &Page{
-				Title: item.Location,
+				Title: visit.LocationName,
 				Tag:   "location",
 			})
-			locations[item.Location] = true
+			locations[visit.LocationName] = true
 		}
 
 		datePage.Children = append(datePage.Children, Child{
-			String: fmt.Sprintf("[[%s]]", item.Location),
+			String: fmt.Sprintf("[[%s]]", visit.LocationName),
 			Type:   ChildGooglePlaceVisit,
 		})
 	}

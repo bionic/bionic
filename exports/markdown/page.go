@@ -6,6 +6,7 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"time"
 )
 
 type ChildType int
@@ -38,6 +39,7 @@ type Page struct {
 type Child struct {
 	String string
 	Type   ChildType
+	Time   time.Time
 }
 
 func (p *Page) Write(outputPath string) error {
@@ -52,20 +54,12 @@ func (p *Page) Write(outputPath string) error {
 	}()
 
 	sort.Slice(p.Children, func(i, j int) bool {
-		return p.Children[i].Type < p.Children[j].Type
+		return p.Children[i].Time.Before(p.Children[j].Time)
 	})
 
-	var previousChildren ChildType
-
 	for _, children := range p.Children {
-		if children.Type != previousChildren {
-			if _, err := file.WriteString(fmt.Sprintf("# %s\n", children.Type)); err != nil {
-				return err
-			}
-			previousChildren = children.Type
-		}
-
-		escaped := strings.Replace(children.String, "/", "\\", -1)
+		line := children.Time.Format("3:04 pm") + ": " + children.String
+		escaped := strings.Replace(line, "/", "\\", -1)
 		if _, err := file.WriteString(fmt.Sprintf("- %s\n", escaped)); err != nil {
 			return err
 		}
