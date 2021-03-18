@@ -3,6 +3,7 @@ package markdown
 import (
 	"fmt"
 	"github.com/bionic-dev/bionic/imports/rescuetime"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -13,6 +14,9 @@ func (p *markdown) rescueTime() error {
 		Class    string
 	}
 
+	categories := map[string]bool{}
+	classes := map[string]bool{}
+
 	p.DB().
 		Model(rescuetime.ActivityHistoryItem{}).
 		Distinct(
@@ -20,40 +24,39 @@ func (p *markdown) rescueTime() error {
 			"category",
 			"class",
 		).
-		Find(&data)
+		FindInBatches(&data, 100, func(tx *gorm.DB, batch int) error {
+			for _, item := range data {
+				date, err := time.Parse("2006-01-02", item.Date)
+				if err != nil {
+					return err
+				}
 
-	categories := map[string]bool{}
-	classes := map[string]bool{}
+				datePage := p.pageForDate(date)
 
-	for _, item := range data {
-		date, err := time.Parse("2006-01-02", item.Date)
-		if err != nil {
-			return err
-		}
+				if !categories[item.Category] {
+					p.pages = append(p.pages, &Page{
+						Title: item.Category,
+						Tag:   "category",
+					})
+					categories[item.Category] = true
+				}
 
-		datePage := p.pageForDate(date)
+				if !classes[item.Class] {
+					p.pages = append(p.pages, &Page{
+						Title: item.Class,
+						Tag:   "class",
+					})
+					classes[item.Class] = true
+				}
 
-		if !categories[item.Category] {
-			p.pages = append(p.pages, &Page{
-				Title: item.Category,
-				Tag:   "category",
-			})
-			categories[item.Category] = true
-		}
+				datePage.Children = append(datePage.Children, Child{
+					String: fmt.Sprintf("[[%s]], [[%s]]", item.Category, item.Class),
+					Type:   ChildRescueTime,
+				})
+			}
 
-		if !classes[item.Class] {
-			p.pages = append(p.pages, &Page{
-				Title: item.Class,
-				Tag:   "class",
-			})
-			classes[item.Class] = true
-		}
-
-		datePage.Children = append(datePage.Children, Child{
-			String: fmt.Sprintf("[[%s]], [[%s]]", item.Category, item.Class),
-			Type:   ChildRescueTime,
+			return nil
 		})
-	}
 
 	return nil
 }

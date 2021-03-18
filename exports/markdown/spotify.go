@@ -3,6 +3,7 @@ package markdown
 import (
 	"fmt"
 	"github.com/bionic-dev/bionic/imports/spotify"
+	"gorm.io/gorm"
 	"strings"
 	"time"
 )
@@ -15,21 +16,22 @@ func (p *markdown) spotify() error {
 	p.DB().
 		Model(spotify.StreamingHistoryItem{}).
 		Where("ms_played > ?", spotifyMinMsPlayed).
-		Find(&items)
+		FindInBatches(&items, 100, func(tx *gorm.DB, batch int) error {
+			for _, item := range items {
+				datePage := p.pageForDate(time.Time(item.EndTime))
 
-	for _, item := range items {
-		datePage := p.pageForDate(time.Time(item.EndTime))
+				artistName := strings.TrimLeft(item.ArtistName, "#")
 
-		artistName := strings.TrimLeft(item.ArtistName, "#")
+				trackName := fmt.Sprintf("%s – %s", artistName, item.TrackName)
 
-		trackName := fmt.Sprintf("%s – %s", artistName, item.TrackName)
-
-		datePage.Children = append(datePage.Children, Child{
-			String: trackName,
-			Type:   ChildSpotify,
-			Time:   time.Time(item.EndTime),
+				datePage.Children = append(datePage.Children, Child{
+					String: trackName,
+					Type:   ChildSpotify,
+					Time:   time.Time(item.EndTime),
+				})
+			}
+			return nil
 		})
-	}
 
 	return nil
 }
