@@ -14,13 +14,13 @@ type markdown struct {
 	database.Database
 
 	pages     []*Page
-	datePages map[time.Time]*Page
+	datePages map[string]*Page
 }
 
 func New(db *gorm.DB) provider.Provider {
 	return &markdown{
 		Database:  database.New(db),
-		datePages: make(map[time.Time]*Page),
+		datePages: make(map[string]*Page),
 	}
 }
 
@@ -36,6 +36,9 @@ func (p *markdown) Export(outputPath string) error {
 	if err := p.googlePlaceVisits(); err != nil {
 		return err
 	}
+	if err := p.googleSearches(); err != nil {
+		return err
+	}
 	if err := p.spotify(); err != nil {
 		return err
 	}
@@ -49,10 +52,16 @@ func (p *markdown) Export(outputPath string) error {
 
 	errs, _ := errgroup.WithContext(context.Background())
 
+	// Avoid too many opened files
+	ch := make(chan struct{}, 100)
+
 	for _, page := range p.pages {
 		page := page
 		errs.Go(func() error {
-			return page.Write(outputPath)
+			ch <- struct{}{}
+			err := page.Write(outputPath)
+			<-ch
+			return err
 		})
 	}
 
@@ -60,15 +69,16 @@ func (p *markdown) Export(outputPath string) error {
 }
 
 func (p *markdown) pageForDate(date time.Time) *Page {
-	if page, ok := p.datePages[date]; ok {
+	dateString := date.Format("2006-01-02")
+
+	if page, ok := p.datePages[dateString]; ok {
 		return page
 	} else {
 		page := &Page{
-			Title: date.Format("2006-01-02"),
-			Tag:   "date",
+			Title: dateString,
 		}
 
-		p.datePages[date] = page
+		p.datePages[dateString] = page
 		p.pages = append(p.pages, page)
 
 		return page

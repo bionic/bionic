@@ -3,46 +3,36 @@ package markdown
 import (
 	"fmt"
 	"github.com/bionic-dev/bionic/imports/google"
+	"gorm.io/gorm"
 	"time"
 )
 
 func (p *markdown) googlePlaceVisits() error {
-	var data []struct {
-		Date     string
-		Location string
-	}
-
-	p.DB().
-		Model(google.PlaceVisit{}).
-		Distinct(
-			"STRFTIME('%Y-%m-%d', duration_start_timestamp_ms) date",
-			"location_name location",
-		).
-		Find(&data)
+	var visits []google.PlaceVisit
 
 	locations := map[string]bool{}
 
-	for _, item := range data {
-		date, err := time.Parse("2006-01-02", item.Date)
-		if err != nil {
-			return err
-		}
+	p.DB().
+		Model(google.PlaceVisit{}).
+		FindInBatches(&visits, 100, func(tx *gorm.DB, batch int) error {
+			for _, visit := range visits {
+				datePage := p.pageForDate(time.Time(visit.DurationStartTimestampMs))
 
-		datePage := p.pageForDate(date)
+				if !locations[visit.LocationName] {
+					p.pages = append(p.pages, &Page{
+						Title: visit.LocationName,
+						Tag:   "location",
+					})
+					locations[visit.LocationName] = true
+				}
 
-		if !locations[item.Location] {
-			p.pages = append(p.pages, &Page{
-				Title: item.Location,
-				Tag:   "location",
-			})
-			locations[item.Location] = true
-		}
-
-		datePage.Children = append(datePage.Children, Child{
-			String: fmt.Sprintf("[[%s]]", item.Location),
-			Type:   ChildGooglePlaceVisit,
+				datePage.Children = append(datePage.Children, Child{
+					String: fmt.Sprintf("[[%s]]", visit.LocationName),
+					Type:   ChildGooglePlaceVisit,
+				})
+			}
+			return nil
 		})
-	}
 
 	return nil
 }

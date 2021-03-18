@@ -1,0 +1,29 @@
+package markdown
+
+import (
+	"fmt"
+	"github.com/bionic-dev/bionic/views/google"
+	"gorm.io/gorm"
+	"time"
+)
+
+func (p *markdown) googleSearches() error {
+	var searches []google.Search
+
+	p.DB().
+		Model(google.Search{}).
+		FindInBatches(&searches, 100, func(tx *gorm.DB, batch int) error {
+			for _, search := range searches {
+				datePage := p.pageForDate(time.Time(search.Time))
+				datePage.Children = append(datePage.Children, Child{
+					String: fmt.Sprintf("Searched in Google for '%s'", search.Text),
+					Type:   ChildGooglePlaceVisit,
+					Time:   time.Time(search.Time),
+				})
+			}
+
+			return nil
+		})
+
+	return nil
+}
