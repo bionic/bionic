@@ -8,30 +8,16 @@ import (
 )
 
 func (p *markdown) rescueTime() error {
-	var data []struct {
-		Date     string
-		Category string
-		Class    string
-	}
+	var data []rescuetime.ActivityHistoryItem
 
 	categories := map[string]bool{}
 	classes := map[string]bool{}
 
 	p.DB().
 		Model(rescuetime.ActivityHistoryItem{}).
-		Distinct(
-			"STRFTIME('%Y-%m-%d', timestamp) date",
-			"category",
-			"class",
-		).
 		FindInBatches(&data, 100, func(tx *gorm.DB, batch int) error {
 			for _, item := range data {
-				date, err := time.Parse("2006-01-02", item.Date)
-				if err != nil {
-					return err
-				}
-
-				datePage := p.pageForDate(date)
+				datePage := p.pageForDate(time.Time(item.Timestamp))
 
 				if !categories[item.Category] {
 					p.pages = append(p.pages, &Page{
