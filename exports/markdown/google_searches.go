@@ -11,14 +11,15 @@ func (p *markdown) googleSearches() error {
 	var searches []google.Search
 
 	p.DB().
-		Model(google.Search{}).
 		FindInBatches(&searches, 100, func(tx *gorm.DB, batch int) error {
 			for _, search := range searches {
-				datePage := p.pageForDate(time.Time(search.Time))
+				localTime := time.Time(search.Time).Local()
+
+				datePage := p.pageForDate(localTime)
 				datePage.Children = append(datePage.Children, Child{
 					String: fmt.Sprintf("Searched in Google for '%s'", search.Text),
 					Type:   ChildGooglePlaceVisit,
-					Time:   time.Time(search.Time),
+					Time:   localTime,
 				})
 			}
 

@@ -13,10 +13,11 @@ func (p *markdown) googlePlaceVisits() error {
 	locations := map[string]bool{}
 
 	p.DB().
-		Model(google.PlaceVisit{}).
 		FindInBatches(&visits, 100, func(tx *gorm.DB, batch int) error {
 			for _, visit := range visits {
-				datePage := p.pageForDate(time.Time(visit.DurationStartTimestampMs))
+				localTime := time.Time(visit.DurationStartTimestampMs).Local()
+
+				datePage := p.pageForDate(localTime)
 
 				if !locations[visit.LocationName] {
 					p.pages = append(p.pages, &Page{
@@ -29,6 +30,7 @@ func (p *markdown) googlePlaceVisits() error {
 				datePage.Children = append(datePage.Children, Child{
 					String: fmt.Sprintf("[[%s]]", visit.LocationName),
 					Type:   ChildGooglePlaceVisit,
+					Time:   localTime,
 				})
 			}
 			return nil

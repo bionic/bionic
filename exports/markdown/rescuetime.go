@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+const rescuetimeMinSecondsDuration = 5 * 60
+
 func (p *markdown) rescueTime() error {
 	var data []rescuetime.ActivityHistoryItem
 
@@ -14,10 +16,19 @@ func (p *markdown) rescueTime() error {
 	classes := map[string]bool{}
 
 	p.DB().
-		Model(rescuetime.ActivityHistoryItem{}).
+		Where("duration > ?", rescuetimeMinSecondsDuration).
+		Group("category,class,timestamp").
+		Select("category", "class", "timestamp", "sum(duration) duration", "min(id) id").
 		FindInBatches(&data, 100, func(tx *gorm.DB, batch int) error {
 			for _, item := range data {
-				datePage := p.pageForDate(time.Time(item.Timestamp))
+				timestamp := time.Time(item.Timestamp)
+				_, timestampOffset := timestamp.Zone()
+				_, localOffset := time.Now().Zone()
+
+				utcTime := timestamp.UTC().Add(time.Duration(timestampOffset) * time.Second)
+				localTime := utcTime.Local().Add(time.Duration(-localOffset) * time.Second)
+
+				datePage := p.pageForDate(localTime)
 
 				if !categories[item.Category] {
 					p.pages = append(p.pages, &Page{
@@ -36,8 +47,14 @@ func (p *markdown) rescueTime() error {
 				}
 
 				datePage.Children = append(datePage.Children, Child{
-					String: fmt.Sprintf("[[%s]], [[%s]]", item.Category, item.Class),
-					Type:   ChildRescueTime,
+					String: fmt.Sprintf(
+						"[[%s]], [[%s]] for %s",
+						item.Category,
+						item.Class,
+						(time.Second * time.Duration(item.Duration)).String(),
+					),
+					Type: ChildRescueTime,
+					Time: localTime,
 				})
 			}
 
