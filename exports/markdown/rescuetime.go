@@ -73,11 +73,34 @@ FROM (
 		activity := make([]string, len(items))
 
 		for i, item := range items {
+			duration := (time.Second * time.Duration(item.Duration)).Round(time.Minute)
+			hours := duration / time.Hour
+			duration -= hours * time.Hour
+			minutes := duration / time.Minute
+
+			var durationParts []string
+			if hours > 0 {
+				hoursStr := fmt.Sprintf("%d hour", hours)
+				if hours != 1 {
+					hoursStr += "s"
+				}
+
+				durationParts = append(durationParts, hoursStr)
+			}
+			if minutes > 0 {
+				minutesStr := fmt.Sprintf("%d minute", minutes)
+				if minutes != 1 {
+					minutesStr += "s"
+				}
+
+				durationParts = append(durationParts, minutesStr)
+			}
+
 			activity[i] = fmt.Sprintf(
 				"[[%s]] [[%s]] for %s",
 				item.Category,
 				item.Class,
-				(time.Second * time.Duration(item.Duration)).String(),
+				strings.Join(durationParts, " "),
 			)
 		}
 
@@ -128,4 +151,29 @@ func (p *markdown) insertRescuetimeItem(
 	}
 
 	items[localTime] = append(items[localTime], item)
+}
+
+func formatRescuetimeDuration(d time.Duration) string {
+	formatUnit := func(d time.Duration, unit string) string {
+		result := fmt.Sprintf("%d %s", d, unit)
+		if d != 1 {
+			result += "s"
+		}
+
+		return result
+	}
+
+	h := d / time.Hour
+	d -= h * time.Hour
+	m := d / time.Minute
+
+	var parts []string
+	if h > 0 {
+		parts = append(parts, formatUnit(h, "hour"))
+	}
+	if m > 0 {
+		parts = append(parts, formatUnit(m, "minute"))
+	}
+
+	return strings.Join(parts, " ")
 }
