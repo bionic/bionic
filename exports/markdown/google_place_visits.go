@@ -28,9 +28,16 @@ func (p *markdown) googlePlaceVisits() error {
 				}
 
 				datePage.Children = append(datePage.Children, Child{
-					String: fmt.Sprintf("[[%s]]", visit.LocationName),
-					Type:   ChildGooglePlaceVisit,
-					Time:   localTime,
+					String: fmt.Sprintf(
+						"[[%s]] for %s",
+						visit.LocationName,
+						formatDuration(
+							time.Time(visit.DurationEndTimestampMs).Sub(time.Time(visit.DurationStartTimestampMs)),
+							time.Minute,
+						),
+					),
+					Type: ChildGooglePlaceVisit,
+					Time: localTime,
 				})
 			}
 			return nil

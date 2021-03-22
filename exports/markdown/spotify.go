@@ -23,7 +23,12 @@ func (p *markdown) spotify() error {
 
 				artistName := strings.TrimLeft(item.ArtistName, "#")
 
-				trackName := fmt.Sprintf("[[%s]] – %s", artistName, item.TrackName)
+				trackName := fmt.Sprintf(
+					"[[%s]] – %s for %s",
+					artistName,
+					item.TrackName,
+					formatDuration(time.Millisecond*time.Duration(item.MsPlayed), time.Second),
+				)
 
 				datePage.Children = append(datePage.Children, Child{
 					String: trackName,
