@@ -40,14 +40,17 @@ func (dt *DateTime) UnmarshalCSV(csv string) (err error) {
 }
 
 func (dt *DateTime) Scan(src interface{}) error {
-	t, ok := src.(time.Time)
-	if !ok {
-		return fmt.Errorf("failed to scan value into time.Time: %+v", src)
+	switch v := src.(type) {
+	case time.Time:
+		*dt = DateTime(v)
+		return nil
+	case string:
+		return dt.UnmarshalText([]byte(v))
+	case []byte:
+		return dt.UnmarshalText(v)
+	default:
+		return fmt.Errorf("failed to scan value into DateTime: %+v", src)
 	}
-
-	*dt = DateTime(t)
-
-	return nil
 }
 
 func (dt DateTime) Value() (driver.Value, error) {
