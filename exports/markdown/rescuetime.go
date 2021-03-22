@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bionic-dev/bionic/imports/rescuetime"
 	"gorm.io/gorm"
+	"strings"
 	"time"
 )
 
@@ -33,6 +34,8 @@ FROM (
 	var mergedItem *rescuetime.ActivityHistoryItem
 	var offset int
 
+	itemsByTimestamps := map[time.Time][]*rescuetime.ActivityHistoryItem{}
+
 	err = p.DB().
 		Unscoped().
 		Model(&rescuetime.ActivityHistoryItem{}).
@@ -43,11 +46,11 @@ FROM (
 
 				if mergedItem != nil {
 					if mergedItem.Category == item.Category && mergedItem.Class == item.Class &&
-						time.Time(mergedItem.Timestamp).Add(time.Duration(offset) * time.Hour).Equal(time.Time(item.Timestamp)) {
+						time.Time(mergedItem.Timestamp).Add(time.Duration(offset)*time.Hour).Equal(time.Time(item.Timestamp)) {
 						mergedItem.Duration += item.Duration
 						continue
 					} else {
-						p.insertRescuetimeItem(categories, classes, mergedItem)
+						p.insertRescuetimeItem(categories, classes, itemsByTimestamps, mergedItem)
 					}
 				}
 
@@ -62,12 +65,37 @@ FROM (
 		return err
 	}
 
-	p.insertRescuetimeItem(categories, classes, mergedItem)
+	p.insertRescuetimeItem(categories, classes, itemsByTimestamps, mergedItem)
+
+	for timestamp, items := range itemsByTimestamps {
+		datePage := p.pageForDate(timestamp)
+
+		activity := make([]string, len(items))
+
+		for i, item := range items {
+			activity[i] = fmt.Sprintf(
+				"[[%s]] [[%s]] for %s",
+				item.Category,
+				item.Class,
+				(time.Second * time.Duration(item.Duration)).String(),
+			)
+		}
+
+		datePage.Children = append(datePage.Children, Child{
+			String: strings.Join(activity, ", "),
+			Type:   ChildRescueTime,
+			Time:   timestamp,
+		})
+	}
 
 	return nil
 }
 
-func (p *markdown) insertRescuetimeItem(categories, classes map[string]bool, item *rescuetime.ActivityHistoryItem) {
+func (p *markdown) insertRescuetimeItem(
+	categories, classes map[string]bool,
+	items map[time.Time][]*rescuetime.ActivityHistoryItem,
+	item *rescuetime.ActivityHistoryItem,
+) {
 	if item.Duration < rescuetimeMinSecondsDuration {
 		return
 	}
@@ -78,8 +106,6 @@ func (p *markdown) insertRescuetimeItem(categories, classes map[string]bool, ite
 
 	utcTime := timestamp.UTC().Add(time.Duration(timestampOffset) * time.Second)
 	localTime := utcTime.Local().Add(time.Duration(-localOffset) * time.Second)
-
-	datePage := p.pageForDate(localTime)
 
 	if !categories[item.Category] {
 		p.pages = append(p.pages, &Page{
@@ -97,14 +123,9 @@ func (p *markdown) insertRescuetimeItem(categories, classes map[string]bool, ite
 		classes[item.Class] = true
 	}
 
-	datePage.Children = append(datePage.Children, Child{
-		String: fmt.Sprintf(
-			"[[%s]], [[%s]] for %s",
-			item.Category,
-			item.Class,
-			(time.Second * time.Duration(item.Duration)).String(),
-		),
-		Type: ChildRescueTime,
-		Time: localTime,
-	})
+	if _, ok := items[localTime]; !ok {
+		items[localTime] = make([]*rescuetime.ActivityHistoryItem, 0)
+	}
+
+	items[localTime] = append(items[localTime], item)
 }
