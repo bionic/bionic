@@ -65,7 +65,9 @@ FROM (
 		return err
 	}
 
-	p.insertRescuetimeItem(categories, classes, itemsByTimestamps, mergedItem)
+	if mergedItem != nil {
+		p.insertRescuetimeItem(categories, classes, itemsByTimestamps, mergedItem)
+	}
 
 	for timestamp, items := range itemsByTimestamps {
 		datePage := p.pageForDate(timestamp)
@@ -77,7 +79,7 @@ FROM (
 				"[[%s]] [[%s]] for %s",
 				item.Category,
 				item.Class,
-				formatDuration(time.Second * time.Duration(item.Duration), time.Minute),
+				formatDuration(time.Second*time.Duration(item.Duration), time.Minute),
 			)
 		}
 
