@@ -45,9 +45,7 @@ func (a *Account) UnmarshalXML(decoder *xml.Decoder, start xml.StartElement) err
 	a.BankID = data.AccountInfo.Meta.BankID
 	a.AccountID = data.AccountInfo.Meta.AccountID
 	a.Type = data.AccountInfo.Meta.Type
-	for _, transaction := range data.AccountInfo.TransactionsStruct.Transactions {
-		a.Transactions = append(a.Transactions, transaction)
-	}
+	a.Transactions = append(a.Transactions, data.AccountInfo.TransactionsStruct.Transactions...)
 
 	return nil
 }
