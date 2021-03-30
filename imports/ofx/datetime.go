@@ -9,9 +9,6 @@ import (
 	"time"
 )
 
-// 20210310002816.000[+3:MSK]
-// 20210318
-
 type DateTime ofxgo.Date
 
 func (dt *DateTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
