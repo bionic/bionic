@@ -19,10 +19,7 @@ func (Account) TableName() string {
 }
 
 func (a *Account) UnmarshalXML(decoder *xml.Decoder, start xml.StartElement) error {
-	type Alias Account
-
 	var data struct {
-		Alias
 		AccountInfo struct {
 			Currency string `xml:"CURDEF"`
 			Meta     struct {
@@ -30,7 +27,7 @@ func (a *Account) UnmarshalXML(decoder *xml.Decoder, start xml.StartElement) err
 				AccountID string `xml:"ACCTID"`
 				Type      string `xml:"ACCTTYPE"`
 			} `xml:"BANKACCTFROM"`
-			TransactionsStruct struct {
+			TransactionsInfo struct {
 				Transactions []Transaction `xml:"STMTTRN"`
 			} `xml:"BANKTRANLIST"`
 		} `xml:"STMTRS"`
@@ -40,12 +37,11 @@ func (a *Account) UnmarshalXML(decoder *xml.Decoder, start xml.StartElement) err
 		return err
 	}
 
-	*a = Account(data.Alias)
 	a.Currency = data.AccountInfo.Currency
 	a.BankID = data.AccountInfo.Meta.BankID
 	a.AccountID = data.AccountInfo.Meta.AccountID
 	a.Type = data.AccountInfo.Meta.Type
-	a.Transactions = append(a.Transactions, data.AccountInfo.TransactionsStruct.Transactions...)
+	a.Transactions = data.AccountInfo.TransactionsInfo.Transactions
 
 	return nil
 }

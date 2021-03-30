@@ -44,6 +44,8 @@ func TestOFX_importStatement(t *testing.T) {
 	}
 	assertAccount(t, expectedAccount, accounts[0])
 
+	require.NoError(t, p.importStatement("testdata/ofx/statement.ofx"))
+
 	var newAccounts []Account
 	require.NoError(t, p.DB().Preload("Transactions").Find(&newAccounts).Error)
 	require.Len(t, newAccounts, 1)
