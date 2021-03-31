@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 	"github.com/bionic-dev/bionic/database"
+	"github.com/bionic-dev/bionic/imports"
 	"github.com/bionic-dev/bionic/internal/progress"
-	"github.com/bionic-dev/bionic/providers"
-	"github.com/bionic-dev/bionic/providers/provider"
+	"github.com/bionic-dev/bionic/internal/provider/describer"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
@@ -17,7 +17,7 @@ var importCmd = &cobra.Command{
 }
 
 func init() {
-	for _, p := range providers.DefaultProviders(nil) {
+	for _, p := range imports.DefaultProviders(nil) {
 		providerName := p.Name()
 
 		command := &cobra.Command{
@@ -30,7 +30,7 @@ func init() {
 					return err
 				}
 
-				manager, err := providers.NewManager(db, providers.DefaultProviders(db))
+				manager, err := imports.NewManager(db, imports.DefaultProviders(db))
 				if err != nil {
 					return err
 				}
@@ -90,7 +90,7 @@ func init() {
 				}
 
 				err = p.DB().
-					Create(&database.Import{
+					Create(&imports.Import{
 						Provider: p.Name(),
 					}).
 					Error
@@ -107,8 +107,8 @@ func init() {
 			Args: cobra.MinimumNArgs(1),
 		}
 
-		if describer, ok := p.(provider.ExportDescriber); ok {
-			command.Short = describer.ExportDescription()
+		if d, ok := p.(describer.Import); ok {
+			command.Short = d.ImportDescription()
 		}
 
 		importCmd.AddCommand(command)

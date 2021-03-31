@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/bionic-dev/bionic/providers"
-	"github.com/bionic-dev/bionic/providers/provider"
+	"github.com/bionic-dev/bionic/imports"
+	"github.com/bionic-dev/bionic/internal/provider/describer"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 	"os"
@@ -17,9 +17,9 @@ var providersCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var lines []string
 
-		for _, p := range providers.DefaultProviders(nil) {
-			if describer, ok := p.(provider.ExportDescriber); ok {
-				lines = append(lines, fmt.Sprintf("%s\t%s\n", p.Name(), describer.ExportDescription()))
+		for _, p := range imports.DefaultProviders(nil) {
+			if d, ok := p.(describer.Export); ok {
+				lines = append(lines, fmt.Sprintf("%s\t%s\n", p.Name(), d.ExportDescription()))
 			} else {
 				lines = append(lines, fmt.Sprintf("%s\t\n", p.Name()))
 			}
