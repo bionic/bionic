@@ -7,6 +7,7 @@ import (
 	"github.com/bionic-dev/bionic/imports/health"
 	"github.com/bionic-dev/bionic/imports/instagram"
 	"github.com/bionic-dev/bionic/imports/netflix"
+	"github.com/bionic-dev/bionic/imports/ofx"
 	"github.com/bionic-dev/bionic/imports/provider"
 	"github.com/bionic-dev/bionic/imports/rescuetime"
 	"github.com/bionic-dev/bionic/imports/spotify"
@@ -33,6 +34,7 @@ func DefaultProviders(db *gorm.DB) []provider.Provider {
 		spotify.New(db),
 		instagram.New(db),
 		rescuetime.New(db),
+		ofx.New(db),
 	}
 }
 
