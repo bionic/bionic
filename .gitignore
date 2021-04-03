@@ -7,4 +7,5 @@ test_data/*/**
 
 dist
 build
+!/**/build
 db.sqlite
