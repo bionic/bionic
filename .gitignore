@@ -8,3 +8,4 @@ test_data/*/**
 dist
 build
 db.sqlite
+!testdata/chrome/db.sqlite
