@@ -28,7 +28,9 @@ func (chrome) TablePrefix() string {
 }
 
 func (chrome) ImportDescription() string {
-	return "OS X: ~/Library/Application\\ Support/Google/Chrome/Default/History"
+	return "OS X: ~/Library/Application\\ Support/Google/Chrome/Default/History\n" +
+		"Windows: C:\\Users\\%USERNAME%\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History\n" +
+		"Linux: ~/.config/google-chrome/Default/databases"
 }
 
 func (p *chrome) Migrate() error {
@@ -51,7 +53,7 @@ func (p *chrome) ImportFns(inputPath string) ([]provider.ImportFn, error) {
 
 	return []provider.ImportFn{
 		provider.NewImportFn(
-			"History DB",
+			"History",
 			p.importDB,
 			inputPath,
 		),
