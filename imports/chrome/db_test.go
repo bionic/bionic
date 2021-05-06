@@ -19,7 +19,7 @@ func TestChrome_importDB(t *testing.T) {
 	p := chrome{Database: database.New(db)}
 	require.NoError(t, p.Migrate())
 
-	require.NoError(t, p.importDB("testdata/chrome/db.sqlite"))
+	require.NoError(t, p.importDB("testdata/chrome/db.sqlite?_loc=UTC"))
 
 	var visits []Visit
 	require.NoError(t, db.Preload("Segment.URL").Preload("URL").Find(&visits).Error)
