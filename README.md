@@ -110,12 +110,13 @@ messages_df = pd.read_sql('select * from telegram_messages;', con=db_connection)
 | Spotify: `spotify` | https://www.spotify.com/us/account/privacy/ | `spotify_streaming_history`
 | Telegram: `telegram` | Telegram Desktop app => Settings | `telegram_chats`, `telegram_members`, `telegram_messages`, `telegram_poll_answers`, `telegram_text_attachments`
 | Twitter: `twitter` |https://twitter.com/settings/download_your_data | `twitter_ad_impressions`, `twitter_ad_impressions_matched_targeting_criteria`, `twitter_advertisers`, `twitter_age_info_records`, `twitter_audience_and_advertiser_records`, `twitter_audience_and_advertisers`, `twitter_audience_and_lookalike_advertisers`, `twitter_conversations`, `twitter_device_infos`, `twitter_direct_message_reactions`, `twitter_direct_message_urls`, `twitter_direct_messages`, `twitter_email_address_changes`, `twitter_gender_info`, `twitter_hashtags`, `twitter_inferred_age_info_records`, `twitter_interest_records`, `twitter_language_records`, `twitter_likes`, `twitter_locations`, `twitter_login_ips`, `twitter_personalization_locations`, `twitter_personalization_records`, `twitter_personalization_shows`, `twitter_screen_name_changes`, `twitter_shows`, `twitter_targeting_criteria`, `twitter_tweet_entities`, `twitter_tweet_hashtags`, `twitter_tweet_media`, `twitter_tweet_urls`, `twitter_tweet_user_mentions`, `twitter_tweets`, `twitter_urls`, `twitter_users`
+| Chrome: `chrome` | OS X: ~/Library/Application Support/Google/Chrome/Default/History<br />Windows: C:\\Users\%USERNAME%\AppData\Local\Google\Chrome\User Data\Default\History<br />Linux: ~/.config/google-chrome/Default/databases | `chrome_segments`, `chrome_urls`, `chrome_visits`
 
 ## As a package
 
 ## Contributing
 
-We appreciate contributions a lot! Here are some of the ways you can contribute:
+We appreciate contributions a lot! Here are some ways you can contribute:
 
 * **Providers**. You can create new sources of data. Check out [#new-provider issues](https://github.com/bionic-dev/bionic/issues?q=is%3Aissue+is%3Aopen+label%3Anew-provider) and [an example PR with a new provider](https://github.com/bionic-dev/bionic/pull/41). Many existing providers lack some of the data: for example, the Google provider only proccesses a small subset of the Google export. Feel free to change it! We also target to test all providers and adding tests (especially, with unusual corner cases you found in your data) could be a very helpful contribution.
 * **Views**. Views are additional SQL tables based on data from providers. Check out [an example PR with new views](https://github.com/bionic-dev/bionic/pull/29/files).
