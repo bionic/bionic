@@ -27,7 +27,7 @@ func (u URL) Conditions() map[string]interface{} {
 
 func (p *chrome) importURLs(db *gorm.DB) error {
 	selection := "id, url, title, visit_count, typed_count, " +
-		"datetime((last_visit_time/1000000)-11644473600, 'unixepoch', 'localtime') as last_visit, hidden"
+		"datetime((last_visit_time/1000000)-11644473600, 'unixepoch') as last_visit, hidden"
 
 	var urls []URL
 	err := db.

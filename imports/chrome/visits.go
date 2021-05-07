@@ -71,7 +71,7 @@ type SourceVisit struct {
 }
 
 func (p *chrome) importVisits(db *gorm.DB) error {
-	selection := "id, url as url_id, datetime((visit_time/1000000)-11644473600, 'unixepoch', 'localtime') as time, " +
+	selection := "id, url as url_id, datetime((visit_time/1000000)-11644473600, 'unixepoch') as time, " +
 		"from_visit as visit_id, transition, segment_id, visit_duration, incremented_omnibox_typed_score, publicly_routable"
 
 	var sourceVisits []SourceVisit

@@ -30,13 +30,13 @@ func TestChrome_importDB(t *testing.T) {
 		Title:      "Mercury | Banking built for startups",
 		VisitCount: 46,
 		TypedCount: 42,
-		LastVisit:  types.DateTime(time.Date(2021, 4, 25, 20, 51, 12, 0, time.UTC)),
+		LastVisit:  types.DateTime(time.Date(2021, 4, 25, 17, 51, 12, 0, time.UTC)),
 		Hidden:     false,
 	}
 
 	assertVisit(t, Visit{
 		URL:                     expectedURL,
-		Time:                    types.DateTime(time.Date(2021, 1, 26, 9, 19, 44, 0, time.UTC)),
+		Time:                    types.DateTime(time.Date(2021, 1, 26, 6, 19, 44, 0, time.UTC)),
 		VisitID:                 0,
 		Visit:                   nil,
 		TransitionType:          "TYPED",
