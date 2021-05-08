@@ -5,25 +5,19 @@ import (
 	"gorm.io/gorm"
 	"io"
 	"io/ioutil"
+	url2 "net/url"
 	"os"
-	"strings"
 )
 
 const dbRowSelectLimit = 100
 
 func (p *chrome) importDB(inputPath string) error {
-	// strip sqlite arguments
-	var filePath string
-	var arguments string
-	parts := strings.Split(inputPath, "?")
-	if len(parts) > 1 {
-		filePath = strings.Join(parts[:len(parts)-1], "?")
-		arguments = parts[len(parts)-1]
-	} else {
-		filePath = parts[0]
+	url, err := url2.Parse(inputPath)
+	if err != nil {
+		return err
 	}
 
-	sourceFile, err := os.Open(filePath)
+	sourceFile, err := os.Open(url.Path)
 	if err != nil {
 		return err
 	}
@@ -40,7 +34,7 @@ func (p *chrome) importDB(inputPath string) error {
 		return err
 	}
 
-	db, err := gorm.Open(sqlite.Open(tmpFile.Name()+"?"+arguments), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(tmpFile.Name()+"?"+url.RawQuery), &gorm.Config{})
 
 	if err != nil {
 		return err
