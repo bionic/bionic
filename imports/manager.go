@@ -3,6 +3,7 @@ package imports
 import (
 	"errors"
 	"fmt"
+	"github.com/bionic-dev/bionic/imports/chrome"
 	"github.com/bionic-dev/bionic/imports/google"
 	"github.com/bionic-dev/bionic/imports/health"
 	"github.com/bionic-dev/bionic/imports/instagram"
@@ -35,6 +36,7 @@ func DefaultProviders(db *gorm.DB) []provider.Provider {
 		instagram.New(db),
 		rescuetime.New(db),
 		ofx.New(db),
+		chrome.New(db),
 	}
 }
 
