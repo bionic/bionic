@@ -67,7 +67,7 @@ const (
 type VisitAlias Visit
 type SourceVisit struct {
 	VisitAlias
-	Transition int
+	Transition int64
 }
 
 func (p *chrome) importVisits(db *gorm.DB) error {
@@ -118,7 +118,7 @@ func (p *chrome) saveVisits(sourceVisits []SourceVisit) error {
 	return nil
 }
 
-func transitionInfoBySourceValue(transition int) (tt TransitionType, tqt TransitionQualifierType, isRedirect bool) {
+func transitionInfoBySourceValue(transition int64) (tt TransitionType, tqt TransitionQualifierType, isRedirect bool) {
 	switch transition & 0xFF {
 	case 0:
 		tt = TransitionLink
