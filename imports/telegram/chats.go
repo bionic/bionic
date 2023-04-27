@@ -2,12 +2,14 @@ package telegram
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/bionic-dev/bionic/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"io/ioutil"
-	"os"
-	"strings"
 )
 
 type Chat struct {
@@ -92,6 +94,8 @@ func (m *Message) UnmarshalJSON(b []byte) error {
 
 	var data struct {
 		alias
+		ActorID            string              `json:"actor_id"`
+		FromID             string              `json:"from_id"`
 		Text               TextWithAttachments `json:"text"`
 		ContactInformation struct {
 			FirstName   string `json:"first_name"`
@@ -115,6 +119,24 @@ func (m *Message) UnmarshalJSON(b []byte) error {
 	}
 
 	*m = Message(data.alias)
+
+	if data.ActorID != "" {
+		actorID, err := strconv.Atoi(strings.TrimPrefix(data.ActorID, "user"))
+		if err != nil {
+			return err
+		}
+
+		m.ActorID = actorID
+	}
+
+	if data.FromID != "" {
+		fromID, err := strconv.Atoi(strings.TrimPrefix(data.FromID, "user"))
+		if err != nil {
+			return err
+		}
+		m.FromID = fromID
+	}
+
 	m.Text = data.Text.Text
 	m.TextAttachments = data.Text.Attachments
 	m.ContactInformationFirstName = data.ContactInformation.FirstName
